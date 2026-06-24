@@ -727,7 +727,7 @@ function eatCheap(id){const c=cheapFood.find(x=>x.id===id);if(!c)return;if(state
 function askSignature(id,courseCode){const o=signatureOffers.find(x=>x.id===id);if(!o)return;if(state.money<o.price){msg('Param yetmedi.');return}state.money-=o.price;advance(15);if(Math.random()<o.chance){let c;if(courseCode)c=state.courses.find(x=>x.code===courseCode&&x.absent<x.max&&x.type!=='lab');if(!c)c=state.courses.find(x=>x.absent>0&&x.absent<x.max&&x.type!=='lab');if(c){if(c.absent>0){c.absent--;msg(signerName()+' imza attı · '+c.code+' → '+c.absent+'/'+c.max)}else{c.preSigned=true;msg('✓ '+signerName()+' söz verdi · '+c.code+' gelmezsen imza atılacak')}state.mood=clamp(state.mood+3)}else{msg('Uygun ders yok.')}}else{msg(o.price>0?'Teklif boşa gitti, imza atmadı.':signerName()+' bedavaya yapmadı.')}render()}
 function doJob(id){const j=getJobs().find(x=>x.id===id);if(!j)return;if(j.gate&&!j.gate()){msg(j.gateText||'Şu an uygun değil.');return}state.money+=j.pay;state.energy=clamp(state.energy+j.energy);state.location='İş: '+j.name.split(' · ')[0];advance(j.mins);msg(j.name+' bitti. +'+fmt(j.pay)+'₺ kazandın.');render()}
 function takeLoan(id){const l=loanOptions.find(x=>x.id===id);if(!l)return;if(l.usedFlag&&state[l.usedFlag]){msg('Bu kaynak zaten kullanıldı.');return}state.money+=l.amount;if(l.usedFlag)state[l.usedFlag]=true;if(l.mood)state.mood=clamp(state.mood+l.mood);if(l.friendAff)Object.entries(l.friendAff).forEach(([fid,d])=>{const f=state.friends.find(x=>x.id===fid);if(f)f.affinity=Math.max(0,f.affinity+d)});if(l.debt)state.bankDebt=(state.bankDebt||0)+l.debt;msg(l.name+' · +'+fmt(l.amount)+'₺');render()}
-function payRent(){if(state.money<state.rentDue){msg('Param yetmedi.');return}state.money-=state.rentDue;state.rentPaid=true;state.mood=clamp(state.mood+8);msg('Yurt kirası ödendi.');render()}
+function payRent(){if(state.money<state.rentDue){msg('Param yetmedi.');return}state.money-=state.rentDue;state.rentPaid=true;state.daysUntilRent=30;state.rentOverdueDays=0;state.mood=clamp(state.mood+8);msg('Yurt kirası ödendi · sonraki kira 30 gün sonra');render()}
 function askDad(){if(state.lastExtraAsk===state.dayOfMonth){msg('🙃 Bugün zaten istedin, yarın tekrar dene');return}state.lastExtraAsk=state.dayOfMonth;advance(10);if(Math.random()<getDadChance()){state.money+=2000;state.mood=clamp(state.mood+5);msg('💸 Baba verdi · +2.000₺ · "Dikkatli harca"')}else{state.mood=clamp(state.mood-3);msg('🙅 Baba "şimdi olmaz '+(state.gender==='kız'?'kızım':'oğlum')+'" dedi · mood -3')}render()}
 function doLaundry(){
 if(Math.random()<0.4){state.laundryFullPrompt=true;render();return}
@@ -1821,7 +1821,7 @@ h+=`</div>`;
 return h;
 }
 function modalWalletHtml(){return `<div style="background:white;border:0.5px solid ${C.bt};border-radius:6px;padding:14px;margin-bottom:10px;text-align:center;"><div style="font-size:11px;color:${C.ts};">Bakiye</div><div style="font-size:28px;font-weight:700;color:#1F4A11;">${fmt(state.money)} ₺</div>${state.bankDebt>0?`<div style="font-size:11px;color:#791F1F;margin-top:6px;font-weight:600;">Banka borcu: ${fmt(state.bankDebt)} ₺</div>`:''}</div><div style="font-size:11px;color:${C.ts};margin-bottom:6px;">Ulaşım</div><div style="background:white;border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;margin-bottom:14px;"><div style="padding:10px 12px;border-bottom:0.5px solid ${C.bt};display:flex;justify-content:space-between;align-items:center;gap:8px;"><div><div style="font-size:12px;font-weight:600;color:${C.tp};">Akbil</div><div style="font-size:10px;color:${C.ts};">Tek biniş 20.50₺</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><span style="font-size:13px;font-weight:600;color:${state.akbil<50?'#791F1F':C.tp};">${state.akbil} ₺</span><div style="display:flex;gap:3px;"><button onclick="topUpAkbil(50)" style="font-size:9px;padding:3px 6px;${state.money<50?'opacity:0.4':''}">+50</button><button onclick="topUpAkbil(200)" style="font-size:9px;padding:3px 6px;${state.money<200?'opacity:0.4':''}">+200</button></div></div></div><div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;"><div><div style="font-size:12px;font-weight:600;color:${C.tp};">Aylık abonman</div><div style="font-size:10px;color:${state.abonman?'#27500A':C.ts};font-weight:${state.abonman?600:400};">${state.abonman?state.abonmanTrips+' biniş · '+state.abonmanDays+' gün kaldı':'200 biniş · 30 gün geçerli'}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">${state.abonman?'<span style="font-size:10px;background:#EAF3DE;color:#27500A;padding:2px 8px;border-radius:4px;font-weight:600;">aktif</span>':`<span style="font-size:13px;font-weight:600;color:${C.tp};">593 ₺</span><button onclick="buyAbonman()" style="font-size:10px;padding:3px 10px;${state.money<593?'opacity:0.4':''}">Al</button>`}</div></div></div><div style="font-size:11px;color:${C.ts};margin-bottom:6px;">Kira</div><div style="background:white;border:0.5px solid ${state.rentPaid?C.bt:'#EF9F27'};border-radius:6px;padding:10px 12px;margin-bottom:14px;"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><div><div style="font-size:12px;font-weight:600;color:${C.tp};">KYK kirası</div><div style="font-size:10px;color:${C.ts};">${state.daysUntilRent} gün sonra</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><span style="font-size:13px;font-weight:600;color:${C.tp};">${fmt(state.rentDue)}₺</span>${state.rentPaid?'<span style="font-size:10px;background:#EAF3DE;color:#27500A;padding:2px 6px;border-radius:4px;font-weight:600;">ödendi</span>':`<button onclick="payRent()" style="font-size:10px;padding:3px 10px;${state.money<state.rentDue?'opacity:0.4':''}">Öde</button>`}</div></div></div><div style="font-size:11px;color:${C.ts};margin-bottom:6px;">Aile</div><div style="background:white;border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;margin-bottom:14px;"><div style="padding:10px 12px;border-bottom:0.5px solid ${C.bt};display:flex;justify-content:space-between;align-items:center;gap:8px;"><div><div style="font-size:12px;font-weight:600;color:${C.tp};">Aylık harçlık</div><div style="font-size:10px;color:${C.ts};">Her ayın 15'i · ${Math.max(0,state.nextAllowanceDay-state.dayOfMonth)} gün sonra</div></div><span style="font-size:13px;font-weight:700;color:#1F4A11;">10.000₺</span></div><div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;"><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:600;color:${C.tp};">Babadan ekstra iste</div><div style="font-size:10px;color:${C.ts};">%${Math.round(getDadChance()*100)} şans · 2.000₺ · günde 1 deneme</div></div>${state.lastExtraAsk===state.dayOfMonth?'<span style="font-size:10px;color:#5F5E5A;font-style:italic;flex-shrink:0;">bugün istedin</span>':`<button onclick="askDad()" style="font-size:10px;padding:5px 12px;background:#1F4A11;color:white;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;">İste</button>`}</div></div><div style="font-size:11px;color:${C.ts};margin-bottom:6px;">Borç</div><div style="background:white;border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;">${loanOptions.map((l,i)=>`<div style="padding:10px 12px;${i<loanOptions.length-1?'border-bottom:0.5px solid '+C.bt+';':''}display:flex;justify-content:space-between;align-items:center;gap:8px;"><div style="flex:1;"><div style="font-size:12px;font-weight:600;color:${C.tp};">${l.name}</div><div style="font-size:10px;color:${C.ts};">${l.note}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;"><span style="font-size:13px;font-weight:700;color:#1F4A11;">+${fmt(l.amount)}₺</span><button onclick="takeLoan('${l.id}')" style="font-size:10px;padding:3px 10px;${l.usedFlag&&state[l.usedFlag]?'opacity:0.4':''}">${l.usedFlag&&state[l.usedFlag]?'kullanıldı':'Al'}</button></div></div>`).join('')}</div>`}
-function renderModal(){const m=document.getElementById('modal');if(!state.activeModal){m.style.display='none';return}m.style.display='flex';const titles={schedule:'📚 Ders programı',friends:'👥 Arkadaşlar',dates:'💖 Date',food:'🍔 Yemek',signature:'✍️ İmza iste',jobs:'💼 İş ara',care:'🚿 Bakım & Spor',fun:'🎉 Eğlence',girlfriend:'💕 Sevgili',sleep:'😴 Uyu',skip:'⏰ Zaman atla',shopping:'🛍️ Alışveriş',wallet:'💰 Cüzdan',laundry:'🧺 Çamaşır',library:'📖 Kütüphane',semesterSummary:'🎓 Dönem Sonu',settings:'⚙️ Ayarlar',avatar:'😎 Avatar seç',notifs:'🔔 Bildirimler',yearEnd:'🎓 Yıl Sonu Karnesi'};document.getElementById('modalTitle').innerHTML=titles[state.activeModal];const moneyModals=['signature','food','jobs','care','fun','dates','girlfriend','shopping','friends'];const moneyBar=document.getElementById('modalMoneyBar');if(moneyModals.includes(state.activeModal)){moneyBar.style.display='flex';const akC=state.akbil<25?'#791F1F':'#3C3489';const akBg=state.akbil<25?'#FCEBEB':'#EEEDFE';moneyBar.innerHTML=`<span style="background:#1F4A11;color:white;font-size:13.5px;font-weight:700;padding:6px 12px;border-radius:9px;display:inline-flex;align-items:center;gap:5px;line-height:1;">💰 ${fmt(state.money)}<span style="font-size:11px;opacity:0.9;">₺</span></span>`}else{moneyBar.style.display='none'}const renderers={schedule:modalScheduleHtml,friends:modalFriendsHtml,dates:modalDatesHtml,food:modalFoodHtml,signature:modalSignatureHtml,jobs:modalJobsHtml,care:modalCareHtml,fun:modalFunHtml,girlfriend:modalGirlfriendHtml,sleep:modalSleepHtml,skip:modalSkipHtml,shopping:modalShoppingHtml,wallet:modalWalletHtml,laundry:modalLaundryHtml,library:modalLibraryHtml,semesterSummary:modalSemesterSummaryHtml,settings:modalSettingsHtml,avatar:modalAvatarHtml,notifs:modalNotifsHtml,yearEnd:modalYearEndHtml};document.getElementById('modalBody').innerHTML=renderers[state.activeModal]()}
+function renderModal(){const m=document.getElementById('modal');if(!state.activeModal){m.style.display='none';return}m.style.display='flex';const titles={schedule:'📚 Ders programı',friends:'👥 Arkadaşlar',dates:'💖 Date',food:'🍔 Yemek',signature:'✍️ İmza iste',jobs:'💼 İş ara',care:'🚿 Bakım & Spor',fun:'🎉 Eğlence',girlfriend:'💕 Sevgili',sleep:'😴 Uyu',skip:'⏰ Zaman atla',shopping:'🛍️ Alışveriş',wallet:'💰 Cüzdan',laundry:'🧺 Çamaşır',library:'📖 Kütüphane',semesterSummary:'🎓 Dönem Sonu',settings:'⚙️ Ayarlar',avatar:'😎 Avatar seç',notifs:'🔔 Bildirimler',yearEnd:'🎓 Yıl Sonu Karnesi',gameOver:'🚪 Oyun Bitti'};document.getElementById('modalTitle').innerHTML=titles[state.activeModal];const moneyModals=['signature','food','jobs','care','fun','dates','girlfriend','shopping','friends'];const moneyBar=document.getElementById('modalMoneyBar');if(moneyModals.includes(state.activeModal)){moneyBar.style.display='flex';const akC=state.akbil<25?'#791F1F':'#3C3489';const akBg=state.akbil<25?'#FCEBEB':'#EEEDFE';moneyBar.innerHTML=`<span style="background:#1F4A11;color:white;font-size:13.5px;font-weight:700;padding:6px 12px;border-radius:9px;display:inline-flex;align-items:center;gap:5px;line-height:1;">💰 ${fmt(state.money)}<span style="font-size:11px;opacity:0.9;">₺</span></span>`}else{moneyBar.style.display='none'}const renderers={schedule:modalScheduleHtml,friends:modalFriendsHtml,dates:modalDatesHtml,food:modalFoodHtml,signature:modalSignatureHtml,jobs:modalJobsHtml,care:modalCareHtml,fun:modalFunHtml,girlfriend:modalGirlfriendHtml,sleep:modalSleepHtml,skip:modalSkipHtml,shopping:modalShoppingHtml,wallet:modalWalletHtml,laundry:modalLaundryHtml,library:modalLibraryHtml,semesterSummary:modalSemesterSummaryHtml,settings:modalSettingsHtml,avatar:modalAvatarHtml,notifs:modalNotifsHtml,yearEnd:modalYearEndHtml,gameOver:modalGameOverHtml};document.getElementById('modalBody').innerHTML=renderers[state.activeModal]()}
 const friendMsgPool={
 S:['imza atar mısın','dün ders notu lazım','sınav ne zamandı yarın','lab raporu yardım eder misin','cuma akşamı boş musun','kütüphanede miyiz bugün','dünkü ödevi yaptın mı','yarınki dersi kim verecek','sınav stresi, çıkalım mı','final notu açıklandı bak'],
 A:['hafta sonu gel mi oğlum','nasılsın oğlum','baban arıyor seni','cuma yemeğe gel','para gönderdim aldın mı','kardeşin selam söyledi','kombiyi açtık üşüme','çamaşırlarını getir','doktora gittin mi','mantı yaptım gel','sigaraya başlama','gece geç yatma']
@@ -2137,6 +2137,8 @@ if(state.illnessRisk===undefined)state.illnessRisk=0;
 if(state.notifs===undefined)state.notifs=[];
 if(state.sick===undefined)state.sick=null;
 if(state.freelanceGig===undefined)state.freelanceGig=false;
+if(state.rentOverdueDays===undefined)state.rentOverdueDays=0;
+if(state.gameOver===undefined)state.gameOver=null;
 if(!state.firedCalendar)state.firedCalendar={};
 if(!state.weather)rollWeather();
 }
@@ -2299,8 +2301,46 @@ if(state.weather&&state.weather.key==='sicak'){state.hunger=clamp(state.hunger-4
 updateHealth();
 state.freelanceGig=Math.random()<0.45;
 if(state.freelanceGig&&state.academic>=60)pushNotif('money','💻 Yeni freelance proje çıktı · İş ara\'dan al');
+rentCycle();
 checkCalendarEvents();
 maybeNotify();
+}
+// --- Aylık kira döngüsü + ödeyemezsen yurttan atılma ---
+function rentCycle(){
+if(state.gameOver)return;
+if(state.rentPaid&&state.daysUntilRent<=0){
+state.rentPaid=false;state.daysUntilRent=7;state.rentOverdueDays=0;
+pushNotif('money','🏠 Yeni dönem · KYK kirası '+fmt(state.rentDue)+'₺ · 7 gün içinde öde');
+return;
+}
+if(!state.rentPaid&&state.daysUntilRent<=0){
+if(state.money>=state.rentDue){
+state.money-=state.rentDue;state.rentPaid=true;state.daysUntilRent=30;state.rentOverdueDays=0;
+pushNotif('money','🏠 Kira otomatik ödendi · '+fmt(state.rentDue)+'₺');
+return;
+}
+state.rentOverdueDays=(state.rentOverdueDays||0)+1;
+if(state.rentOverdueDays>=4){triggerGameOver('evicted');return}
+pushNotif('money','⚠️ Kira gecikti ('+state.rentOverdueDays+'. gün) · paran yetmiyor! Kalan '+(4-state.rentOverdueDays)+' gün, para bul');
+}
+}
+function triggerGameOver(reason){state.gameOver=reason;state.activeModal='gameOver';pushNotif('money','🚪 Yurttan atıldın · oyun bitti');msg('🚪 Yurttan atıldın!')}
+function modalGameOverHtml(){
+const reasons={evicted:{emoji:'🚪',title:'Yurttan Atıldın',desc:'Kira borcunu ödeyemedin. KYK yurtla ilişiğin kesildi, eşyalarını topladın. İstanbul\'da kalacak yerin kalmadı — memlekete dönmek zorunda kaldın.'}};
+const r=reasons[state.gameOver]||reasons.evicted;
+const st=yearStats();
+return `<div style="text-align:center;padding:20px 0 14px;background:linear-gradient(180deg,#FCEBEB 0%,white 100%);margin:-2px -2px 14px;border-radius:6px 6px 0 0;border-bottom:0.5px solid ${C.bt};">
+<div style="font-size:50px;line-height:1;margin-bottom:6px;">${r.emoji}</div>
+<div style="font-size:20px;font-weight:700;color:#791F1F;margin-bottom:4px;">${r.title}</div>
+<div style="font-size:11px;color:${C.ts};">Oyun bitti</div>
+</div>
+<div style="background:#FCEBEB;border:1px solid #C9333B;border-radius:8px;padding:12px;margin-bottom:14px;font-size:11.5px;color:#791F1F;line-height:1.5;">${r.desc}</div>
+<div style="background:white;border:0.5px solid ${C.bt};border-radius:8px;padding:12px;margin-bottom:14px;font-size:11px;color:${C.tp};">
+<div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:${C.ts};">Geldiğin yer</span><span style="font-weight:600;">${(state.year||1)}. sınıf</span></div>
+<div style="display:flex;justify-content:space-between;padding:3px 0;border-top:0.5px solid ${C.bt};"><span style="color:${C.ts};">GANO</span><span style="font-weight:600;">${st.gano.toFixed(2)}</span></div>
+<div style="display:flex;justify-content:space-between;padding:3px 0;border-top:0.5px solid ${C.bt};"><span style="color:${C.ts};">Para</span><span style="font-weight:600;">${fmt(state.money)}₺</span></div>
+</div>
+<button onclick="endGameNewGame()" style="width:100%;font-size:13px;padding:13px;background:#791F1F;color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;">🆕 Yeni oyun başlat</button>`;
 }
 
 // --- Yıl sonu karne / kazanma-kaybetme / çok yıl ---
@@ -2370,7 +2410,7 @@ state.dayOfMonth=20;state.dayName='Pzt';state.hour=8;state.minute=0;
 state.location=getYurtName();
 state.energy=70;state.hygiene=80;state.hunger=60;state.mood=70;
 state.sick=null;state.illnessRisk=0;
-state.nextAllowanceDay=45;state.daysUntilRent=10;state.rentPaid=false;
+state.nextAllowanceDay=45;state.daysUntilRent=10;state.rentPaid=false;state.rentOverdueDays=0;
 state.eventCooldowns={};state.lastEventTime=0;state.firedCalendar={};
 state.activeModal=null;
 rollWeather();
@@ -2447,7 +2487,7 @@ const u=unreadCount();
 if(nc){nc.textContent=u>0?String(u):'';nc.style.display=u>0?'inline-flex':'none'}
 }
 const _origRenderExt=render;
-render=function(){ensureExtState();_origRenderExt();updateExtrasUI()};
+render=function(){ensureExtState();if(state.gameOver&&state.activeModal!=='gameOver')state.activeModal='gameOver';_origRenderExt();updateExtrasUI()};
 
 // App başlangıç: splash → ana menü
 setTimeout(()=>{const splash=document.getElementById('appSplash');if(splash){splash.style.opacity='0';setTimeout(()=>{splash.style.display='none';showMainMenu()},500)}},1500);

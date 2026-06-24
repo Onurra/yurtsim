@@ -120,6 +120,11 @@ ile bağlanır (`advance` ve `doSleep` içindeki iki gün-geçiş bloğunda ça�
   (Ders=bugün işlenmemiş ders sayısı/yaklaşan sınav, Bakım=hasta/hijyen/risk,
   Yemek/Uyu=düşük stat, Çamaşır, Sevgili, İmza iste). `renderApps` rozeti çizer;
   kritik olanlar `metroPulse` ile yanıp söner.
+- **Oyun sonu / kayıp:** Kira artık aylık (`rentCycle()`): ödenince 30 gün sonra
+  yeniden gelir, 7 gün ödeme süresi. Süre dolunca parası varsa otomatik kesilir;
+  yoksa 4 gün gecikince `triggerGameOver('evicted')` → `modalGameOverHtml` (yurttan
+  atılma, sadece yeni oyun). `state.gameOver` set olunca render sarmalı modalı zorlar.
+  `payRent` 30 günlük döngü kurar.
 - **Kalıcılık:** Hepsi `state` içinde → `saveGame()` ile otomatik kaydedilir.
 - `ensureExtState()` eksik alanları (year/weather/notifs/sick/illnessRisk) doldurur;
   `render` sarmalı her çizimde çağırır ve `updateExtrasUI()` ile üst barı günceller.
