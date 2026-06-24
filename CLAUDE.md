@@ -1,0 +1,88 @@
+# Yurt Simülatör — Proje Hafızası
+
+Türk üniversite hayatı temalı bir yaşam simülasyonu oyunu. Tek dosyalık, vanilla
+JS + HTML/CSS bir tarayıcı oyunu. Kurulum/derleme/bağımlılık yok — `index.html`
+herhangi bir modern tarayıcıda açılınca çalışır.
+
+## Mimari
+
+- **Tek dosya:** Tüm oyun `index.html` içinde (~2100 satır). CSS `<style>` içinde,
+  tüm mantık tek bir `<script>` bloğunda (satır ~140'tan sonra).
+- **Harici bağımlılık:** Yok. Sadece ikonlar için Tabler Icons CDN
+  (`@tabler/icons-webfont`).
+- **Durum yönetimi:** Tek global `const state={...}` objesi (satır ~160). UI tamamen
+  `render()` (satır ~1845) ile string-template HTML üreterek yeniden çizilir.
+  Modal'lar `state.activeModal` ile yönetilir (`openModal`/`closeModal`).
+- **Kalıcılık (persistence):** Yok — sayfa yenilenince oyun sıfırlanır. Bir "Sıfırla"
+  dev butonu var.
+- **Dil:** Tüm UI metni ve değişken adları Türkçe/karışık. Yeni metin eklerken Türkçe yaz.
+
+## Tema / Sunum
+
+- Oyun bir telefon ekranı (`.phone-screen`, 390x830px) içinde, ana ekranda uygulama
+  ikonları (app tile) olarak sunulur. Açılışta splash ekranı var.
+- Karakter: erkek veya kız (`state.gender`). Cinsiyet, dersleri/arkadaşları/iş
+  seçeneklerini/date'leri/metro rotasını değiştirir (`...Kiz` varyantları).
+- Metro geçiş animasyonu (`showMetroTransition`) kampüse/eve gidişte oynar.
+
+## Temel İstatistikler (state)
+
+- `energy`, `hygiene` (temizlik), `hunger` (tokluk), `mood` (moral), `academic` (başarı)
+  — hepsi `clamp()` ile 0-100 arası tutulur.
+- `money` (₺, başlangıç 5000), `akbil` (ulaşım bakiyesi), `bankDebt`.
+- `gano` (not ortalaması), her ders için vize/final notları (`...VizeNote`/`...FinalNote`).
+
+## Zaman / Takvim
+
+- `state.hour`/`minute`/`dayOfMonth`/`dayName`. `advance(mins)` ile zaman ilerler;
+  her eylem belirli dakika harcar. 24 saati geçince yeni güne geçilir (gün geçiş
+  mantığı `advance` içinde, satır ~447 ve ~1691'de DUPLICATE — ikisini birlikte güncelle).
+- `monthBoundaries` (satır ~381): dayOfMonth → ay/gün eşlemesi (Eylül=1. gün başlar).
+- Dönemler: `guz` (güz, Ekim–Ocak), `bahar` (Şubat–Haziran), `yaz`. `getCurrentSemester()`.
+- Harçlık: her 30 günde babadan +10.000₺ (`nextAllowanceDay`).
+
+## Akademik Sistem
+
+- Dersler cinsiyete göre: erkek = Bilgisayar Müh. (`guzCourses`/`baharCourses`),
+  kız = Hukuk (`guzCoursesKiz`/`baharCoursesKiz`). Her dersin programı, kredisi,
+  devamsızlık (`absent`/`max`), vize/final tarihleri var.
+- `attendCourse` (derse git), `studyForCourse` (kütüphanede çalış, `bilgi` artırır).
+- Sınavlar tarihinde otomatik tetiklenir (`checkExamsToday`/`doExam`); kaçırılan
+  sınavlar `failMissedExams` ile FF olur. Not = `bilgi`'ye göre (`scoreToNote`: AA–FF).
+- `recalculateGANO` GANO'yu kredi-ağırlıklı hesaplar. Dönem sonu `checkSemesterEnd`
+  → `startBaharSemester` ile bahar dönemine geçer.
+
+## Para Kazanma / Harcama (uygulamalar — `getApps`)
+
+- **İş ara** (`jobs`/`jobsKiz`): garson, kurye, freelance kodlama (başarı≥60 gerekli) vb.
+  Para verir, enerji düşürür; bazıları saat-kapılı (`gate`).
+- **İmza iste** (`signatureOffers`): hocadan imza/yoklama ricası.
+- **Yemek** (`yemekseleItems` sipariş, `outsideFood` dışarıda, `cheapFood` ucuz/kötü,
+  yurt yemekhanesi bedava). Günlük rastgele indirimler (`ensureFoodDiscounts`, %20 şans).
+- **Eğlence** (`entertainment`): `outings` (bar/klüp), `games` (FIFA/LoL/CS:GO),
+  `gamble` (Şeker oyunu/Blackjack/İddia — İddia'da `iddiaLevel` ile kazanma oranı artar).
+- **Kişisel bakım** (`carePlaces`/`carePlacesKiz`): duş, tıraş, kuaför.
+- **Çamaşır, Alışveriş, Uyu, Kütüphane** uygulamaları.
+- Borç: `loanOptions` (Kerem'den / banka kredisi), `askDad` (babadan ekstra para iste).
+
+## Sosyal
+
+- **Arkadaşlar** (`FRIENDS_ERKEK`/`FRIENDS_KIZ`): her birinin `affinity`'si var; davetler
+  (`inviteTemplates`, `maybeSpawnInvite`/`acceptInvite`) affinity'yi etkiler.
+- **Date/Sevgili** (`dates`/`datesKiz`): flört → ilişki (`girlfriend`, `relationship`).
+- Oda arkadaşı mekaniği: tuvalet kağıdı bitince (`toiletPaperPending`) Evren söylenir,
+  moral düşer.
+
+## Rastgele Olaylar
+
+`tryRandomEvent`/`advance` içinde tetiklenir (`randomEvents`, satır ~408 civarı):
+bursluluk müjdesi (GANO≥3.0), vb. — ağırlık (`weight`) ve `cooldown` ile.
+
+## Geliştirme Notları
+
+- Düzenleme yaparken: dosya çok büyük olduğu için `Read` ile tamamı okunamaz —
+  `offset`/`limit` veya `Grep` kullan.
+- Gün-geçiş bloğu satır ~447 ve ~1691'de KOPYALANMIŞ; birini değiştirince diğerini de güncelle.
+- Stil inline yapılır; yeni UI eklerken `C` renk paletini (satır ~141) kullan.
+- Çalışma dalı: `claude/laughing-pascal-16yzz7`.
+- GitHub Pages ile yayınlanabiliyor: `https://Onurra.github.io/yurtsim/`.
