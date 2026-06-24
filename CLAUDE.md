@@ -80,6 +80,34 @@ herhangi bir modern tarayıcıda açılınca çalışır.
 `tryRandomEvent`/`advance` içinde tetiklenir (`randomEvents`, satır ~408 civarı):
 bursluluk müjdesi (GANO≥3.0), vb. — ağırlık (`weight`) ve `cooldown` ile.
 
+## Ek Sistemler (v2)
+
+Tümü dosyanın sonundaki "EK ÖZELLİKLER v2" bloğunda; gün döngüsüne `onNewDay()`
+ile bağlanır (`advance` ve `doSleep` içindeki iki gün-geçiş bloğunda çağrılır).
+
+- **Hava durumu / mevsim:** `getSeason()`, `WEATHER`, `rollWeather()` (her gün),
+  `isBadWeather()`. Kar/fırtına enerji, sıcak tokluk düşürür; yağmur/kar/fırtınada
+  metro gecikir + moral -3 (`goToKampus`/`goToYurt`). Üst barda `weatherBadge`.
+- **Sağlık/hastalık:** `state.illnessRisk` birikir (hijyen/tokluk/enerji/hava),
+  `makeSick()` → `state.sick={severity,daysLeft,name}`. Şiddet 3'te derse gidilemez
+  (`attendCourse` engeli). Tedavi: `goPharmacy()` (250₺), `goDoctor()` (600₺).
+  Bakım modalında `healthSectionHtml()`.
+- **Gece çalışma (all-nighter):** `studyNight(code)` — +12 bilgi, -35 enerji,
+  -20 moral, +hastalık riski, 5sa. Kütüphane modalında 🌙 butonu.
+- **Etkinlik takvimi:** `calendarEvents` (29 Ekim, 10 Kasım, yılbaşı, 14 Şubat,
+  Nevruz, Bahar Şenliği, 19 Mayıs), `checkCalendarEvents()` yılda bir tetikler.
+- **Telefon bildirimleri:** `state.notifs[]`, `pushNotif(type,text)`, `modalNotifsHtml`,
+  üst barda 🔔 `notifBtn` + okunmamış sayacı. `maybeNotify()` günlük hatırlatmalar.
+- **Yıl sonu karne + amaç:** bahar bitince (`dayOfMonth>=300`) `checkSemesterEnd`
+  `yearEnd` modalını açar. `yearStats()`, `modalYearEndHtml()` — GANO, notlar,
+  rozetler, sonuç rütbesi (Şeref/Onur/Başarılı/Zar zor/Başarısız). Kazanma:
+  GANO≥1.0 ve ≤3 FF → 2. sınıfa geç. Aksi halde sadece yeni oyun.
+- **Çok yıllık:** `state.year` (vars. 1), `advanceToNextYear()` dersleri sıfırlar,
+  yeni güz başlatır. Okul metni (`getSchoolText`/`getSchoolShortText`) yılı kullanır.
+- **Kalıcılık:** Hepsi `state` içinde → `saveGame()` ile otomatik kaydedilir.
+- `ensureExtState()` eksik alanları (year/weather/notifs/sick/illnessRisk) doldurur;
+  `render` sarmalı her çizimde çağırır ve `updateExtrasUI()` ile üst barı günceller.
+
 ## Geliştirme Notları
 
 - Düzenleme yaparken: dosya çok büyük olduğu için `Read` ile tamamı okunamaz —
