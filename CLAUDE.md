@@ -104,6 +104,11 @@ ile bağlanır (`advance` ve `doSleep` içindeki iki gün-geçiş bloğunda ça�
   GANO≥1.0 ve ≤3 FF → 2. sınıfa geç. Aksi halde sadece yeni oyun.
 - **Çok yıllık:** `state.year` (vars. 1), `advanceToNextYear()` dersleri sıfırlar,
   yeni güz başlatır. Okul metni (`getSchoolText`/`getSchoolShortText`) yılı kullanır.
+- **Davet event'leri:** `randomEvents` içinde `invite_mangal` (600₺), `invite_halisaha`
+  (300₺) — cinsiyete göre arkadaş (erkek: Salih, kız: Eylül). Mevcut `pendingInvite`
+  + `acceptInvite`/`declineInvite` sistemini kullanır (kabul: moral+/enerji-/para-,
+  red: moral -3 + affinity -2). Random-event davetlerinde artık `initial`/`color` set
+  edilir (avatar düzgün çizilsin diye).
 - **App rozetleri:** `getAppBadge(label)` app kutucuklarında durum göstergesi döndürür
   (Ders=bugün işlenmemiş ders sayısı/yaklaşan sınav, Bakım=hasta/hijyen/risk,
   Yemek/Uyu=düşük stat, Çamaşır, Sevgili, İmza iste). `renderApps` rozeti çizer;

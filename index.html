@@ -402,14 +402,16 @@ function getCurrentSemester(){const cal=getCalDate(state.dayOfMonth);if(cal.mont
 function getDayOfWeek(d){const names=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];return names[((d-20)%7+7)%7]}
 const randomEvents=[
 {id:'found_money',weight:4,cooldown:5,condition:()=>true,fire:()=>{const amount=50+Math.floor(Math.random()*150);state.money+=amount;state.mood=clamp(state.mood+5);msg('💵 Yerde '+amount+'₺ buldun! · mood +5')}},
-{id:'rainy',weight:3,cooldown:3,condition:()=>true,fire:()=>{state.mood=clamp(state.mood-3);msg('🌧️ Yağmur başladı, şemsiyen yok · mood -3')}},
+{id:'rainy',weight:3,cooldown:3,condition:()=>isBadWeather(),fire:()=>{state.mood=clamp(state.mood-3);msg('🌧️ Yağmura yakalandın, şemsiyen yok · mood -3')}},
 {id:'mom_call',weight:5,cooldown:4,condition:()=>true,fire:()=>{state.mood=clamp(state.mood+10);const anne=state.friends.find(f=>f.id==='anne');if(anne)anne.affinity=Math.min(100,anne.affinity+5);msg('📞 Annen aradı, biraz konuştun · mood +10')}},
 {id:'kyk_paket',weight:2,cooldown:10,condition:()=>true,fire:()=>{if(Math.random()<0.5){state.money+=500;state.mood=clamp(state.mood+8);msg('📦 Annen KYK paketi göndermiş · +500₺ helal yiyecek')}else{state.hygiene=Math.min(100,state.hygiene+20);state.mood=clamp(state.mood+6);msg('📦 Annen KYK paketi · temiz çorap çamaşır · hijyen +20')}}},
 {id:'sick',weight:2,cooldown:7,condition:()=>!state.sick&&(state.hygiene<60||Math.random()<0.4),fire:()=>{makeSick(2)}},
 {id:'bursluluk',weight:1,cooldown:60,condition:()=>state.gano&&state.gano>=3.0,fire:()=>{state.money+=2000;state.mood=clamp(state.mood+15);msg('🎓 Bursluluk müjdesi · GANO 3+ aldın · +2.000₺')}},
 {id:'festival',weight:1,cooldown:30,condition:()=>true,fire:()=>{state.mood=clamp(state.mood+18);msg('🎪 BLG Fest haftası · kampüste konser, ücretsiz yemek · mood +18')}},
 {id:'invite_mert',weight:3,cooldown:5,condition:()=>!state.pendingInvite&&(state.hour>=18||state.dayName==='Cum'||state.dayName==='Cmt'),fire:()=>{state.pendingInvite={from:'Mert',fid:'mert',text:'Mekan akşam, gelir misin?',label:'bara çık',cost:1500,mood:35,energy:-45,hygiene:-15,aff:10,mins:240};msg('💬 Mert davet etti · görevlere bak')}},
-{id:'invite_emre',weight:2,cooldown:6,condition:()=>!state.pendingInvite&&state.hour>=14&&state.hour<=20,fire:()=>{state.pendingInvite={from:'Emre',fid:'emre',text:'sahile inelim mi',label:'sahil',cost:150,mood:25,energy:-10,aff:10,mins:120};msg('💬 Emre sahile çağırdı')}},
+{id:'invite_emre',weight:2,cooldown:6,condition:()=>!state.pendingInvite&&state.hour>=14&&state.hour<=20,fire:()=>{state.pendingInvite={from:'Emre',fid:'emre',initial:'E',color:'#0F6E56',text:'sahile inelim mi',label:'sahil',cost:150,mood:25,energy:-10,aff:10,mins:120};msg('💬 Emre sahile çağırdı')}},
+{id:'invite_mangal',weight:2,cooldown:8,condition:()=>!state.pendingInvite&&state.hour>=12&&state.hour<=20,fire:()=>{const k=state.gender==='kız';state.pendingInvite={from:k?'Eylül':'Salih',fid:k?'eylul':'salih',initial:k?'E':'S',color:k?'#1D9E75':'#527E32',text:'Mangal yapıyoruz, gelir misin? Kişi başı 600₺',label:'mangal',cost:600,mood:30,energy:-25,hygiene:-10,aff:8,mins:180};msg('💬 Mangal daveti geldi · görevlere bak')}},
+{id:'invite_halisaha',weight:2,cooldown:7,condition:()=>!state.pendingInvite&&state.hour>=14&&state.hour<=21,fire:()=>{const k=state.gender==='kız';state.pendingInvite={from:k?'Eylül':'Salih',fid:k?'eylul':'salih',initial:k?'E':'S',color:k?'#1D9E75':'#527E32',text:'Halısaha var, kadro eksik! Gelir misin? 300₺',label:'halısaha',cost:300,mood:25,energy:-35,hygiene:-20,aff:8,mins:120};msg('💬 Halısaha daveti geldi · görevlere bak')}},
 {id:'cuzdan',weight:1,cooldown:20,condition:()=>state.money>=500,fire:()=>{const loss=200+Math.floor(Math.random()*300);state.money=Math.max(0,state.money-loss);state.mood=clamp(state.mood-15);msg('💸 Cüzdanından '+loss+'₺ düşmüş · mood -15')}},
 {id:'kuyruk',weight:3,cooldown:4,condition:()=>/Yemekhane/i.test(state.location)||state.hunger<35,fire:()=>{state.mood=clamp(state.mood-4);msg('⏳ Yemekhanede uzun kuyruk · 30 dk kaybettin · mood -4')}},
 {id:'toilet_paper',weight:3,cooldown:28,condition:()=>!state.toiletPaperPending,fire:()=>{state.toiletPaperPending=true;state.toiletPaperDays=0;state.toiletPaperSnoozed=false;msg('🧻 Evren: "tuvalet kağıdı ve sabun sırası sende kanka"')}}
@@ -2214,6 +2216,7 @@ state.illnessRisk=Math.min(100,(state.illnessRisk||0)+10);
 if(atSchool)state.location='Kütüphane';
 closeModal();advance(300);
 msg('🌙 Sabaha kadar çalıştın · '+c.code+' bilgi +'+gain+' ('+c.bilgi+'/100) · bitkinsin (-35⚡ -20😊)');
+render();
 }
 
 // --- Etkinlik takvimi (özel günler) ---
@@ -2221,7 +2224,7 @@ const calendarEvents=[
 {key:'cumhuriyet',month:10,day:29,fire:()=>{state.mood=clamp(state.mood+10);return'🇹🇷 29 Ekim Cumhuriyet Bayramı · kampüs kapalı, tatil · moral +10'}},
 {key:'ataturk',month:11,day:10,fire:()=>{return'🕯️ 10 Kasım · saygı duruşu, hüzünlü bir gün'}},
 {key:'yilbasi',month:12,day:31,fire:()=>{state.mood=clamp(state.mood+15);state.energy=clamp(state.energy-10);return'🎉 Yılbaşı gecesi · arkadaşlarla kutlama · moral +15'}},
-{key:'sevgililer',month:2,day:14,fire:()=>{if(state.girlfriend){state.relationship=Math.min(100,(state.relationship||0)+12);state.mood=clamp(state.mood+12);return'💘 Sevgililer Günü · '+getGf().name+' ile özel gün · ilişki +12'}state.mood=clamp(state.mood-6);return'💔 Sevgililer Günü · yalnızsın · moral -6'}},
+{key:'sevgililer',month:2,day:14,fire:()=>{const gf=getGf();if(gf){state.relationship=Math.min(100,(state.relationship||0)+12);state.mood=clamp(state.mood+12);return'💘 Sevgililer Günü · '+gf.name+' ile özel gün · ilişki +12'}state.mood=clamp(state.mood-6);return'💔 Sevgililer Günü · yalnızsın · moral -6'}},
 {key:'newroz',month:3,day:21,fire:()=>{state.mood=clamp(state.mood+6);return'🌱 Nevruz · bahar geldi, hava güzelleşiyor · moral +6'}},
 {key:'senlik',month:5,day:10,fire:()=>{state.mood=clamp(state.mood+20);state.energy=clamp(state.energy-10);return'🎪 Bahar Şenliği! Kampüste konser, stantlar, bedava yemek · moral +20'}},
 {key:'19mayis',month:5,day:19,fire:()=>{state.mood=clamp(state.mood+8);return'🤸 19 Mayıs Gençlik ve Spor Bayramı · tatil · moral +8'}}
