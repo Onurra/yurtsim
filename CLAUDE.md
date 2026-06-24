@@ -95,6 +95,10 @@ ile bağlanır (`advance` ve `doSleep` içindeki iki gün-geçiş bloğunda ça�
   `makeSick()` → `state.sick={severity,daysLeft,name}`. Şiddet 3'te derse gidilemez
   (`attendCourse` engeli). Tedavi: `goPharmacy()` (250₺), `goDoctor()` (600₺).
   Bakım modalında `healthSectionHtml()`.
+- **Fitness:** `doFitness()` (120₺, 90dk) moral+12, hastalık riski−12, enerji−25,
+  hijyen−15; `state.fitnessDays` sayar (yıl sonu 💪 Sporcu rozeti ≥10). Hasta/yorgunken
+  engellenir. "Kişisel bakım" sekmesi **"Bakım & Spor"** olarak yeniden adlandırıldı
+  (getApps label, getAppBadge, titles.care, `fitnessSectionHtml()` modalCareHtml'de).
 - **Gece çalışma (all-nighter):** `studyNight(code)` — +12 bilgi, -35 enerji,
   -20 moral, +hastalık riski, 5sa. Kütüphane modalında 🌙 butonu.
 - **Etkinlik takvimi:** `calendarEvents` (29 Ekim, 10 Kasım, yılbaşı, 14 Şubat,
