@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editör
+.vscode/
+.idea/
+*.swp
+
+# Bağımlılıklar (ileride Capacitor eklenirse)
+node_modules/
+dist/
+.gradle/
+*.iml
+
+# Capacitor / iOS / Android (ileride eklenirse)
+ios/App/Pods/
+ios/App/build/
+android/.gradle/
+android/app/build/
+android/build/
