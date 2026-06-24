@@ -88,6 +88,9 @@ ile bağlanır (`advance` ve `doSleep` içindeki iki gün-geçiş bloğunda ça�
 - **Hava durumu / mevsim:** `getSeason()`, `WEATHER`, `rollWeather()` (her gün),
   `isBadWeather()`. Kar/fırtına enerji, sıcak tokluk düşürür; yağmur/kar/fırtınada
   metro gecikir + moral -3 (`goToKampus`/`goToYurt`). Üst barda `weatherBadge`.
+  Dinamik gökyüzü: `getSkyColor()` (saat+hava, hep açık/okunur) `--sky` CSS değişkenine
+  yazılır; `updateWeatherFx()` yağmur/kar için düşük opaklıklı katman (`#weatherFx`,
+  z-index 5, modal=10 altında). Paneller `background:var(--sky,#DCE9F3)`.
 - **Sağlık/hastalık:** `state.illnessRisk` birikir (hijyen/tokluk/enerji/hava),
   `makeSick()` → `state.sick={severity,daysLeft,name}`. Şiddet 3'te derse gidilemez
   (`attendCourse` engeli). Tedavi: `goPharmacy()` (250₺), `goDoctor()` (600₺).
