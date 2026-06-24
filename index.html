@@ -283,19 +283,21 @@ const signatureOffers=[
 {id:'meal',name:'Tam yemek',price:400,chance:1.00}
 ];
 const jobs=[
-{id:'parttime',name:'Garson · Tarihi kantin',type:'Part-time sabit',schedule:'Pzt/Çar/Cum 18-22',mins:240,pay:800,energy:-40,gate:()=>state.hour>=17&&state.hour<22},
+{id:'parttime',name:'Garson · Tarihi kantin',type:'Part-time sabit',schedule:'Pzt/Çar/Cum 18-22',mins:240,pay:700,energy:-40,gate:()=>state.hour>=17&&state.hour<22},
 {id:'event',name:'Etkinlik görevlisi',type:'Günlük',schedule:'Bugün, esnek',mins:240,pay:1000,energy:-35},
 {id:'survey',name:'Online anket doldur',type:'Günlük',schedule:'Her zaman',mins:90,pay:200,energy:-10},
 {id:'tutor',name:'Matematik özel ders',type:'Günlük',schedule:'Hafta içi 12-18',mins:90,pay:800,energy:-15,gate:()=>state.hour>=12&&state.hour<18,gateText:'Sadece 12-18'},
 {id:'kurye',name:'Yemeksele kurye',type:'Günlük',schedule:'Akşam-gece',mins:300,pay:1500,energy:-50,gate:()=>state.hour>=17||state.hour<3,gateText:'Akşam 17:00 sonrası'},
-{id:'freelance',name:'Freelance kodlama',type:'Skill · esnek',schedule:'Esnek',mins:180,pay:2500,energy:-30,gate:()=>state.academic>=60,gateText:'Başarı ≥60 gerekli'}
+{id:'b101',name:'B101 market · reyon',type:'Part-time hafta sonu',schedule:'Cmt/Paz 09-18',mins:300,pay:750,energy:-40,gate:()=>(state.dayName==='Cmt'||state.dayName==='Paz')&&state.hour>=9&&state.hour<18,gateText:'Sadece hafta sonu 09:00-18:00'},
+{id:'freelance',name:'Freelance kodlama',type:'Skill · proje geldikçe',schedule:'Proje varsa',mins:180,pay:2500,energy:-30,gate:()=>state.academic>=60&&state.freelanceGig,gateText:'Şu an uygun proje yok (ya da başarı <60) · sonra tekrar bak'}
 ];
 const jobsKiz=[
-{id:'parttime',name:'Garson · Tarihi kantin',type:'Part-time sabit',schedule:'Pzt/Çar/Cum 18-22',mins:240,pay:800,energy:-40,gate:()=>state.hour>=17&&state.hour<22},
+{id:'parttime',name:'Garson · Tarihi kantin',type:'Part-time sabit',schedule:'Pzt/Çar/Cum 18-22',mins:240,pay:700,energy:-40,gate:()=>state.hour>=17&&state.hour<22},
 {id:'event',name:'Etkinlik görevlisi',type:'Günlük',schedule:'Bugün, esnek',mins:240,pay:1000,energy:-35},
 {id:'survey',name:'Online anket doldur',type:'Günlük',schedule:'Her zaman',mins:90,pay:200,energy:-10},
 {id:'tutor',name:'Türkçe özel ders',type:'Günlük',schedule:'Hafta içi 12-18',mins:90,pay:800,energy:-15,gate:()=>state.hour>=12&&state.hour<18,gateText:'Sadece 12-18'},
-{id:'kasiyer',name:'Market kasiyer',type:'Günlük',schedule:'10-22',mins:240,pay:1200,energy:-30,gate:()=>state.hour>=10&&state.hour<22,gateText:'10:00-22:00 arası'}
+{id:'kasiyer',name:'Market kasiyer',type:'Günlük',schedule:'10-22',mins:240,pay:1200,energy:-30,gate:()=>state.hour>=10&&state.hour<22,gateText:'10:00-22:00 arası'},
+{id:'b101',name:'B101 market · reyon',type:'Part-time hafta sonu',schedule:'Cmt/Paz 09-18',mins:300,pay:750,energy:-40,gate:()=>(state.dayName==='Cmt'||state.dayName==='Paz')&&state.hour>=9&&state.hour<18,gateText:'Sadece hafta sonu 09:00-18:00'}
 ];
 function getJobs(){return state.gender==='kız'?jobsKiz:jobs}
 const loanOptions=[
@@ -2134,6 +2136,7 @@ if(state.year===undefined)state.year=1;
 if(state.illnessRisk===undefined)state.illnessRisk=0;
 if(state.notifs===undefined)state.notifs=[];
 if(state.sick===undefined)state.sick=null;
+if(state.freelanceGig===undefined)state.freelanceGig=false;
 if(!state.firedCalendar)state.firedCalendar={};
 if(!state.weather)rollWeather();
 }
@@ -2269,6 +2272,8 @@ rollWeather();
 if(state.weather&&(state.weather.key==='kar'||state.weather.key==='firtina')){state.energy=clamp(state.energy-3)}
 if(state.weather&&state.weather.key==='sicak'){state.hunger=clamp(state.hunger-4)}
 updateHealth();
+state.freelanceGig=Math.random()<0.45;
+if(state.freelanceGig&&state.academic>=60)pushNotif('money','💻 Yeni freelance proje çıktı · İş ara\'dan al');
 checkCalendarEvents();
 maybeNotify();
 }
