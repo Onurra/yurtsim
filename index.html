@@ -1095,7 +1095,7 @@ render();
 }
 function renderApps(){
 const apps=getApps();
-document.getElementById('apps').innerHTML=apps.map((a,i)=>`<div data-i="${i}" class="app-tile" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;border-radius:10px;cursor:pointer;"><div style="width:56px;height:56px;background:${a.color};border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:28px;line-height:1;box-shadow:0 2px 5px rgba(0,0,0,0.10);">${a.emoji}</div><span style="font-size:10.5px;font-weight:600;text-align:center;color:${C.tp};line-height:1.15;">${a.label}</span></div>`).join('');
+document.getElementById('apps').innerHTML=apps.map((a,i)=>{const bdg=typeof getAppBadge==='function'?getAppBadge(a.label):null;return `<div data-i="${i}" class="app-tile" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;border-radius:10px;cursor:pointer;"><div style="position:relative;width:56px;height:56px;background:${a.color};border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:28px;line-height:1;box-shadow:0 2px 5px rgba(0,0,0,0.10);">${a.emoji}${bdg?`<span style="position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;background:${bdg.bg};color:white;font-size:11px;font-weight:700;border-radius:9px;display:flex;align-items:center;justify-content:center;border:2px solid #DCE9F3;line-height:1;${bdg.pulse?'animation:metroPulse 1.4s ease-in-out infinite;':''}">${bdg.text}</span>`:''}</div><span style="font-size:10.5px;font-weight:600;text-align:center;color:${C.tp};line-height:1.15;">${a.label}</span></div>`}).join('');
 document.querySelectorAll('.app-tile').forEach((el,i)=>{el.onclick=()=>{apps[i].fn();render()}});
 }
 function generateTasks(){
@@ -2343,6 +2343,27 @@ msg('🎉 Tebrikler! '+state.year+'. sınıfa geçtin · yeni yıl, yeni dersler
 render();
 }
 function endGameNewGame(){if(confirm('Yeni oyun başlatılsın mı? Mevcut ilerleme silinir.')){localStorage.removeItem(SAVE_KEY);location.reload()}}
+
+// --- App kutucuğu durum rozetleri ---
+function getAppBadge(label){
+if(label==='Ders'){
+let cnt=0;(state.courses||[]).forEach(c=>{const s=c.schedule.find(s=>s.day===state.dayName);if(s&&state.hour<s.end&&c.handledOnDay!==state.dayOfMonth)cnt++});
+if(cnt>0)return{text:String(cnt),bg:'#C9333B',pulse:true};
+const up=upcomingExam();if(up&&up.days<=3)return{text:'!',bg:'#EF9F27',pulse:false};
+return null;
+}
+if(label==='Kişisel bakım'){
+if(state.sick)return{text:'!',bg:'#C9333B',pulse:true};
+if(state.hygiene<=25||(state.illnessRisk||0)>=40)return{text:'!',bg:'#EF9F27',pulse:false};
+return null;
+}
+if(label==='Yemek')return state.hunger<=25?{text:'!',bg:'#C9333B',pulse:true}:null;
+if(label==='Uyu')return state.energy<=20?{text:'!',bg:'#C9333B',pulse:true}:null;
+if(label==='Çamaşır')return (state.daysSinceLaundry||0)>=10?{text:'!',bg:'#EF9F27',pulse:false}:null;
+if(label==='Sevgili')return (state.girlfriend&&(state.relationship||0)<50)?{text:'!',bg:'#C9333B',pulse:true}:null;
+if(label==='İmza iste')return (state.courses||[]).some(c=>c.type!=='lab'&&c.absent>0&&c.absent>=c.max-1&&c.absent<c.max)?{text:'!',bg:'#EF9F27',pulse:false}:null;
+return null;
+}
 
 // --- Üst bardaki hava/bildirim göstergelerini güncelle ---
 function updateExtrasUI(){

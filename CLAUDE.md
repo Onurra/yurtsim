@@ -104,6 +104,10 @@ ile bağlanır (`advance` ve `doSleep` içindeki iki gün-geçiş bloğunda ça�
   GANO≥1.0 ve ≤3 FF → 2. sınıfa geç. Aksi halde sadece yeni oyun.
 - **Çok yıllık:** `state.year` (vars. 1), `advanceToNextYear()` dersleri sıfırlar,
   yeni güz başlatır. Okul metni (`getSchoolText`/`getSchoolShortText`) yılı kullanır.
+- **App rozetleri:** `getAppBadge(label)` app kutucuklarında durum göstergesi döndürür
+  (Ders=bugün işlenmemiş ders sayısı/yaklaşan sınav, Bakım=hasta/hijyen/risk,
+  Yemek/Uyu=düşük stat, Çamaşır, Sevgili, İmza iste). `renderApps` rozeti çizer;
+  kritik olanlar `metroPulse` ile yanıp söner.
 - **Kalıcılık:** Hepsi `state` içinde → `saveGame()` ile otomatik kaydedilir.
 - `ensureExtState()` eksik alanları (year/weather/notifs/sick/illnessRisk) doldurur;
   `render` sarmalı her çizimde çağırır ve `updateExtrasUI()` ile üst barı günceller.
