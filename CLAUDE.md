@@ -23,6 +23,8 @@ herhangi bir modern tarayıcıda açılınca çalışır.
   ikonları (app tile) olarak sunulur. Açılışta splash ekranı var.
 - Karakter: erkek veya kız (`state.gender`). Cinsiyet, dersleri/arkadaşları/iş
   seçeneklerini/date'leri/metro rotasını değiştirir (`...Kiz` varyantları).
+- Yurt: erkek = **Avcılar yurdu** (Metrobüs → Mecidiyeköy → M2 → Ayazağa ile İTÜ'ye),
+  kız = Cevizlibağ yurdu (M1A → Beşiktaş). Bkz. `getYurtName`/`getMetroRoute`.
 - Metro geçiş animasyonu (`showMetroTransition`) kampüse/eve gidişte oynar.
 
 ## Temel İstatistikler (state)

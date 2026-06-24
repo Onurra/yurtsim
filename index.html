@@ -64,7 +64,7 @@ button:hover{background:#F5F4EE}
 <div id="avatarCircle" onclick="openModal('avatar')" style="width:40px;height:40px;border-radius:50%;background:#534AB7;color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;cursor:pointer;">OY</div>
 <div style="line-height:1.25;min-width:0;">
 <div id="playerName" style="font-size:15px;font-weight:700;color:#1F1F1D;">Onur Yılmaz</div>
-<div id="playerSchoolKyk" style="font-size:10.5px;color:#5F5E5A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">İTÜ BLG · 1. sınıf · Ataköy KYK</div>
+<div id="playerSchoolKyk" style="font-size:10.5px;color:#5F5E5A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">İTÜ BLG · 1. sınıf · Avcılar KYK</div>
 </div>
 </div>
 <button id="moneyBtn" style="background:#1F4A11;color:white;padding:7px 13px;border-radius:18px;font-weight:700;font-size:13px;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;line-height:1;flex-shrink:0;font-family:inherit;">
@@ -85,7 +85,7 @@ button:hover{background:#F5F4EE}
 <div style="padding:0 14px 8px;background:#DCE9F3;display:flex;gap:5px;align-items:center;flex-wrap:wrap;flex-shrink:0;">
 <span id="locationPill" style="background:#EEEDFE;color:#3C3489;font-size:11px;padding:5px 11px;border-radius:14px;font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:background 0.3s,color 0.3s;line-height:1;">
 <span id="locationEmoji">🏠</span>
-<span id="currentLocation">Ataköy yurdu</span>
+<span id="currentLocation">Avcılar yurdu</span>
 </span>
 <button id="travelBtn" style="background:rgba(60,52,137,0.1);border:0.5px solid rgba(60,52,137,0.4);border-radius:14px;padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;display:none;align-items:center;gap:4px;font-family:inherit;color:#3C3489;line-height:1;"><span style="font-size:12px;">🚇</span><span id="travelLabel">Yurda dön</span></button>
 <button id="travelBtn2" style="background:rgba(15,68,124,0.1);border:0.5px solid rgba(15,68,124,0.4);border-radius:14px;padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;display:none;align-items:center;gap:4px;font-family:inherit;color:#0C447C;line-height:1;"><span style="font-size:12px;">🎓</span><span id="travelLabel2">Kampüse git</span></button>
@@ -161,7 +161,7 @@ const state={
 hour:8,minute:0,dayName:'Pzt',dayOfMonth:20,
 money:5000,akbil:80,abonman:false,abonmanTrips:0,abonmanDays:0,
 energy:75,hygiene:80,hunger:50,mood:70,academic:0,
-location:'Ataköy yurdu',
+location:'Avcılar yurdu',
 activeModal:null,pendingInvite:null,tasksExpanded:false,
 toiletPaperPending:false,toiletPaperDays:0,toiletPaperSnoozed:false,
 rentDue:1000,rentPaid:false,daysUntilRent:10,
@@ -627,13 +627,13 @@ overlay.innerHTML=`
 </div>
 <div style="position:relative;z-index:2;text-align:center;color:white;padding:18px;width:100%;max-width:380px;">
 <div style="background:#1F1F1D;border:1px solid #C2410C;border-radius:5px;padding:6px 14px;margin-bottom:16px;font-family:'Courier New',monospace;color:#FF8E3C;font-size:9.5px;letter-spacing:1.5px;display:inline-block;overflow:hidden;">
-<span style="display:inline-block;animation:metroPulse 1.2s ease-in-out infinite;">● </span>M1A — ATATÜRK HAVALİMANI ↔ YENİKAPI
+<span style="display:inline-block;animation:metroPulse 1.2s ease-in-out infinite;">● </span>${state.gender==='kız'?'M1A — ATATÜRK HAVALİMANI ↔ YENİKAPI':'34 — METROBÜS · BEYLİKDÜZÜ ↔ ZİNCİRLİKUYU'}
 </div>
 <div style="font-size:54px;color:#C2410C;margin-bottom:12px;animation:metroBob 0.55s ease-in-out infinite;line-height:1;">
 <i class="ti ti-train"></i>
 </div>
 <div style="font-size:16px;font-weight:700;letter-spacing:1.5px;margin-bottom:4px;color:#fff;">${routeLabel||getMetroRoute('toKampus')}</div>
-<div style="font-size:10px;color:#888;margin-bottom:20px;">${state.gender==='kız'?'M1A → Yenikapı → Marmaray → Beşiktaş · 1 saat 30 dk':'M1A → Yenikapı aktarma → M2 → Ayazağa · 1 saat 30 dk'}</div>
+<div style="font-size:10px;color:#888;margin-bottom:20px;">${state.gender==='kız'?'M1A → Yenikapı → Marmaray → Beşiktaş · 1 saat 30 dk':'Metrobüs → Mecidiyeköy → M2 → Ayazağa · 1 saat 30 dk'}</div>
 <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:6px;">
 <span style="width:9px;height:9px;border-radius:50%;background:#C2410C;box-shadow:0 0 8px #C2410C;"></span>
 <span style="width:32px;height:1.5px;background:#C2410C;"></span>
@@ -646,7 +646,7 @@ overlay.innerHTML=`
 <span style="width:9px;height:9px;border-radius:50%;background:#1D9E75;opacity:0.6;"></span>
 </div>
 <div style="display:flex;justify-content:space-between;width:260px;margin:0 auto 18px;font-size:8.5px;color:#666;">
-<span style="color:#FF8E3C;">${state.gender==='kız'?'Cevizlibağ':'Ataköy'}</span>
+<span style="color:#FF8E3C;">${state.gender==='kız'?'Cevizlibağ':'Avcılar'}</span>
 <span>Aktarma</span>
 <span style="color:#1D9E75;">${state.gender==='kız'?'Beşiktaş':'Ayazağa'}</span>
 </div>
@@ -1923,11 +1923,11 @@ html+=`<div style="background:white;border:1px solid #E5E2D8;border-radius:12px;
 c.innerHTML=html;
 if(state.gender){setTimeout(()=>{const i=document.getElementById('charName');if(i&&!name){try{i.focus({preventScroll:true})}catch(e){}}},50)}
 }
-function applyGenderProfile(){if(state.gender==='kız'){state.guzCourses=state.guzCoursesKiz;state.baharCourses=state.baharCoursesKiz;state.courses=state.semester==='bahar'?state.baharCourses:state.guzCourses;state.dates=state.datesKiz;if(state.location==='Ataköy yurdu')state.location='Cevizlibağ yurdu'}}
+function applyGenderProfile(){if(state.gender==='kız'){state.guzCourses=state.guzCoursesKiz;state.baharCourses=state.baharCoursesKiz;state.courses=state.semester==='bahar'?state.baharCourses:state.guzCourses;state.dates=state.datesKiz;if(state.location==='Avcılar yurdu')state.location='Cevizlibağ yurdu'}}
 function getSchoolText(){return state.gender==='kız'?'Bahçeşehir Üniversitesi Hukuk Fakültesi · 1. sınıf':'İTÜ Bilgisayar Mühendisliği · 1. sınıf'}
-function getSchoolShortText(){return state.gender==='kız'?'Hukuk · 1. sınıf · Cevizlibağ KYK':'BLG · 1. sınıf · Ataköy KYK'}
-function getYurtName(){return state.gender==='kız'?'Cevizlibağ yurdu':'Ataköy yurdu'}
-function getMetroRoute(dir){if(state.gender==='kız'){return dir==='toKampus'?'CEVİZLİBAĞ → BEŞİKTAŞ':'BEŞİKTAŞ → CEVİZLİBAĞ'}return dir==='toKampus'?'ATAKÖY → İTÜ AYAZAĞA':'İTÜ AYAZAĞA → ATAKÖY'}
+function getSchoolShortText(){return state.gender==='kız'?'Hukuk · 1. sınıf · Cevizlibağ KYK':'BLG · 1. sınıf · Avcılar KYK'}
+function getYurtName(){return state.gender==='kız'?'Cevizlibağ yurdu':'Avcılar yurdu'}
+function getMetroRoute(dir){if(state.gender==='kız'){return dir==='toKampus'?'CEVİZLİBAĞ → BEŞİKTAŞ':'BEŞİKTAŞ → CEVİZLİBAĞ'}return dir==='toKampus'?'AVCILAR → İTÜ AYAZAĞA':'İTÜ AYAZAĞA → AVCILAR'}
 function signerName(suffix){const n=state.gender==='kız'?'Deniz':'Selçuk';if(suffix==='dan')return n+(state.gender==='kız'?"'den":"'tan");if(suffix==='a')return n+(state.gender==='kız'?"'e":"'a");return n}
 function signerInitial(){return state.gender==='kız'?'D':'S'}
 function getDadChance(){return state.gender==='kız'?0.30:0.20}
