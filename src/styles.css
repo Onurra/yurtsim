@@ -1,0 +1,18 @@
+*{box-sizing:border-box}
+body{margin:0;padding:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#2a2a2a;color:#1F1F1D}
+button{background:#fff;border:0.5px solid #BBB7AC;border-radius:5px;cursor:pointer;font-family:inherit;color:#1F1F1D;font-weight:500}
+button:hover{background:#F5F4EE}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden}
+.container{max-width:900px;margin:0 auto}
+@keyframes metroSlide{from{transform:translateX(0)}to{transform:translateX(-42px)}}
+@keyframes metroBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes metroPulse{0%,100%{opacity:0.55}50%{opacity:1}}
+@keyframes metroFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes reelsScroll{from{transform:translateY(0)}to{transform:translateY(-4320px)}}
+@keyframes ledScroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+@keyframes modalSlideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.app-tile:active{transform:scale(0.94);transition:transform 0.1s}
+.app-tile{transition:transform 0.15s}
+@keyframes skyRain{from{transform:translateY(-40px)}to{transform:translateY(40px)}}
+@keyframes skySnow{from{transform:translateY(-60px)}to{transform:translateY(60px)}}

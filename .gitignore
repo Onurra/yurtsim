@@ -19,3 +19,11 @@ ios/App/build/
 android/.gradle/
 android/app/build/
 android/build/
+
+# Refaktör/doğrulama artıkları (üretime dahil değil — build/ scriptleri tutulur)
+build/shot-*.png
+build/_*.html
+build/_*.txt
+
+# Eski monolit yedeği (yerelde durur, izlenmez)
+yurtsim (2).html
