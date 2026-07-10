@@ -15,8 +15,23 @@ if(state.freelanceGig===undefined)state.freelanceGig=false;
 if(state.rentOverdueDays===undefined)state.rentOverdueDays=0;
 if(state.gameOver===undefined)state.gameOver=null;
 if(!state.firedCalendar)state.firedCalendar={};
+if(state.theme===undefined)state.theme='light';
 if(!state.weather)rollWeather();
 }
+
+// --- Tema (açık / koyu / sistem) ---
+function isDarkTheme(){
+const t=state.theme||'light';
+if(t==='dark')return true;
+if(t==='light')return false;
+return window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+}
+function applyTheme(){
+const t=state.theme||'light';
+const el=document.documentElement;
+if(t==='auto')el.removeAttribute('data-theme');else el.setAttribute('data-theme',t);
+}
+function setTheme(t){state.theme=t;applyTheme();if(typeof updateExtrasUI==='function')updateExtrasUI();if(typeof render==='function')render()}
 
 // --- Hava durumu / mevsim ---
 const WEATHER={
@@ -72,7 +87,7 @@ h+=`<div style="background:#FCEBEB;border:1px solid #C9333B;border-radius:8px;pa
 <div style="font-size:12px;font-weight:700;color:#791F1F;">🤒 ${state.sick.name}</div>
 <div style="font-size:10.5px;color:${C.ts};margin:3px 0 8px;">Şiddet ${'🔴'.repeat(state.sick.severity)} · ~${state.sick.daysLeft} gün · ders/sınav riskte${state.sick.severity>=3?' · derse gidemezsin':''}</div>
 <div style="display:flex;gap:6px;">
-<button onclick="goPharmacy()" style="flex:1;font-size:11px;padding:9px;background:white;color:#791F1F;border:1px solid #C9333B;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;${state.money<250?'opacity:0.5;':''}">💊 Eczane · 250₺</button>
+<button onclick="goPharmacy()" style="flex:1;font-size:11px;padding:9px;background:var(--surface);color:#791F1F;border:1px solid #C9333B;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;${state.money<250?'opacity:0.5;':''}">💊 Eczane · 250₺</button>
 <button onclick="goDoctor()" style="flex:1;font-size:11px;padding:9px;background:#C9333B;color:white;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;${state.money<600?'opacity:0.5;':''}">🏥 Doktor · 600₺</button>
 </div></div>`;
 }else{
@@ -156,7 +171,7 @@ function modalNotifsHtml(){
 const ns=state.notifs||[];
 if(!ns.length)return `<div style="text-align:center;padding:34px 0;color:${C.ts};font-size:12px;">📭 Henüz bildirim yok</div>`;
 let h=`<div style="font-size:10.5px;color:${C.ts};margin-bottom:8px;">Son ${ns.length} bildirim</div>`;
-h+=ns.map(n=>{const cal=getCalDate(n.day);return `<div style="background:white;border:0.5px solid ${C.bt};border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;gap:9px;align-items:flex-start;"><div style="font-size:18px;flex-shrink:0;line-height:1.2;">${notifIcon(n.type)}</div><div style="flex:1;min-width:0;"><div style="font-size:11.5px;color:${C.tp};line-height:1.4;">${n.text}</div><div style="font-size:9.5px;color:${C.tt};margin-top:2px;">${cal.day} ${cal.monthName}</div></div></div>`}).join('');
+h+=ns.map(n=>{const cal=getCalDate(n.day);return `<div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;gap:9px;align-items:flex-start;"><div style="font-size:18px;flex-shrink:0;line-height:1.2;">${notifIcon(n.type)}</div><div style="flex:1;min-width:0;"><div style="font-size:11.5px;color:${C.tp};line-height:1.4;">${n.text}</div><div style="font-size:9.5px;color:${C.tt};margin-top:2px;">${cal.day} ${cal.monthName}</div></div></div>`}).join('');
 return h;
 }
 function upcomingExam(){let best=null;const sem=state.semester;(state.courses||[]).forEach(c=>{['Vize','Final'].forEach(t=>{const d=c[sem+t];const n=c[sem+t+'Note'];if(d&&!n){const dd=daysUntilDate(d);if(dd>=0&&(!best||dd<best.days))best={code:c.code,type:t==='Vize'?'vize':'final',days:dd}}})});return best}
@@ -210,7 +225,7 @@ return `<div style="text-align:center;padding:20px 0 14px;background:linear-grad
 <div style="font-size:11px;color:${C.ts};">Oyun bitti</div>
 </div>
 <div style="background:#FCEBEB;border:1px solid #C9333B;border-radius:8px;padding:12px;margin-bottom:14px;font-size:11.5px;color:#791F1F;line-height:1.5;">${r.desc}</div>
-<div style="background:white;border:0.5px solid ${C.bt};border-radius:8px;padding:12px;margin-bottom:14px;font-size:11px;color:${C.tp};">
+<div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:8px;padding:12px;margin-bottom:14px;font-size:11px;color:${C.tp};">
 <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:${C.ts};">Geldiğin yer</span><span style="font-weight:600;">${(state.year||1)}. sınıf</span></div>
 <div style="display:flex;justify-content:space-between;padding:3px 0;border-top:0.5px solid ${C.bt};"><span style="color:${C.ts};">GANO</span><span style="font-weight:600;">${st.gano.toFixed(2)}</span></div>
 <div style="display:flex;justify-content:space-between;padding:3px 0;border-top:0.5px solid ${C.bt};"><span style="color:${C.ts};">Para</span><span style="font-weight:600;">${fmt(state.money)}₺</span></div>
@@ -264,7 +279,7 @@ let h=`<div style="text-align:center;padding:16px 0 12px;background:linear-gradi
 <div style="font-size:10px;color:${C.ts};margin-top:6px;">${st.pass} ders geçti · ${st.fail} FF · 💰 ${fmt(state.money)}₺</div>
 </div>`;
 if(badges.length){h+=`<div style="font-size:11px;color:${C.tp};font-weight:600;margin-bottom:6px;">🎖️ Rozetler</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;">${badges.map(b=>`<span style="font-size:10.5px;background:#EEEDFE;color:#3C3489;padding:3px 8px;border-radius:6px;font-weight:600;">${b}</span>`).join('')}</div>`}
-h+=`<div style="font-size:11px;color:${C.tp};font-weight:600;margin-bottom:6px;">📋 Yıl Sonu Notları</div><div style="background:white;border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;margin-bottom:14px;">`;
+h+=`<div style="font-size:11px;color:${C.tp};font-weight:600;margin-bottom:6px;">📋 Yıl Sonu Notları</div><div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;margin-bottom:14px;">`;
 st.rows.forEach((r,i)=>{const ff=r.g==='FF';const good=['AA','BA','BB'].includes(r.g);h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px;${i<st.rows.length-1?'border-bottom:0.5px solid '+C.bt+';':''}font-size:11px;"><div style="flex:1;min-width:0;"><span style="font-weight:600;color:${C.tp};">${r.c.code}</span></div><span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:${ff?'#FCEBEB':good?'#EAF3DE':'#FAEEDA'};color:${ff?'#791F1F':good?'#27500A':'#854F0B'};">${r.g}</span></div>`});
 h+=`</div>`;
 if(canAdvance){
@@ -319,12 +334,23 @@ return null;
 // --- Dinamik gökyüzü (saate + havaya göre, metin okunur kalır) ---
 function getSkyColor(){
 const h=state.hour;
+const k=state.weather&&state.weather.key;
+if(isDarkTheme()){
+let d;
+if(h>=6&&h<11)d='#1B2432';        // sabah · koyu lacivert
+else if(h>=11&&h<17)d='#1C2836';  // öğle · biraz açık koyu
+else if(h>=17&&h<20)d='#2A2330';  // akşam · sıcak koyu mor
+else d='#141A26';                 // gece · en koyu
+if(k==='yagmur'||k==='firtina')d='#1A1E24';
+else if(k==='bulutlu')d='#1C2028';
+else if(k==='kar')d='#232A36';
+return d;
+}
 let base;
 if(h>=6&&h<11)base='#DDEAF4';      // sabah · açık mavi
 else if(h>=11&&h<17)base='#D5E6F5'; // öğle · parlak
 else if(h>=17&&h<20)base='#F1DFD2'; // akşam · sıcak ton
 else base='#CBD3E6';                // gece · dingin lacivert-açık
-const k=state.weather&&state.weather.key;
 if(k==='yagmur'||k==='firtina')base='#D2D8DE';
 else if(k==='bulutlu')base='#D8DEE6';
 else if(k==='kar')base='#E4EAF1';
@@ -350,6 +376,7 @@ fx.innerHTML='<div style="position:absolute;inset:-40px;background-image:repeati
 // --- Üst bardaki hava/bildirim göstergelerini güncelle ---
 function updateExtrasUI(){
 ensureExtState();
+applyTheme();
 const screen=document.querySelector('.phone-screen');
 if(screen)screen.style.setProperty('--sky',getSkyColor());
 updateWeatherFx();
@@ -363,6 +390,9 @@ if(nc){nc.textContent=u>0?String(u):'';nc.style.display=u>0?'inline-flex':'none'
 }
 const _origRenderExt=render;
 render=function(){ensureExtState();if(state.gameOver&&state.activeModal!=='gameOver')state.activeModal='gameOver';_origRenderExt();updateExtrasUI()};
+
+// Tema'yı olabildiğince erken uygula (splash beklemeden), sonra boot
+ensureExtState();applyTheme();
 
 // App başlangıç: splash → ana menü
 setTimeout(()=>{const splash=document.getElementById('appSplash');if(splash){splash.style.opacity='0';setTimeout(()=>{splash.style.display='none';showMainMenu()},500)}},1500);

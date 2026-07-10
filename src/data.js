@@ -1,6 +1,9 @@
 /* data.js — palette, friends, world data (food/jobs/loans/care/fun/gf), food+calendar helpers
    Auto-extracted from the original single-file game; behaviour unchanged. */
-const C={tp:'#1F1F1D',ts:'#5F5E5A',tt:'#888780',bt:'#D5D2C8',bg3:'#E8E4D6'};
+/* Palette bridged to CSS design tokens (src/styles.css :root).
+   Values are var() references so every inline style built from C
+   re-themes instantly (incl. dark mode) with no re-render. */
+const C={tp:'var(--tp)',ts:'var(--ts)',tt:'var(--tt)',bt:'var(--bt)',bg3:'var(--bg3)'};
 const FRIENDS_ERKEK=[
 {id:'mert',name:'Mert',initial:'M',color:'#534AB7',tag:'Barcı',bio:'Hafta sonu hep mekan',affinity:70},
 {id:'emre',name:'Emre',initial:'E',color:'#0F6E56',tag:'Sahil dostu',bio:'Sakin, Burgazada hayalleri',affinity:55},

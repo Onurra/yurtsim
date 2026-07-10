@@ -6,16 +6,16 @@ const av=state.avatarId;const name=state.tempName||'';const last=state.tempLastN
 const canStart=state.gender&&name.trim().length>=2&&last.trim().length>=2&&av;
 let html=`<div style="text-align:center;margin-bottom:24px;">
 <div style="width:90px;height:90px;margin:0 auto 14px;border-radius:20px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,0.12);">${APP_ICON_SVG}</div>
-<div style="font-size:22px;font-weight:700;color:#1F1F1D;margin-bottom:6px;">Karakterini seç</div>
-<div style="font-size:12px;color:#5F5E5A;line-height:1.4;">Kız ve erkek karakterlerinde farklı deneyimler yaşarsın</div>
+<div style="font-size:22px;font-weight:700;color:var(--tp);margin-bottom:6px;">Karakterini seç</div>
+<div style="font-size:12px;color:var(--ts);line-height:1.4;">Kız ve erkek karakterlerinde farklı deneyimler yaşarsın</div>
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
-<button onclick="selectGender('kız')" style="background:${state.gender==='kız'?'#D4537E':'white'};border:1px solid ${state.gender==='kız'?'#D4537E':'#E5E2D8'};border-radius:14px;padding:20px 12px;cursor:pointer;font-family:inherit;color:${state.gender==='kız'?'white':'#1F1F1D'};${state.gender==='kız'?'box-shadow:0 4px 14px rgba(212,83,126,0.25);':''}">
+<button onclick="selectGender('kız')" style="background:${state.gender==='kız'?'#D4537E':'white'};border:1px solid ${state.gender==='kız'?'#D4537E':'#E5E2D8'};border-radius:14px;padding:20px 12px;cursor:pointer;font-family:inherit;color:${state.gender==='kız'?'white':'var(--tp)'};${state.gender==='kız'?'box-shadow:0 4px 14px rgba(212,83,126,0.25);':''}">
 <div style="font-size:56px;line-height:1;margin-bottom:8px;">👩</div>
 <div style="font-size:13px;font-weight:700;">Kız</div>
 <div style="font-size:10px;font-weight:500;margin-top:3px;opacity:${state.gender==='kız'?'0.85':'0.65'};">Hukuk Öğrencisi</div>
 </button>
-<button onclick="selectGender('erkek')" style="background:${state.gender==='erkek'?'#3C3489':'white'};border:1px solid ${state.gender==='erkek'?'#3C3489':'#E5E2D8'};border-radius:14px;padding:20px 12px;cursor:pointer;font-family:inherit;color:${state.gender==='erkek'?'white':'#1F1F1D'};${state.gender==='erkek'?'box-shadow:0 4px 14px rgba(60,52,137,0.25);':''}">
+<button onclick="selectGender('erkek')" style="background:${state.gender==='erkek'?'#3C3489':'white'};border:1px solid ${state.gender==='erkek'?'#3C3489':'#E5E2D8'};border-radius:14px;padding:20px 12px;cursor:pointer;font-family:inherit;color:${state.gender==='erkek'?'white':'var(--tp)'};${state.gender==='erkek'?'box-shadow:0 4px 14px rgba(60,52,137,0.25);':''}">
 <div style="font-size:56px;line-height:1;margin-bottom:8px;">🧑</div>
 <div style="font-size:13px;font-weight:700;">Erkek</div>
 <div style="font-size:10px;font-weight:500;margin-top:3px;opacity:${state.gender==='erkek'?'0.85':'0.65'};">Mühendislik Öğrencisi</div>
@@ -23,19 +23,19 @@ let html=`<div style="text-align:center;margin-bottom:24px;">
 </div>`;
 if(state.gender){
 const accent=state.gender==='kız'?'#D4537E':'#3C3489';const accentBg=state.gender==='kız'?'#FCE4EC':'#EEEDFE';
-html+=`<div style="background:white;border:1px solid #E5E2D8;border-radius:12px;padding:14px;margin-bottom:14px;">
+html+=`<div style="background:var(--surface);border:1px solid #E5E2D8;border-radius:12px;padding:14px;margin-bottom:14px;">
 <label style="display:block;margin-bottom:10px;">
-<span style="font-size:11px;color:#5F5E5A;font-weight:600;display:block;margin-bottom:4px;">Ad</span>
-<input id="charName" type="text" value="${name.replace(/"/g,'&quot;')}" maxlength="20" oninput="state.tempName=this.value;updateCharSubmit()" placeholder="${state.gender==='kız'?'Elif':'Mehmet'}" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #E5E2D8;border-radius:8px;background:#FAFAF7;font-family:inherit;color:#1F1F1D;outline:none;box-sizing:border-box;">
+<span style="font-size:11px;color:var(--ts);font-weight:600;display:block;margin-bottom:4px;">Ad</span>
+<input id="charName" type="text" value="${name.replace(/"/g,'&quot;')}" maxlength="20" oninput="state.tempName=this.value;updateCharSubmit()" placeholder="${state.gender==='kız'?'Elif':'Mehmet'}" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #E5E2D8;border-radius:8px;background:#FAFAF7;font-family:inherit;color:var(--tp);outline:none;box-sizing:border-box;">
 </label>
 <label style="display:block;">
-<span style="font-size:11px;color:#5F5E5A;font-weight:600;display:block;margin-bottom:4px;">Soyad</span>
-<input id="charLastName" type="text" value="${last.replace(/"/g,'&quot;')}" maxlength="20" oninput="state.tempLastName=this.value;updateCharSubmit()" placeholder="${state.gender==='kız'?'Kaya':'Demir'}" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #E5E2D8;border-radius:8px;background:#FAFAF7;font-family:inherit;color:#1F1F1D;outline:none;box-sizing:border-box;">
+<span style="font-size:11px;color:var(--ts);font-weight:600;display:block;margin-bottom:4px;">Soyad</span>
+<input id="charLastName" type="text" value="${last.replace(/"/g,'&quot;')}" maxlength="20" oninput="state.tempLastName=this.value;updateCharSubmit()" placeholder="${state.gender==='kız'?'Kaya':'Demir'}" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #E5E2D8;border-radius:8px;background:#FAFAF7;font-family:inherit;color:var(--tp);outline:none;box-sizing:border-box;">
 </label>
 </div>
-<div style="background:white;border:1px solid #E5E2D8;border-radius:12px;padding:14px;margin-bottom:14px;">
-<div style="font-size:11px;color:#5F5E5A;font-weight:600;margin-bottom:10px;">Avatar seç</div>
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">${getActiveAvatarOptions().map(a=>{const sel=state.avatarId===a.id;const svgMap=getActiveAvatarSvgs();return `<button onclick="state.avatarId='${a.id}';renderCharStep()" style="background:${sel?accentBg:'white'};border:1.5px solid ${sel?accent:'#E5E2D8'};border-radius:10px;padding:5px;cursor:pointer;font-family:inherit;aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;${sel?`box-shadow:0 0 0 3px ${accent}20;`:''}"><div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:white;">${svgMap[a.id]}</div></button>`}).join('')}</div>
+<div style="background:var(--surface);border:1px solid #E5E2D8;border-radius:12px;padding:14px;margin-bottom:14px;">
+<div style="font-size:11px;color:var(--ts);font-weight:600;margin-bottom:10px;">Avatar seç</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">${getActiveAvatarOptions().map(a=>{const sel=state.avatarId===a.id;const svgMap=getActiveAvatarSvgs();return `<button onclick="state.avatarId='${a.id}';renderCharStep()" style="background:${sel?accentBg:'white'};border:1.5px solid ${sel?accent:'#E5E2D8'};border-radius:10px;padding:5px;cursor:pointer;font-family:inherit;aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;${sel?`box-shadow:0 0 0 3px ${accent}20;`:''}"><div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--surface);">${svgMap[a.id]}</div></button>`}).join('')}</div>
 </div>
 <button id="charSubmit" onclick="finishCharCreation()" ${canStart?'':'disabled'} style="width:100%;background:${canStart?'#1F4A11':'#C2C0B6'};color:white;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:${canStart?'pointer':'not-allowed'};font-family:inherit;transition:background 0.2s;">Oyuna başla</button>`;
 }

@@ -97,6 +97,12 @@ async function main() {
   await js("openModal('schedule')"); await wait(300); await shot('shot-schedule.png'); await js("closeModal()");
   await js("openModal('food')"); await wait(300); await shot('shot-food.png'); await js("closeModal()");
 
+  // Dark theme (Stage B)
+  await js("typeof setTheme==='function' && setTheme('dark')"); await wait(400); await shot('shot-dark.png');
+  await js("openModal('settings')"); await wait(300); await shot('shot-settings-dark.png'); await js("closeModal()");
+  const themeCheck = await js("JSON.stringify({attr:document.documentElement.getAttribute('data-theme'), surface:getComputedStyle(document.querySelector('.phone-screen')).getPropertyValue('--surface').trim(), themeFns:['setTheme','applyTheme','isDarkTheme'].filter(f=>typeof window[f]==='function')})");
+  await js("typeof setTheme==='function' && setTheme('light')"); await wait(300);
+
   // NEW-version systems (weather/health/notifications/year-end)
   const extras = await js("JSON.stringify({weather:state.weather&&state.weather.key, year:state.year, notifs:Array.isArray(state.notifs), illnessRisk:state.illnessRisk, fns:['doFitness','studyNight','openNotifs','modalYearEndHtml','triggerGameOver','rollWeather'].filter(f=>typeof window[f]==='function')})");
   await js("typeof openNotifs==='function' && openNotifs()"); await wait(300); await shot('shot-notifs.png'); await js("closeModal()");
@@ -106,6 +112,7 @@ async function main() {
   console.log('char.display   =', charVisible);
   console.log('gameState      =', gameState);
   console.log('extras systems =', extras);
+  console.log('theme check    =', themeCheck);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();

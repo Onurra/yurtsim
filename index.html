@@ -9,16 +9,16 @@
 <body>
 <div class="container">
 <h2 class="sr-only">Öğrenci simülasyonu v6</h2>
-<div style="--color-text-primary:#1F1F1D;background:#F5F4EE;padding:14px;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;">
+<div style="--color-text-primary:#1F1F1D;background:var(--page-bg);padding:14px;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;">
 <div style="background:#1F1F1D;border-radius:42px;padding:6px;box-shadow:0 14px 40px rgba(0,0,0,0.18);">
 <div class="phone-screen" style="background:var(--sky,#DCE9F3);border-radius:36px;overflow:hidden;display:flex;flex-direction:column;width:390px;height:830px;position:relative;">
-<div id="appSplash" style="position:absolute;inset:0;z-index:100;background:#EAE0C6;display:flex;align-items:center;justify-content:center;transition:opacity 0.5s ease;">
+<div id="appSplash" style="position:absolute;inset:0;z-index:100;background:var(--splash);display:flex;align-items:center;justify-content:center;transition:opacity 0.5s ease;">
 <div style="width:180px;height:180px;border-radius:40px;overflow:hidden;box-shadow:0 25px 60px rgba(74,46,20,0.3);">
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" style="display:block;width:100%;height:100%;"><defs><linearGradient id="asbg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#EAE0C6"/><stop offset="100%" stop-color="#D9C9A8"/></linearGradient><symbol id="asflower" viewBox="-50 -50 100 100"><g><circle cx="0" cy="0" r="15"/><circle cx="0" cy="-32" r="14"/><circle cx="28" cy="-16" r="14"/><circle cx="28" cy="16" r="14"/><circle cx="0" cy="32" r="14"/><circle cx="-28" cy="16" r="14"/><circle cx="-28" cy="-16" r="14"/></g></symbol><symbol id="ascross" viewBox="-30 -30 60 60"><g><rect x="-6" y="-22" width="12" height="44" rx="6"/><rect x="-22" y="-6" width="44" height="12" rx="6"/></g></symbol></defs><rect width="1024" height="1024" rx="220" fill="url(#asbg)"/><g><use href="#asflower" x="60" y="50" width="200" height="200" fill="#6B4423"/><use href="#ascross" x="320" y="100" width="110" height="110" fill="#8B6E47"/><use href="#asflower" x="480" y="40" width="240" height="240" fill="#5C3D1E"/><use href="#ascross" x="760" y="80" width="85" height="85" fill="#5C3D1E"/><use href="#ascross" x="880" y="180" width="75" height="75" fill="#6B95B5"/><use href="#asflower" x="180" y="700" width="200" height="200" fill="#5C3D1E"/><use href="#asflower" x="420" y="770" width="240" height="240" fill="#5C3D1E"/><use href="#ascross" x="710" y="780" width="105" height="105" fill="#8B6E47"/></g><g transform="translate(512 540) rotate(-13)"><rect x="-650" y="-105" width="1300" height="210" fill="#4A2E14"/></g><g transform="translate(512 540) rotate(-13)"><text y="30" font-family="Georgia,serif" font-size="135" fill="#F0E2C7" text-anchor="middle" letter-spacing="3" font-style="italic" font-weight="500">Yurt Simülatör</text></g></svg>
 </div>
 </div>
-<div id="mainMenu" style="position:absolute;inset:0;z-index:95;background:#F5F4EE;display:none;align-items:center;justify-content:center;padding:0;">
-<div style="background:#F5F4EE;width:100%;height:100%;border-radius:0;overflow-y:auto;padding:30px 24px;display:flex;flex-direction:column;justify-content:center;">
+<div id="mainMenu" style="position:absolute;inset:0;z-index:95;background:var(--bg-app);display:none;align-items:center;justify-content:center;padding:0;">
+<div style="background:var(--bg-app);width:100%;height:100%;border-radius:0;overflow-y:auto;padding:30px 24px;display:flex;flex-direction:column;justify-content:center;">
 <div id="mainMenuContent" style="width:100%;"></div>
 </div>
 </div>
@@ -27,17 +27,23 @@
 <div id="introHint" style="position:absolute;bottom:50px;left:50%;transform:translateX(-50%);text-align:center;font-size:13px;color:white;font-family:system-ui,-apple-system,sans-serif;letter-spacing:1.5px;background:rgba(0,0,0,0.45);padding:10px 22px;border-radius:30px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeInPulse 2.5s ease infinite;pointer-events:none;font-weight:500;">geçmek için dokun</div>
 <style>@keyframes fadeInPulse{0%,100%{opacity:0.65}50%{opacity:1}}</style>
 </div>
-<div id="charCreation" style="position:absolute;inset:0;z-index:96;background:#F5F4EE;display:none;align-items:center;justify-content:center;padding:0;">
-<div style="background:#F5F4EE;width:100%;height:100%;border-radius:0;overflow-y:auto;padding:24px 18px;">
+<div id="charCreation" style="position:absolute;inset:0;z-index:96;background:var(--bg-app);display:none;align-items:center;justify-content:center;padding:0;">
+<div style="background:var(--bg-app);width:100%;height:100%;border-radius:0;overflow-y:auto;padding:24px 18px;">
 <div id="charContent" style="width:100%;"></div>
 </div>
 </div>
 <div class="upper-area" style="flex:1;position:relative;display:flex;flex-direction:column;overflow:hidden;min-height:0;">
 <!-- iOS status bar -->
-<div style="background:var(--sky,#DCE9F3);padding:14px 26px 4px;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;color:#1F1F1D;flex-shrink:0;">
+<div style="background:var(--sky,#DCE9F3);padding:14px 26px 4px;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;color:var(--tp);flex-shrink:0;">
 <span id="clock" onclick="openModal('skip')" style="cursor:pointer;font-size:15px;font-weight:700;letter-spacing:-0.3px;" title="Zaman atla">10:00</span>
-<div style="display:flex;align-items:center;gap:5px;font-size:11px;">
-<span style="font-size:13px;">📶</span><span style="font-size:10px;font-weight:700;">5G</span><span style="font-size:13px;">🔋</span>
+<div style="display:flex;align-items:center;gap:6px;">
+<!-- cellular signal -->
+<svg width="17" height="11" viewBox="0 0 17 11" style="display:block;"><rect x="0" y="7.5" width="2.6" height="3.5" rx="0.8" fill="var(--tp)"/><rect x="4.6" y="5" width="2.6" height="6" rx="0.8" fill="var(--tp)"/><rect x="9.2" y="2.5" width="2.6" height="8.5" rx="0.8" fill="var(--tp)"/><rect x="13.8" y="0" width="2.6" height="11" rx="0.8" fill="var(--tp)"/></svg>
+<span style="font-size:11px;font-weight:700;letter-spacing:-0.2px;">5G</span>
+<!-- wifi -->
+<svg width="16" height="12" viewBox="0 0 16 12" style="display:block;" fill="var(--tp)"><path d="M8 2.1c2.53 0 4.86.9 6.68 2.4a.5.5 0 00.66-.02l.5-.5a.5.5 0 00-.03-.74A12.44 12.44 0 008 .6 12.44 12.44 0 00.19 3.24a.5.5 0 00-.03.74l.5.5a.5.5 0 00.66.02A10.44 10.44 0 018 2.1z"/><path d="M8 5.35c1.62 0 3.1.58 4.25 1.55a.5.5 0 00.66-.03l.55-.55a.5.5 0 00-.03-.73A9.2 9.2 0 008 3.6a9.2 9.2 0 00-5.43 1.99.5.5 0 00-.03.73l.55.55a.5.5 0 00.66.03A6.55 6.55 0 018 5.35z"/><path d="M8 8.5c.86 0 1.65.3 2.28.82a.5.5 0 00.67-.04l1.2-1.2A.5.5 0 0012.1 8 5.94 5.94 0 008 6.5 5.94 5.94 0 003.9 8a.5.5 0 00-.05.88l1.2 1.2a.5.5 0 00.67.04A3.53 3.53 0 018 8.5z"/></svg>
+<!-- battery -->
+<svg width="27" height="13" viewBox="0 0 27 13" style="display:block;"><rect x="0.6" y="0.6" width="22" height="11.8" rx="3" fill="none" stroke="var(--tp)" stroke-opacity="0.45" stroke-width="1.1"/><rect x="2.2" y="2.2" width="16.5" height="8.6" rx="1.6" fill="#34C759"/><path d="M24.4 4.2c1 .35 1 4.25 0 4.6z" fill="var(--tp)" fill-opacity="0.45"/></svg>
 </div>
 </div>
 <!-- App header -->
@@ -46,8 +52,8 @@
 <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
 <div id="avatarCircle" onclick="openModal('avatar')" style="width:40px;height:40px;border-radius:50%;background:#534AB7;color:white;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;cursor:pointer;">OY</div>
 <div style="line-height:1.25;min-width:0;">
-<div id="playerName" style="font-size:15px;font-weight:700;color:#1F1F1D;">Onur Yılmaz</div>
-<div id="playerSchoolKyk" style="font-size:10.5px;color:#5F5E5A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">İTÜ BLG · 1. sınıf · Avcılar KYK</div>
+<div id="playerName" style="font-size:15px;font-weight:700;color:var(--tp);">Onur Yılmaz</div>
+<div id="playerSchoolKyk" style="font-size:10.5px;color:var(--ts);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">İTÜ BLG · 1. sınıf · Avcılar KYK</div>
 </div>
 </div>
 <button id="moneyBtn" style="background:#1F4A11;color:white;padding:7px 13px;border-radius:18px;font-weight:700;font-size:13px;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;line-height:1;flex-shrink:0;font-family:inherit;">
@@ -55,7 +61,7 @@
 <span id="money">2.847</span><span style="font-size:11px;opacity:0.85;">₺</span>
 </button>
 </div>
-<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#5F5E5A;">
+<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--ts);">
 <span><span id="topDayName">Pzt</span>, <span id="topDayOfMonth">20</span> <span id="topMonth">Eylül</span> · Hafta <span id="topWeek">1</span><span id="weatherBadge"></span></span>
 <div style="display:flex;gap:5px;align-items:center;">
 <button id="notifBtn" style="position:relative;background:#FAEEDA;border:0.5px solid #854F0B;cursor:pointer;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;line-height:1;color:#854F0B;border-radius:9px;font-weight:600;" title="Bildirimler">🔔<span id="notifCount" style="display:none;position:absolute;top:-6px;right:-6px;background:#C9333B;color:white;font-size:8px;min-width:14px;height:14px;border-radius:7px;align-items:center;justify-content:center;font-weight:700;padding:0 3px;"></span></button>
@@ -81,37 +87,37 @@
 <!-- Apps grid (3 cols, 4 rows) -->
 <div id="apps" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:10px;"></div>
 <!-- Tasks card -->
-<div style="background:white;border-radius:14px;padding:10px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-<div onclick="toggleTasks()" style="font-size:12.5px;font-weight:700;color:#1F1F1D;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+<div style="background:var(--surface);border-radius:14px;padding:10px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+<div onclick="toggleTasks()" style="font-size:12.5px;font-weight:700;color:var(--tp);margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
 <span style="display:flex;align-items:center;gap:6px;">📋 Görevler</span>
-<span style="background:#E8E4D6;color:#5F5E5A;padding:2px 8px;border-radius:8px;font-weight:700;display:flex;align-items:center;gap:4px;font-size:11px;"><span id="taskCount">3</span> <span id="taskChevron" style="font-size:9px;">▾</span></span>
+<span style="background:var(--bg3);color:var(--ts);padding:2px 8px;border-radius:8px;font-weight:700;display:flex;align-items:center;gap:4px;font-size:11px;"><span id="taskCount">3</span> <span id="taskChevron" style="font-size:9px;">▾</span></span>
 </div>
 <div id="tasks" style="font-size:11.5px;"></div>
 </div>
 <!-- GF widget (if any) -->
-<div id="gfWidget" style="display:none;background:white;border-radius:14px;padding:10px 14px;border:1.5px solid #D4537E;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+<div id="gfWidget" style="display:none;background:var(--surface);border-radius:14px;padding:10px 14px;border:1.5px solid #D4537E;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
 <div style="font-size:12.5px;font-weight:700;color:#D4537E;margin-bottom:7px;display:flex;align-items:center;gap:6px;">💕 Sevgili</div>
 <div id="gfWidgetBody" style="font-size:11.5px;"></div>
 </div>
 </div>
 <!-- Modal (covers only upper area, bars stay visible) -->
-<div id="modal" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:white;z-index:10;flex-direction:column;overflow:hidden;animation:modalSlideUp 0.25s cubic-bezier(0.16,1,0.3,1);">
-<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 14px 12px;border-bottom:0.5px solid #D5D2C8;background:#F5F4EE;">
-<button id="modalBackBtn" style="background:rgba(0,0,0,0.05);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s,transform 0.1s;padding:0;font-family:inherit;" onmouseover="this.style.background='rgba(0,0,0,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.05)'" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" aria-label="Geri">
+<div id="modal" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:var(--surface);z-index:10;flex-direction:column;overflow:hidden;animation:modalSlideUp 0.25s cubic-bezier(0.16,1,0.3,1);">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 14px 12px;border-bottom:0.5px solid var(--bt);background:var(--bg-app);">
+<button id="modalBackBtn" style="background:var(--ghost);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s,transform 0.1s;padding:0;font-family:inherit;" onmouseover="this.style.background='var(--ghost-hover)'" onmouseout="this.style.background='var(--ghost)'" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" aria-label="Geri">
 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1F1F1D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="margin-left:-1px;"><polyline points="14 18 8 12 14 6"></polyline></svg>
 </button>
-<span id="modalTitle" style="font-weight:700;font-size:15px;color:#1F1F1D;display:flex;align-items:center;justify-content:center;gap:6px;flex:1;text-align:center;min-width:0;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
-<button id="modalCloseBtn" style="background:rgba(0,0,0,0.05);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s,transform 0.1s;padding:0;font-family:inherit;" onmouseover="this.style.background='rgba(0,0,0,0.1)'" onmouseout="this.style.background='rgba(0,0,0,0.05)'" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" aria-label="Kapat">
+<span id="modalTitle" style="font-weight:700;font-size:15px;color:var(--tp);display:flex;align-items:center;justify-content:center;gap:6px;flex:1;text-align:center;min-width:0;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
+<button id="modalCloseBtn" style="background:var(--ghost);border:none;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s,transform 0.1s;padding:0;font-family:inherit;" onmouseover="this.style.background='var(--ghost-hover)'" onmouseout="this.style.background='var(--ghost)'" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" aria-label="Kapat">
 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1F1F1D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 </button>
 </div>
-<div id="modalMoneyBar" style="display:none;padding:8px 14px;background:#F5F4EE;border-bottom:0.5px solid #D5D2C8;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;"></div>
-<div id="modalBody" style="flex:1;overflow-y:auto;padding:14px;background:#F5F4EE;color:#1F1F1D;-webkit-overflow-scrolling:touch;"></div>
+<div id="modalMoneyBar" style="display:none;padding:8px 14px;background:var(--bg-app);border-bottom:0.5px solid var(--bt);align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;"></div>
+<div id="modalBody" style="flex:1;overflow-y:auto;padding:14px;background:var(--bg-app);color:var(--tp);-webkit-overflow-scrolling:touch;"></div>
 </div>
 </div>
 <!-- /upper-area : modal'ın dışı, barlar her zaman görünür -->
 <!-- Stats bar (BOTTOM - always visible, modal'dan etkilenmez) -->
-<div id="bars" style="background:white;padding:10px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-top:0.5px solid #D5D2C8;flex-shrink:0;"></div>
+<div id="bars" style="background:var(--surface);padding:10px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-top:0.5px solid var(--bt);flex-shrink:0;"></div>
 <!-- Toast -->
 <div id="toast" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) translateY(-20px);background:#1F1F1D;color:white;padding:13px 20px;border-radius:14px;font-size:13px;font-weight:600;width:max-content;max-width:320px;text-align:left;z-index:30;opacity:0;transition:opacity 0.25s ease,transform 0.3s cubic-bezier(0.16,1,0.3,1);pointer-events:none;line-height:1.45;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px;">
 <i id="toastIcon" class="ti ti-check" style="font-size:17px;color:#5DD96B;flex-shrink:0;"></i>

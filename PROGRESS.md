@@ -1,6 +1,6 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-09 · Kaldığımız yer: **Stage A bitti, Stage B başlamadı**
+> Son güncelleme: 2026-07-10 · Kaldığımız yer: **Stage B bitti, Stage C başlamadı**
 
 ## ⚠️ ÖNEMLİ: Doğru kaynak sürüm
 Stage A ilk başta yerel `yurtsim (2).html` (2265 satır) üzerine yapılmıştı — ama bu
@@ -21,8 +21,8 @@ branch'inde (base = `origin/claude/laughing-pascal-16yzz7`). Eski (yanlış) ref
 
 ## Genel Plan (4 aşama)
 - **A. Refaktör** ✅ Tamamlandı
-- **B. Görsel cila + design token + dark mode** ⬜ Başlamadı (sırada)
-- **C. Yeni özellikler** ⬜ Başlamadı
+- **B. Görsel cila + design token + dark mode** ✅ Tamamlandı
+- **C. Yeni özellikler** ⬜ Başlamadı (sırada)
 - **D. Capacitor paketleme** ⬜ Başlamadı
 
 ---
@@ -85,10 +85,40 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 
 ---
 
-## 2) Stage B nerede kaldı
-**Hiç başlanmadı.** Yarım iş yok. `styles.css` şu an sadece orijinal head <style>'ı
-(birkaç keyframe + temel button/body). Inline style'lar hâlâ HTML string'lerin içinde
-(render fonksiyonları `style="..."` üretiyor) ve `C={tp,ts,...}` JS paleti kullanılıyor.
+## 2) Stage B (GÖRSEL CİLA + DESIGN TOKEN + DARK MODE) ✅
+
+**Tamamlandı (2026-07-10).** Davranış korundu, smoke test 0 hata (dark mode dahil).
+
+### Ne yapıldı
+- **Design token'lar** (`src/styles.css` `:root`): `--tp/--ts/--tt/--bt/--bg3` (metin/çizgi),
+  `--surface` (kart), `--bg-app` (uygulama), `--splash`, `--sky`, `--radius-*`, `--shadow-*`,
+  `--ghost`/`--ghost-hover` (modal ikon butonları).
+- **`C` paleti CSS değişkenine köprülendi** (`data.js`): `C={tp:'var(--tp)',...}`. Böylece
+  330+ inline style otomatik tema-duyarlı oldu; tema değişince **re-render gerekmeden** cascade eder.
+  (Canvas/CSS-dışı kullanım yok — güvenli.)
+- **Sabit renkler token'a bağlandı:** `background:white`→`var(--surface)` (57), `#F5F4EE`→`var(--bg-app)`,
+  `color:#1F1F1D`→`var(--tp)`, `color:#5F5E5A`→`var(--ts)`, `#D5D2C8`→`var(--bt)`, `#E8E4D6`→`var(--bg3)`.
+  **KORUNANLAR** (iki temada da koyu): `background:#1F1F1D` (toast/bezel/terminal LED/Kapat butonu),
+  SVG `fill/stroke="#1F1F1D"` (dekoratif art), semantik pastel kartlar (`#FFF7E0` test, `#FCEBEB` tehlike).
+- **Dark mode** (`extras.js`): sıcak-koyu palet (`:root[data-theme="dark"]` + `@media prefers-color-scheme`).
+  `state.theme` = `'light'|'dark'|'auto'` (varsayılan **light**; `ensureExtState`'te set edilir, save'e girer).
+  `applyTheme()` → `<html data-theme>`; `isDarkTheme()`; `setTheme()`. `getSkyColor()` artık tema-duyarlı
+  (dark'ta koyu gökyüzü tonları). `updateExtrasUI` + boot'ta `applyTheme()` çağrılır.
+- **Ayarlar modalında "🎨 Görünüm" kartı** (`menu.js` `themeSectionHtml()`): Açık/Koyu/Sistem seçici.
+- **Bileşen cilası:** base `button` kuralına transition + `:active{scale(.97)}` + hover brightness.
+  (Toast mood-renkleri & modal `modalSlideUp` animasyonu zaten koddaydı — korundu.)
+- **Gerçekçi iOS statusbar** (`index.html`): emoji 📶5G🔋 yerine SVG sinyal çubukları + 5G + wifi +
+  yeşil batarya; renkler `var(--tp)` → tema ile döner. Saat zaten oyun saati.
+
+### Doğrulama
+- `node build/smoke.js` — 0 hata. smoke.js'e **dark-mode testi** eklendi: `setTheme('dark')` →
+  `shot-dark.png`, ayarlar → `shot-settings-dark.png`, `theme check` çıktısı (attr/surface/fns).
+- Görsel: `shot-game.png` (light), `shot-dark.png`, `shot-settings-dark.png` — hepsi temiz/okunur.
+
+### Not / gelecekte iyileştirilebilir (kritik değil)
+- Semantik pastel kartlar (`#FFF7E0`, `#FCEBEB`) dark'ta parlak kalıyor (kasıtlı bırakıldı, toast gibi).
+  İstenirse dark'ta translucent tint'e çevrilebilir.
+- `.phone-screen *` üzerinde renk transition'ı var (tema geçişi yumuşak); istenirse kapsam daraltılabilir.
 
 ---
 
@@ -121,11 +151,16 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 
 ---
 
-## 4) Yarın İLK yapılacak adım
+## 4) Yarın İLK yapılacak adım (Stage C)
 1. Bu dosyayı oku, sonra **doğrulamanın hâlâ geçtiğini gör:** `node build/smoke.js`
-   (0 hata beklenir; `build/shot-game.png`'e bak).
-2. Stage B'ye başla: önce `src/styles.css`'i aç, design token bloğu (`:root{...}`) ekle;
-   paleti `C` sabitiyle eşle. Sonra bileşen class'larını (`.card`, `.btn`, `.modal`) tanımla.
-3. Her değişiklikten sonra tekrar `node build/smoke.js` çalıştır — oyun bozulmasın.
+   (0 hata + `theme check` satırı beklenir; `build/shot-dark.png`'e bak).
+2. Stage C'ye başla — önerilen sıra:
+   a. Save/Load sağlamlaştırma + "Yeni oyun" guard'ları (zaten var olanı geliştir, sıfırdan yazma).
+   b. WhatsApp tarzı **Mesajlaşma ekranı** (arkadaşlar+sevgili; davetler buradan gelsin).
+   c. Kütüphane **çalış mini-oyunu** → mevcut `bilgi` puanını artırsın.
+   d. Achievement/rozet + animasyonlu karne, Ayarlar ekranı genişletme.
+3. Her değişiklikten sonra `node build/smoke.js` — oyun bozulmasın.
 
-**Görev takibi:** Stage A = tamamlandı. Stage B/C/D = pending.
+**Görev takibi:** Stage A ✅ · Stage B ✅ · Stage C/D = pending.
+**Git:** Stage B değişiklikleri `stage-a-refactor` branch'inde çalışma ağacında (henüz commit edilmedi;
+kullanıcı commit/merge kararı verecek). Base hâlâ `origin/claude/laughing-pascal-16yzz7`.

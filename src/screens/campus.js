@@ -75,7 +75,7 @@ const vD=c[sem+'Vize'];const fD=c[sem+'Final'];const vN=c[sem+'VizeNote'];const 
 if(vD&&!vN){const d=daysUntilDate(vD);if(d>=0){examInfo='Vize: '+(d===0?'BUGÜN':fmtExamDate(vD)+' ('+d+'g)');examUrg=d<=5}else examInfo='Vize geçti'}
 else if(fD&&!fN){const d=daysUntilDate(fD);if(d>=0){examInfo='Final: '+(d===0?'BUGÜN':fmtExamDate(fD)+' ('+d+'g)');examUrg=d<=5}else examInfo='Final geçti'}
 else examInfo='Sınav bitti';
-h+=`<div style="background:white;border:0.5px solid ${C.bt};border-radius:10px;padding:10px 12px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+h+=`<div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:10px;padding:10px 12px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
 <div style="flex:1;min-width:0;">
 <div style="font-size:11.5px;font-weight:700;color:${C.tp};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.code} · ${c.name}</div>
 <div style="font-size:10px;color:${C.ts};margin-top:2px;">Bilgi <span style="color:${bC};font-weight:700;">${bilgi}/100</span> · <span style="color:${examUrg?'#791F1F':C.ts};${examUrg?'font-weight:700;':''}">${examInfo}${examUrg?' ⚠':''}</span></div>
@@ -111,7 +111,7 @@ return [
 state.girlfriend?{label:'Sevgili',emoji:'💕',color:'#D4537E',fn:()=>openModal('girlfriend')}:{label:'Date',emoji:'💖',color:'#E24B4A',fn:()=>openModal('dates')},
 {label:'Yemek',emoji:'🍔',color:'#D85A30',fn:()=>openModal('food')},
 {label:'İmza iste',emoji:'✍️',color:'#639922',fn:()=>openModal('signature')},
-{label:'İş ara',emoji:'💼',color:'#5F5E5A',fn:()=>openModal('jobs')},
+{label:'İş ara',emoji:'💼',color:'var(--ts)',fn:()=>openModal('jobs')},
 {label:'Eğlence',emoji:'🎉',color:'#C2410C',fn:()=>openModal('fun')},
 {label:'Bakım & Spor',emoji:'🚿',color:'#378ADD',fn:()=>openModal('care')},
 {label:'Kütüphane',emoji:'📖',color:'#185FA5',fn:()=>openModal('library')},
@@ -363,7 +363,7 @@ let h=`<div style="text-align:center;padding:14px 0 12px;background:linear-gradi
 <div style="font-size:10px;color:${C.ts};margin-top:6px;">${passCount} ders geçti · ${failCount} FF</div>
 </div>
 <div style="font-size:11px;color:${C.tp};font-weight:600;margin-bottom:8px;">📋 Ders Notları</div>
-<div style="background:white;border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;margin-bottom:14px;">`;
+<div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;margin-bottom:14px;">`;
 rows.forEach(({c,grade},i)=>{
 const ff=grade==='FF';const good=grade&&['AA','BA','BB'].includes(grade);
 h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px;${i<rows.length-1?'border-bottom:0.5px solid '+C.bt+';':''}font-size:11px;">

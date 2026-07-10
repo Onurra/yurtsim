@@ -11,7 +11,7 @@ return `<div style="text-align:center;padding:8px 0 4px;">
 <div style="font-size:11px;color:#5C4A1A;line-height:1.5;">⏰ Eğer beklersen toplam <b>5 sa 30 dk</b> harcayacaksın</div>
 </div>
 <div style="display:flex;gap:8px;">
-<button onclick="cancelLaundryWait()" style="flex:1;font-size:13px;padding:12px;background:white;color:${C.tp};border:0.5px solid ${C.bt};border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;">Vazgeç</button>
+<button onclick="cancelLaundryWait()" style="flex:1;font-size:13px;padding:12px;background:var(--surface);color:${C.tp};border:0.5px solid ${C.bt};border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;">Vazgeç</button>
 <button onclick="doLaundryWait()" style="flex:1;font-size:13px;padding:12px;background:#B89540;color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;">⏳ 30dk Bekle</button>
 </div>`;
 }
@@ -22,14 +22,14 @@ return `<div style="text-align:center;padding:8px 0 4px;">
 <div style="font-size:17px;font-weight:700;color:${C.tp};margin-bottom:6px;">Çamaşır 5 saat sürer</div>
 <div style="font-size:12px;color:${C.ts};line-height:1.5;margin-bottom:18px;">Yurt çamaşırhanesi bedava ama uzun</div>
 </div>
-<div style="background:white;border:0.5px solid ${C.bt};border-radius:10px;padding:14px;margin-bottom:14px;">
+<div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:10px;padding:14px;margin-bottom:14px;">
 <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid #ECE9DF;"><span style="font-size:12px;color:${C.ts};display:flex;align-items:center;gap:6px;">🌀 Yıkama</span><span style="font-size:12px;font-weight:600;color:${C.tp};">1 saat</span></div>
 <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid #ECE9DF;"><span style="font-size:12px;color:${C.ts};display:flex;align-items:center;gap:6px;">☀️ Kurutma</span><span style="font-size:12px;font-weight:600;color:${C.tp};">4 saat</span></div>
 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px;"><span style="font-size:12px;font-weight:700;color:${C.tp};">Toplam · biter</span><span style="font-size:13px;font-weight:700;color:#1F4A11;">${endStr}'da</span></div>
 </div>
 ${dersToday.length>0?`<div style="background:#FCEBEB;border:0.5px solid #C9333B;border-radius:10px;padding:10px 12px;margin-bottom:14px;"><div style="font-size:11px;font-weight:700;color:#791F1F;margin-bottom:4px;">⚠ Bu 5 saatte derslerin kaçar:</div>${dersToday.map(c=>{const s=c.schedule.find(s=>s.day===state.dayName&&s.start>state.hour&&s.start<=state.hour+5);return `<div style="font-size:11px;color:#791F1F;">• ${c.code} · ${s.start}:00 ${c.name}</div>`}).join('')}</div>`:''}
 <div style="display:flex;gap:8px;">
-<button onclick="closeModal()" style="flex:1;font-size:13px;padding:12px;background:white;color:${C.tp};border:0.5px solid ${C.bt};border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;">Hayır, vazgeç</button>
+<button onclick="closeModal()" style="flex:1;font-size:13px;padding:12px;background:var(--surface);color:${C.tp};border:0.5px solid ${C.bt};border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;">Hayır, vazgeç</button>
 <button onclick="doLaundry()" style="flex:1;font-size:13px;padding:12px;background:#1D9E75;color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;">Devam · 5 saat</button>
 </div>`;
 }
@@ -264,7 +264,7 @@ const tasks=generateTasks();
 const showAll=state.tasksExpanded;
 const visible=showAll?tasks:tasks.slice(0,3);
 let h=visible.map(t=>{
-const bs=t.urg==='critical'?'background:#FCEBEB;color:#791F1F':t.urg==='urgent'?'background:#FAEEDA;color:#854F0B':t.urg==='done'?'background:#EAF3DE;color:#27500A':t.urg==='info'?'background:#E9EBEC;color:#5F5E5A':'';
+const bs=t.urg==='critical'?'background:#FCEBEB;color:#791F1F':t.urg==='urgent'?'background:#FAEEDA;color:#854F0B':t.urg==='done'?'background:#EAF3DE;color:#27500A':t.urg==='info'?'background:#E9EBEC;color:var(--ts)':'';
 const lbl=t.urg==='critical'?'acil':t.urg==='urgent'?'önemli':t.urg==='done'?'tamam':t.urg==='info'?'ileride':'';
 const badge=bs?`<span style="${bs};font-size:9px;padding:1px 5px;border-radius:4px;font-weight:600;flex-shrink:0;">${lbl} · ${t.time}</span>`:`<span style="color:${C.tt};font-size:9px;flex-shrink:0;">${t.time}</span>`;
 return `<div style="padding:4px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:0.5px solid ${C.bt};gap:6px;${t.urg==='done'?'opacity:0.55;':''}${t.urg==='info'?'opacity:0.75;':''}"><span style="flex:1;line-height:1.3;color:${C.tp};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.text}</span>${badge}</div>`;

@@ -1,7 +1,91 @@
+/* ============================================================
+   Design tokens — Stage B
+   Legacy JS palette C={tp,ts,tt,bt,bg3} is bridged to these
+   CSS variables (see data.js), so every inline style that used
+   C.* now reads a theme-aware var() and re-themes instantly.
+   ============================================================ */
+:root{
+  /* --- text --- */
+  --tp:#1F1F1D;   /* text primary  (C.tp) */
+  --ts:#5F5E5A;   /* text secondary(C.ts) */
+  --tt:#888780;   /* text tertiary (C.tt) */
+  /* --- lines / subtle fills --- */
+  --bt:#D5D2C8;   /* border        (C.bt) */
+  --bg3:#E8E4D6;  /* subtle bg     (C.bg3) */
+  /* --- surfaces --- */
+  --surface:#ffffff;   /* card/panel background (was hardcoded white) */
+  --bg-app:#F5F4EE;    /* app/page background (was #F5F4EE) */
+  --splash:#EAE0C6;    /* splash / char-creation bg */
+  --sky:#DCE9F3;       /* dynamic sky fallback (JS overrides per hour/weather) */
+  /* --- radii --- */
+  --radius-sm:6px;
+  --radius-md:10px;
+  --radius-lg:16px;
+  --radius-pill:18px;
+  /* --- shadows --- */
+  --shadow-1:0 1px 3px rgba(0,0,0,0.06);
+  --shadow-2:0 6px 20px rgba(0,0,0,0.10);
+  --shadow-modal:0 -6px 40px rgba(0,0,0,0.22);
+  /* --- ghost/icon buttons (modal back/close) --- */
+  --ghost:rgba(0,0,0,0.05);
+  --ghost-hover:rgba(0,0,0,0.10);
+  /* --- outer page chrome --- */
+  --page-bg:#F5F4EE;
+  --bezel:#1F1F1D;
+}
+
+/* Dark theme — warm dark to match the game's beige aesthetic.
+   Applies when user picks dark (data-theme="dark") OR when system
+   prefers dark and the user hasn't forced light. */
+:root[data-theme="dark"]{
+  --tp:#ECEAE2;
+  --ts:#B2AFA5;
+  --tt:#87847B;
+  --bt:#3C3A34;
+  --bg3:#2A2822;
+  --surface:#211F1B;
+  --bg-app:#161410;
+  --splash:#211E17;
+  --sky:#1B1E27;
+  --shadow-1:0 1px 3px rgba(0,0,0,0.4);
+  --shadow-2:0 6px 20px rgba(0,0,0,0.5);
+  --shadow-modal:0 -6px 40px rgba(0,0,0,0.6);
+  --page-bg:#0E0D0B;
+  --bezel:#000;
+  --ghost:rgba(255,255,255,0.08);
+  --ghost-hover:rgba(255,255,255,0.16);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]):not([data-theme="dark"]){
+    --tp:#ECEAE2;
+    --ts:#B2AFA5;
+    --tt:#87847B;
+    --bt:#3C3A34;
+    --bg3:#2A2822;
+    --surface:#211F1B;
+    --bg-app:#161410;
+    --splash:#211E17;
+    --sky:#1B1E27;
+    --shadow-1:0 1px 3px rgba(0,0,0,0.4);
+    --shadow-2:0 6px 20px rgba(0,0,0,0.5);
+    --shadow-modal:0 -6px 40px rgba(0,0,0,0.6);
+    --page-bg:#0E0D0B;
+    --bezel:#000;
+    --ghost:rgba(255,255,255,0.08);
+    --ghost-hover:rgba(255,255,255,0.16);
+  }
+}
+
+/* Smoothly cross-fade colours when the theme flips. */
+.phone-screen, .phone-screen *{
+  transition:background-color .25s ease, color .25s ease, border-color .25s ease;
+}
+
 *{box-sizing:border-box}
-body{margin:0;padding:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#2a2a2a;color:#1F1F1D}
-button{background:#fff;border:0.5px solid #BBB7AC;border-radius:5px;cursor:pointer;font-family:inherit;color:#1F1F1D;font-weight:500}
-button:hover{background:#F5F4EE}
+body{margin:0;padding:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#2a2a2a;color:var(--tp)}
+button{background:var(--surface);border:0.5px solid var(--bt);border-radius:5px;cursor:pointer;font-family:inherit;color:var(--tp);font-weight:500;transition:transform .1s ease, filter .12s ease, background-color .15s ease}
+button:hover{filter:brightness(0.97)}
+button:active{transform:scale(0.97)}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden}
 .container{max-width:900px;margin:0 auto}
 @keyframes metroSlide{from{transform:translateX(0)}to{transform:translateX(-42px)}}
@@ -16,3 +100,6 @@ button:hover{background:#F5F4EE}
 .app-tile{transition:transform 0.15s}
 @keyframes skyRain{from{transform:translateY(-40px)}to{transform:translateY(40px)}}
 @keyframes skySnow{from{transform:translateY(-60px)}to{transform:translateY(60px)}}
+
+/* Screen-content fade — added on each render for a subtle refresh feel. */
+@keyframes screenFade{from{opacity:0.4;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}

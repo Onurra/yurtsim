@@ -10,8 +10,8 @@ if(/kafe|Sahil/.test(loc))return{emoji:'☕',bg:'#F5E6DA',fg:'#854F0B'};
 if(/Lokanta|Kebapçı|yemekhane/.test(loc))return{emoji:'🍴',bg:'#FCEBEB',fg:'#A32D2D'};
 if(/Bar|Klüp/.test(loc))return{emoji:'🎵',bg:'#FCEBEB',fg:'#A32D2D'};
 if(/KKTC|Yunan|Avrupa|tatil|hafta sonu/.test(loc))return{emoji:'✈️',bg:'#DCE9F3',fg:'#0C447C'};
-if(/İş:/.test(loc))return{emoji:'💼',bg:'#E8E4D6',fg:'#5F5E5A'};
-return{emoji:'📍',bg:'#E8E4D6',fg:'#5F5E5A'};
+if(/İş:/.test(loc))return{emoji:'💼',bg:'var(--bg3)',fg:'var(--ts)'};
+return{emoji:'📍',bg:'var(--bg3)',fg:'var(--ts)'};
 }
 function render(){
 document.getElementById('clock').textContent=String(state.hour).padStart(2,'0')+':'+String(state.minute).padStart(2,'0');

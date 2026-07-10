@@ -54,7 +54,7 @@ let h=`<div style="font-size:11px;color:${C.ts};margin-bottom:12px;line-height:1
 opts.forEach(a=>{
 const selected=state.avatarId===a.id;
 h+=`<button onclick="chooseAvatar('${a.id}')" style="background:${selected?accentBg:'white'};border:1.5px solid ${selected?accent:C.bt};border-radius:10px;padding:10px 6px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;${selected?`box-shadow:0 0 0 3px ${accent}22;`:''}">
-<div style="width:64px;height:64px;border-radius:50%;overflow:hidden;background:white;">${svgMap[a.id]}</div>
+<div style="width:64px;height:64px;border-radius:50%;overflow:hidden;background:var(--surface);">${svgMap[a.id]}</div>
 <div style="font-size:11px;color:${selected?accent:C.tp};font-weight:${selected?700:500};text-align:center;line-height:1.2;">${a.label}${selected?' ✓':''}</div>
 </button>`;
 });
@@ -69,10 +69,24 @@ state.avatarId=id;
 closeModal();
 render();
 }
+function themeSectionHtml(){
+const cur=state.theme||'light';
+const opts=[['light','☀️','Açık'],['dark','🌙','Koyu'],['auto','🖥️','Sistem']];
+const btns=opts.map(([k,ic,lbl])=>{
+const on=cur===k;
+return `<button onclick="setTheme('${k}')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:${on?'var(--bg3)':'var(--surface)'};color:${C.tp};border:${on?'1.5px solid #534AB7':'0.5px solid '+C.bt};border-radius:8px;font-weight:600;font-size:10.5px;cursor:pointer;font-family:inherit;">`+
+`<span style="font-size:18px;">${ic}</span>${lbl}${on?' ✓':''}</button>`;
+}).join('');
+return `<div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:8px;padding:14px;margin-bottom:14px;">
+<div style="font-size:11px;color:${C.ts};margin-bottom:8px;font-weight:600;">🎨 Görünüm</div>
+<div style="display:flex;gap:6px;">${btns}</div>
+<div style="font-size:9.5px;color:${C.tt};line-height:1.4;margin-top:8px;">"Sistem" cihazının açık/koyu ayarını izler.</div>
+</div>`;
+}
 function modalSettingsHtml(){
 const sem=state.semester==='bahar'?'Bahar (2.)':'Güz (1.)';
 const cal=getCalDate(state.dayOfMonth);
-return `<div style="background:white;border:0.5px solid ${C.bt};border-radius:8px;padding:14px;margin-bottom:14px;">
+return `<div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:8px;padding:14px;margin-bottom:14px;">
 <div style="font-size:11px;color:${C.ts};margin-bottom:8px;font-weight:600;">💾 Oyun Durumu</div>
 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;"><span style="color:${C.ts};">Tarih</span><span style="color:${C.tp};font-weight:600;">${cal.day} ${cal.monthName} · ${state.dayName}</span></div>
 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-top:0.5px solid ${C.bt};"><span style="color:${C.ts};">Dönem</span><span style="color:${C.tp};font-weight:600;">${sem} yarıyıl</span></div>
@@ -80,20 +94,22 @@ return `<div style="background:white;border:0.5px solid ${C.bt};border-radius:8p
 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-top:0.5px solid ${C.bt};"><span style="color:${C.ts};">Otomatik kayıt</span><span style="color:#27500A;font-weight:600;">✓ Aktif</span></div>
 </div>
 
-<div style="background:white;border:0.5px solid ${C.bt};border-radius:8px;padding:14px;margin-bottom:14px;text-align:center;">
+<div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:8px;padding:14px;margin-bottom:14px;text-align:center;">
 <div style="width:140px;height:140px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">${APP_ICON_SVG}</div>
 <div style="font-size:11px;color:${C.tp};line-height:1.5;">${getSchoolText()} öğrenci simülasyonu. Oyun otomatik kaydedilir.</div>
 </div>
+
+${themeSectionHtml()}
 
 <div style="background:#FFF7E0;border:1px solid #B89540;border-radius:8px;padding:14px;margin-bottom:14px;">
 <div style="font-size:11px;color:#5C4A1A;margin-bottom:8px;font-weight:700;">🧪 Test Araçları</div>
 <div style="font-size:10.5px;color:${C.ts};line-height:1.4;margin-bottom:10px;">Geliştirme/test için — dönem geçişlerini hızlıca dene</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-<button onclick="devJumpGuzEnd()" style="font-size:10.5px;padding:8px;background:white;color:${C.tp};border:0.5px solid #B89540;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">⏩ Güz finallerine</button>
-<button onclick="devJumpBaharStart()" style="font-size:10.5px;padding:8px;background:white;color:${C.tp};border:0.5px solid #B89540;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">⏩ Bahar başlangıcı</button>
-<button onclick="devJumpBaharEnd()" style="font-size:10.5px;padding:8px;background:white;color:${C.tp};border:0.5px solid #B89540;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">⏩ Bahar finallerine</button>
-<button onclick="devShowCharCreation()" style="font-size:10.5px;padding:8px;background:white;color:${C.tp};border:0.5px solid #B89540;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">🆕 Yeni oyun + karakter</button>
-<button onclick="devGiveMoney()" style="font-size:10.5px;padding:8px;background:white;color:${C.tp};border:0.5px solid #B89540;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">💰 +50.000₺</button>
+<button onclick="devJumpGuzEnd()" style="font-size:10.5px;padding:8px;background:var(--surface);color:${C.tp};border:0.5px solid #B89540;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">⏩ Güz finallerine</button>
+<button onclick="devJumpBaharStart()" style="font-size:10.5px;padding:8px;background:var(--surface);color:${C.tp};border:0.5px solid #B89540;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">⏩ Bahar başlangıcı</button>
+<button onclick="devJumpBaharEnd()" style="font-size:10.5px;padding:8px;background:var(--surface);color:${C.tp};border:0.5px solid #B89540;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">⏩ Bahar finallerine</button>
+<button onclick="devShowCharCreation()" style="font-size:10.5px;padding:8px;background:var(--surface);color:${C.tp};border:0.5px solid #B89540;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">🆕 Yeni oyun + karakter</button>
+<button onclick="devGiveMoney()" style="font-size:10.5px;padding:8px;background:var(--surface);color:${C.tp};border:0.5px solid #B89540;border-radius:6px;font-weight:600;cursor:pointer;font-family:inherit;">💰 +50.000₺</button>
 </div>
 </div>
 
@@ -118,19 +134,19 @@ try{const saved=localStorage.getItem(SAVE_KEY);if(saved){const data=JSON.parse(s
 const c=document.getElementById('mainMenuContent');
 c.innerHTML=`<div style="text-align:center;margin-bottom:30px;">
 <div style="width:110px;height:110px;margin:0 auto 14px;border-radius:24px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.15);">${APP_ICON_SVG}</div>
-<div style="font-size:23px;font-weight:700;color:#1F1F1D;letter-spacing:-0.3px;line-height:1.1;">Yurt Simülatör</div>
-<div style="font-size:11px;color:#5F5E5A;margin-top:5px;">Oyuna hoş geldin · maceran burada başlıyor</div>
+<div style="font-size:23px;font-weight:700;color:var(--tp);letter-spacing:-0.3px;line-height:1.1;">Yurt Simülatör</div>
+<div style="font-size:11px;color:var(--ts);margin-top:5px;">Oyuna hoş geldin · maceran burada başlıyor</div>
 </div>
 <div style="display:flex;flex-direction:column;gap:10px;">
 ${savedName?`<button onclick="continueGame()" style="background:#3C3489;color:white;border:none;border-radius:14px;padding:16px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.3;box-shadow:0 4px 14px rgba(60,52,137,0.22);">
 <span>▶ ${savedName} ${savedLast} ile devam</span>
 ${savedDateText?`<span style="font-size:10.5px;font-weight:500;opacity:0.8;">${savedDateText}'den devam</span>`:''}
 </button>`:''}
-<button onclick="startNewGame()" style="background:${savedName?'white':'#1F4A11'};color:${savedName?'#1F1F1D':'white'};border:${savedName?'1px solid #E5E2D8':'none'};border-radius:14px;padding:16px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;${savedName?'':'box-shadow:0 4px 14px rgba(31,74,17,0.22);'}">
+<button onclick="startNewGame()" style="background:${savedName?'white':'#1F4A11'};color:${savedName?'var(--tp)':'white'};border:${savedName?'1px solid #E5E2D8':'none'};border-radius:14px;padding:16px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;${savedName?'':'box-shadow:0 4px 14px rgba(31,74,17,0.22);'}">
 ${savedName?'🆕 Yeni oyun':'▶ Yeni oyun'}
 </button>
 </div>
-${savedName?`<div style="font-size:10px;color:#5F5E5A;text-align:center;margin-top:18px;line-height:1.4;">Yeni oyun başlatırsan mevcut ilerleme silinir</div>`:''}`;
+${savedName?`<div style="font-size:10px;color:var(--ts);text-align:center;margin-top:18px;line-height:1.4;">Yeni oyun başlatırsan mevcut ilerleme silinir</div>`:''}`;
 }
 function continueGame(){
 if(!loadGame()){msg('Kayıt bulunamadı');return}
