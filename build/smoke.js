@@ -107,12 +107,24 @@ async function main() {
   const extras = await js("JSON.stringify({weather:state.weather&&state.weather.key, year:state.year, notifs:Array.isArray(state.notifs), illnessRisk:state.illnessRisk, fns:['doFitness','studyNight','openNotifs','modalYearEndHtml','triggerGameOver','rollWeather'].filter(f=>typeof window[f]==='function')})");
   await js("typeof openNotifs==='function' && openNotifs()"); await wait(300); await shot('shot-notifs.png'); await js("closeModal()");
 
+  // Mesajlaşma ekranı (Stage C) — liste, thread, davetin mesaj olarak düşmesi + okunmamış rozeti
+  await js("state.chatOpen=null; openModal('messages')"); await wait(300); await shot('shot-messages-list.png');
+  const msgList = await js("JSON.stringify({title:document.getElementById('modalTitle').innerText, contacts:buildChatContacts().length, hasRows:/openChat/.test(document.getElementById('modalBody').innerHTML), tile:getApps().some(a=>a.label==='Mesajlar')})");
+  await js("openChat('mert')"); await wait(300); await shot('shot-messages-thread.png');
+  const msgThread = await js("JSON.stringify({back:/closeChat/.test(document.getElementById('modalBody').innerHTML), chips:/sendChat/.test(document.getElementById('modalBody').innerHTML)})");
+  const msgInvite = await js("state.pendingInvite={from:'Mert',fid:'mert',initial:'M',color:'#534AB7',text:'FIFA gel',mins:120,mood:10}; state.chatOpen='mert'; render(); JSON.stringify({unread:chatUnread('mert'), badge:!!getAppBadge('Mesajlar'), acceptBtn:/acceptInvite/.test(document.getElementById('modalBody').innerHTML)})");
+  await shot('shot-messages-invite.png');
+  await js("state.pendingInvite=null; state.chatOpen=null; closeModal()");
+
   console.log('menu.display   =', menuVisible);
   console.log('menu.innerText =', JSON.stringify(menuText).slice(0, 100));
   console.log('char.display   =', charVisible);
   console.log('gameState      =', gameState);
   console.log('extras systems =', extras);
   console.log('theme check    =', themeCheck);
+  console.log('msg list       =', msgList);
+  console.log('msg thread     =', msgThread);
+  console.log('msg invite     =', msgInvite);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();

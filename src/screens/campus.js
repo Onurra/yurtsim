@@ -108,6 +108,7 @@ function getApps(){
 return [
 {label:'Ders',emoji:'📚',color:'#534AB7',fn:()=>openModal('schedule')},
 {label:'Arkadaşlar',emoji:'👥',color:'#D4537E',fn:()=>openModal('friends')},
+{label:'Mesajlar',emoji:'💬',color:'#1FA855',fn:()=>{state.chatOpen=null;openModal('messages')}},
 state.girlfriend?{label:'Sevgili',emoji:'💕',color:'#D4537E',fn:()=>openModal('girlfriend')}:{label:'Date',emoji:'💖',color:'#E24B4A',fn:()=>openModal('dates')},
 {label:'Yemek',emoji:'🍔',color:'#D85A30',fn:()=>openModal('food')},
 {label:'İmza iste',emoji:'✍️',color:'#639922',fn:()=>openModal('signature')},

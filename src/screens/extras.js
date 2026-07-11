@@ -16,6 +16,8 @@ if(state.rentOverdueDays===undefined)state.rentOverdueDays=0;
 if(state.gameOver===undefined)state.gameOver=null;
 if(!state.firedCalendar)state.firedCalendar={};
 if(state.theme===undefined)state.theme='light';
+if(state.chats===undefined)state.chats={};
+if(state.chatOpen===undefined)state.chatOpen=null;
 if(!state.weather)rollWeather();
 }
 
@@ -328,6 +330,7 @@ if(label==='Uyu')return state.energy<=20?{text:'!',bg:'#C9333B',pulse:true}:null
 if(label==='Çamaşır')return (state.daysSinceLaundry||0)>=10?{text:'!',bg:'#EF9F27',pulse:false}:null;
 if(label==='Sevgili')return (state.girlfriend&&(state.relationship||0)<50)?{text:'!',bg:'#C9333B',pulse:true}:null;
 if(label==='İmza iste')return (state.courses||[]).some(c=>c.type!=='lab'&&c.absent>0&&c.absent>=c.max-1&&c.absent<c.max)?{text:'!',bg:'#EF9F27',pulse:false}:null;
+if(label==='Mesajlar'){const n=typeof chatUnreadCount==='function'?chatUnreadCount():0;return n>0?{text:String(n),bg:'#25D366',pulse:true}:null;}
 return null;
 }
 
