@@ -1,6 +1,6 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-11 · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅ + Mesajlaşma ekranı ✅ (push'landı), sırada Kütüphane çalış mini-oyunu**
+> Son güncelleme: 2026-07-11 (gün sonu) · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅ (test edildi). Mesajlaşma ekranı commit+push edildi (`988578e`) ama ⚠️ HENÜZ TARAYICIDA ELLE TEST EDİLMEDİ (sadece smoke test geçti).** Yarın ilk iş: mesajlaşmayı tarayıcıda test et → sonra Kütüphane çalış mini-oyunu.
 
 ## ⚠️ ÖNEMLİ: Doğru kaynak sürüm
 Stage A ilk başta yerel `yurtsim (2).html` (2265 satır) üzerine yapılmıştı — ama bu
@@ -168,7 +168,9 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - `loadGame` — bozuk/nesne olmayan kayıtta güvenli fallback.
 - Not: guard `confirm()` ile (resetGame ile tutarlı). İleride oyunun kendi modal stiline çevrilebilir.
 
-### ✅ TAMAM — WhatsApp tarzı Mesajlaşma ekranı (`988578e`)
+### 🔶 KOD BİTTİ ama ⚠️ TARAYICIDA TEST EDİLMEDİ — WhatsApp tarzı Mesajlaşma ekranı (`988578e`)
+- Durum: commit + push edildi, `node build/smoke.js` 0 hata (liste/thread/davet+rozet otomatik doğrulandı).
+  **Ama gerçek tarayıcıda elle test EDİLMEDİ** → yarın önce bu test edilecek, sonrası ona göre.
 - "Mesajlar" (💬) app tile → sohbet listesi + kişi thread'i (baloncuklu, geri butonlu).
 - Kişiler: sevgili (varsa) + tüm arkadaşlar (Anne dahil) + ders imza hocası.
 - Davet/imza/tuvalet kağıdı ilgili kişinin thread'ine mesaj olarak düşer; aksiyonlar
@@ -177,14 +179,29 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - Ana ekran davet banner'ı (#invites) korundu; davet her ikisinde de görünür.
 - Kod: personal.js (modül), campus.js (tile), personal.js renderModal maps, extras.js (ensureExtState+getAppBadge).
 
-### ⬜ SIRADA — Stage C devam (önerilen sıra)
-5. **Kütüphane çalış mini-oyunu**:
-   - Mevcut `state.courses[].bilgi` + `studyForCourse` ÜSTÜNE kur (yeni puan sistemi değil).
-   - Basit etkileşim (ör. tempo/dikkat) → başarı `bilgi` artışını ölçeklesin → vize/final notunu etkilesin.
-6. (Zaman kalırsa) Achievement/rozet + animasyonlu karne, Ayarlar ekranı genişletme.
+## 6) Yarın yapılacaklar (madde madde, sırayla)
+
+### İLK İŞ — Mesajlaşma ekranını TARAYICIDA test et
+1. `index.html`'i tarayıcıda aç (veya GitHub Pages), yeni oyun başlat.
+2. Ana ekranda **💬 Mesajlar** tile'ının çıktığını gör; tıkla → sohbet listesi açılsın.
+3. Bir kişiye tıkla → baloncuklu thread + geri (‹) butonu + quick-reply chip'leri çalışsın.
+   Chip'e bas → sağda yeşil giden-baloncuk eklensin (kaydolsun, geri gelince kalsın).
+4. Oyunda birkaç saat ilerle (davet spawn'ı için) → davet gelince:
+   - Mesajlar tile'ında **yeşil okunmamış rozeti** çıksın.
+   - İlgili kişinin thread'inde davet mesaj olarak görünsün + **Kabul/Reddet** çalışsın.
+   - Ana ekran davet banner'ı da (#invites) hâlâ görünsün (ikisi senkron).
+5. İmza hocası thread'inde "İmza iste" → signature modalı; oda arkadaşında tuvalet kağıdı akışı.
+6. Sevgili varken thread + "Sevgili menüsü" butonu; koyu tema (dark) görünümü kontrol.
+7. Sorun çıkarsa düzelt → `node build/smoke.js` (0 hata) → commit + push.
+   (İpucu: davet spawn'ını hızlandırmak istersek küçük bir dev butonu eklenebilir.)
+
+### SONRA — Kütüphane çalış mini-oyunu
+8. Mevcut `state.courses[].bilgi` + `studyForCourse` ÜSTÜNE kur (yeni puan sistemi değil).
+9. Basit etkileşim (ör. tempo/dikkat) → başarı `bilgi` artışını ölçeklesin → vize/final notunu etkilesin.
+10. (Zaman kalırsa) Achievement/rozet + animasyonlu karne, Ayarlar ekranı genişletme.
 
 ### Her adımda
-7. Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
-8. Her mantıklı checkpoint'te commit (push zaten yapıldığından düzenli push edebilirsin).
+11. Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
+12. Her mantıklı checkpoint'te commit + push.
 
-**Görev takibi:** Stage A ✅ · Stage B ✅ (commit'li, push bekliyor) · Stage C/D = pending.
+**Görev takibi:** Stage A ✅ · Stage B ✅ · Stage C: Save/Load ✅ · Mesajlaşma 🔶 (kod bitti, tarayıcı testi bekliyor) · Çalış mini-oyunu ⬜ · Stage D ⬜.
