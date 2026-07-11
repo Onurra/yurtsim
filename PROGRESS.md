@@ -1,6 +1,6 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-11 · Kaldığımız yer: **Stage A+B push edildi, Stage C başladı — Save/Load ✅ (test edildi + commit), sırada Mesajlaşma ekranı**
+> Son güncelleme: 2026-07-11 · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅ + Mesajlaşma ekranı ✅ (push'landı), sırada Kütüphane çalış mini-oyunu**
 
 ## ⚠️ ÖNEMLİ: Doğru kaynak sürüm
 Stage A ilk başta yerel `yurtsim (2).html` (2265 satır) üzerine yapılmıştı — ama bu
@@ -22,7 +22,7 @@ branch'inde (base = `origin/claude/laughing-pascal-16yzz7`). Eski (yanlış) ref
 ## Genel Plan (4 aşama)
 - **A. Refaktör** ✅ Tamamlandı
 - **B. Görsel cila + design token + dark mode** ✅ Tamamlandı
-- **C. Yeni özellikler** 🔶 Devam ediyor (Save/Load ✅; sırada Mesajlaşma ekranı)
+- **C. Yeni özellikler** 🔶 Devam ediyor (Save/Load ✅, Mesajlaşma ✅; sırada Çalış mini-oyunu)
 - **D. Capacitor paketleme** ⬜ Başlamadı
 
 ---
@@ -153,8 +153,8 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 
 ## 4) Git durumu (2026-07-11)
 - **Push edildi ✅:** `stage-a-refactor` → `origin/stage-a-refactor` (upstream kuruldu; PR açılabilir).
-- **Commit'ler:** Stage A `02393e4` + Stage B `8e3ecd5` + Save/Load sağlamlaştırma `1067827`.
-- Aktif branch `stage-a-refactor`. Bundan sonra düzenli push edilebilir.
+- **Commit'ler:** Stage A `02393e4` + Stage B `8e3ecd5` + Save/Load `1067827` + Mesajlaşma `988578e`.
+- Aktif branch `stage-a-refactor`. Düzenli push ediliyor.
 
 ## 5) Yapılanlar / sırada (madde madde)
 
@@ -168,11 +168,16 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - `loadGame` — bozuk/nesne olmayan kayıtta güvenli fallback.
 - Not: guard `confirm()` ile (resetGame ile tutarlı). İleride oyunun kendi modal stiline çevrilebilir.
 
+### ✅ TAMAM — WhatsApp tarzı Mesajlaşma ekranı (`988578e`)
+- "Mesajlar" (💬) app tile → sohbet listesi + kişi thread'i (baloncuklu, geri butonlu).
+- Kişiler: sevgili (varsa) + tüm arkadaşlar (Anne dahil) + ders imza hocası.
+- Davet/imza/tuvalet kağıdı ilgili kişinin thread'ine mesaj olarak düşer; aksiyonlar
+  mevcut acceptInvite/declineInvite/openModal('signature')/orderToiletPaper'ı kullanır.
+- Okunmamış rozeti (app tile'da yeşil sayaç) + kozmetik quick-reply chip'leri (state.chats, save'e girer).
+- Ana ekran davet banner'ı (#invites) korundu; davet her ikisinde de görünür.
+- Kod: personal.js (modül), campus.js (tile), personal.js renderModal maps, extras.js (ensureExtState+getAppBadge).
+
 ### ⬜ SIRADA — Stage C devam (önerilen sıra)
-4. **WhatsApp tarzı Mesajlaşma ekranı**:
-   - Yeni app tile + modal; arkadaşlar (`FRIENDS_*`) ve sevgili sohbet listesi.
-   - Davetler (`pendingInvite`/`maybeSpawnInvite`) artık buradan mesaj olarak gelsin.
-   - Mevcut mesaj verisini (`personal.js` içindeki mesaj datası) temel al, sıfırdan yazma.
 5. **Kütüphane çalış mini-oyunu**:
    - Mevcut `state.courses[].bilgi` + `studyForCourse` ÜSTÜNE kur (yeni puan sistemi değil).
    - Basit etkileşim (ör. tempo/dikkat) → başarı `bilgi` artışını ölçeklesin → vize/final notunu etkilesin.
