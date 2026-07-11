@@ -1,6 +1,6 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-10 · Kaldığımız yer: **Stage B commit'lendi (henüz PUSH edilmedi), Stage C başlamadı**
+> Son güncelleme: 2026-07-11 · Kaldığımız yer: **Stage A+B push edildi, Stage C başladı — Save/Load ✅ (test edildi + commit), sırada Mesajlaşma ekranı**
 
 ## ⚠️ ÖNEMLİ: Doğru kaynak sürüm
 Stage A ilk başta yerel `yurtsim (2).html` (2265 satır) üzerine yapılmıştı — ama bu
@@ -22,7 +22,7 @@ branch'inde (base = `origin/claude/laughing-pascal-16yzz7`). Eski (yanlış) ref
 ## Genel Plan (4 aşama)
 - **A. Refaktör** ✅ Tamamlandı
 - **B. Görsel cila + design token + dark mode** ✅ Tamamlandı
-- **C. Yeni özellikler** ⬜ Başlamadı (sırada)
+- **C. Yeni özellikler** 🔶 Devam ediyor (Save/Load ✅; sırada Mesajlaşma ekranı)
 - **D. Capacitor paketleme** ⬜ Başlamadı
 
 ---
@@ -151,24 +151,24 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 
 ---
 
-## 4) Git durumu (2026-07-10 sonu)
-- **Stage B commit'lendi:** `8e3ecd5 Stage B: design token + dark mode + görsel cila`
-- Branch `stage-a-refactor`, `origin/claude/laughing-pascal-16yzz7`'in **2 commit önünde**
-  (Stage A `02393e4` + Stage B `8e3ecd5`).
-- ⚠️ **HENÜZ PUSH EDİLMEDİ.** Yarın **ilk iş push.**
+## 4) Git durumu (2026-07-11)
+- **Push edildi ✅:** `stage-a-refactor` → `origin/stage-a-refactor` (upstream kuruldu; PR açılabilir).
+- **Commit'ler:** Stage A `02393e4` + Stage B `8e3ecd5` + Save/Load sağlamlaştırma `1067827`.
+- Aktif branch `stage-a-refactor`. Bundan sonra düzenli push edilebilir.
 
-## 5) Yarın yapılacaklar (madde madde)
+## 5) Yapılanlar / sırada (madde madde)
 
-### İLK İŞ — Push
-1. `node build/smoke.js` çalıştır → **0 hata + `theme check` satırı** gör (sağlık kontrolü).
-2. `git push origin stage-a-refactor` — Stage A+B'yi uzak branch'e gönder.
-   (Not: hedef branch adı ile netleş; gerekirse `git push -u origin stage-a-refactor`.)
+### ✅ TAMAM — Push
+- `git push -u origin stage-a-refactor` yapıldı; smoke test 0 hata + `theme check` OK.
 
-### SONRA — Stage C'ye başla (önerilen sıra)
-3. **Save/Load sağlamlaştırma + guard'lar** (zaten var olanı geliştir, sıfırdan yazma):
-   - `SAVE_KEY='uni_sim_save_v1'` şeması sürümle (migration'a hazır bir `saveVersion` alanı).
-   - "Yeni oyun" öncesi **onay/guard** (mevcut kayıt varsa uyar → yanlışlıkla silme olmasın).
-   - Bozuk/eksik save'de güvenli fallback (`ensureExtState` zaten eksik alan dolduruyor — üstüne kur).
+### ✅ TAMAM — Save/Load sağlamlaştırma (`1067827`, kullanıcı tarafından test edildi)
+- `saveVersion` (v2) + `migrateSave()` hook — sürümsüz kayıt = v1 kabul, güncel şemaya damgalanır.
+- `hasSaveGame()` — geçerli kayıt tespiti (menüdeki "devam et" mantığıyla birebir).
+- `startNewGame` guard'ı — kayıt varsa `confirm` ile onay (yanlışlıkla silme engellendi).
+- `loadGame` — bozuk/nesne olmayan kayıtta güvenli fallback.
+- Not: guard `confirm()` ile (resetGame ile tutarlı). İleride oyunun kendi modal stiline çevrilebilir.
+
+### ⬜ SIRADA — Stage C devam (önerilen sıra)
 4. **WhatsApp tarzı Mesajlaşma ekranı**:
    - Yeni app tile + modal; arkadaşlar (`FRIENDS_*`) ve sevgili sohbet listesi.
    - Davetler (`pendingInvite`/`maybeSpawnInvite`) artık buradan mesaj olarak gelsin.
