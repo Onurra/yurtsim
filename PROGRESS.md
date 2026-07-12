@@ -1,6 +1,6 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-12 · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅, Mesajlaşma ✅, Çalış mini-oyunu ✅, Başarım sistemi Faz 1 ✅ (kod+smoke, kullanıcı tarayıcı testi bekliyor).** Sıradaki iş: **Faz 2 — Dönem sonu animasyonlu karne** (Faz 1 test edilince); sonrasında Ayarlar genişletme / **Stage D — Capacitor**.
+> Son güncelleme: 2026-07-12 · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅, Mesajlaşma ✅, Çalış mini-oyunu ✅, Başarım sistemi ✅ (Faz 1), Animasyonlu karne ✅ (Faz 2), Görevler paneli scroll bugfix ✅.** Sıradaki iş: **Ayarlar ekranı genişletme** (Stage C son maddesi) veya doğrudan **Stage D — Capacitor paketleme**.
 
 ## ⚠️ ÖNEMLİ: Doğru kaynak sürüm
 Stage A ilk başta yerel `yurtsim (2).html` (2265 satır) üzerine yapılmıştı — ama bu
@@ -198,7 +198,12 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 
 ## 6) Sıradaki işler (madde madde)
 
-### 🔶 Başarım sistemi Faz 1 — KOD BİTTİ, ⚠️ kullanıcı tarayıcı testi bekliyor (`extras.js`)
+### ✅ TAMAM — Görevler paneli scroll bugfix (`index.html`, commit `d0d7b17`)
+- Ana ekrandaki Görevler paneli genişletilince liste ekran altına taşıp kayboluyordu (panel scroll yoktu).
+- Fix: `#tasks`'e `max-height:168px;overflow-y:auto` — panel sığar, içi kaydırılabilir; alt stat bar yerinde.
+- smoke: 40 satır enjekte → `clientHeight`=168'de kapandı, `scrollHeight`=920>168 (kaydırılabilir); mevcut görevler zaten sığıyor.
+
+### ✅ TAMAM — Başarım sistemi Faz 1 (`extras.js`, commit `2e7ec7d`)
 - İkiye bölündü (kullanıcı isteği): **Faz 1 = başarım sistemi** (bu), **Faz 2 = animasyonlu karne** (aşağıda).
 - `ACHIEVEMENTS` kataloğu (15 başarım) + `checkAchievements()` (render sarmalında çağrılır, extras.js).
   `state.achievements` = {id→açılış günü}, save'e girer; `ensureExtState`'te `{}` ile doldurulur.
@@ -211,12 +216,17 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
   Diğerleri doğrudan state'ten okunur (money/fitnessDays/relationship/affinity/iddiaLevel/wardrobe/year/gano).
 - Doğrulama: smoke `achievements = {catalog:15, unlockedNight:true, unlockedRich:true, toast:true,
   settingsSection:true}`; görüntü `shot-achievements.png` (toast + Ayarlar bölümü, okunur). 0 hata.
-- ⚠️ Kullanıcı tarayıcıda test edecek → sonra Faz 2.
 
-### SONRAKİ — Faz 2: Dönem sonu animasyonlu karne
-- `modalYearEndHtml` içinde CSS ile satır kademeli açılışı + rozet pop + GANO 0'dan sayaç (`animateYearEndCountup`).
-- Başarımları (`state.achievements`) yıl sonu karnesine entegre et (mevcut ad-hoc badge listesi yerine).
-- Keyframe'ler: `yeReveal`, `yePop` (henüz eklenmedi — Faz 2'de). `achIn` zaten eklendi.
+### ✅ TAMAM — Faz 2: Dönem sonu animasyonlu karne (`extras.js`+`styles.css`, commit `e2cf34f`)
+- `modalYearEndHtml` üstüne GÖRSEL katman (mevcut mantık/rozet/canAdvance korundu):
+  - Satırlar/başlıklar kademeli fade-in (`yeReveal`, `animation-delay` ile stagger; rozet sayısına göre satır gecikmesi kayar).
+  - Rozetler pop animasyonuyla belirir (`yePop`).
+  - GANO `id="yeGano"` + `data-target`; `animateYearEndCountup()` 0.00'dan gerçek değere sayar (`setTimeout` hook, innerHTML sonrası çalışır).
+  - `_yeShown` guard: yalnızca modal ilk açıldığında oynar (checkSemesterEnd'te `false`'a set edilir), re-render'da tekrarlamaz.
+  - Tema-duyarlı: header gradient sonu + "Yeni oyun" butonu `white`→`var(--surface)` (dark okunur).
+- Keyframe'ler `styles.css`: `yeReveal`, `yePop` (+ Faz 1'den `achIn`). smoke: `karne init={target:2.73,initialText:0.00,hasReveal:true,hasPop:true}`,
+  `karne done={matchesTarget:true}`; görüntüler `shot-karne.png` + `shot-karne-dark.png` (light+dark okunur). 0 hata.
+- NOT: Başarımları karneye ayrı entegre etmedim (mevcut ad-hoc badge listesi korundu, "mantığı bozma" gereği). İstenirse sonra birleştirilebilir.
 
 ### SONRA — Ayarlar genişletme / Stage D
 - Ayarlar: ses opsiyonel, belki zorluk. Sonra **Stage D — Capacitor paketleme**.
@@ -239,4 +249,4 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
 - Her mantıklı checkpoint'te commit + push.
 
-**Görev takibi:** Stage A ✅ · Stage B ✅ · Stage C: Save/Load ✅ · Mesajlaşma ✅ · Çalış mini-oyunu ✅ · Başarım Faz 1 🔶 (kod bitti, kullanıcı testi bekliyor) · Animasyonlu karne Faz 2 ⬜ · Ayarlar ⬜ · Stage D ⬜.
+**Görev takibi:** Stage A ✅ · Stage B ✅ · Stage C: Save/Load ✅ · Mesajlaşma ✅ · Çalış mini-oyunu ✅ · Başarım Faz 1 ✅ · Animasyonlu karne Faz 2 ✅ · Görevler scroll bugfix ✅ · Ayarlar ⬜ · Stage D ⬜.
