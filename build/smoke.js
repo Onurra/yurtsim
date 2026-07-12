@@ -135,6 +135,11 @@ async function main() {
   await wait(200); await shot('shot-achievements.png');
   await js("state.money=5000; state._achNight=false; closeModal()");
 
+  // Görevler paneli scroll (bugfix) — genişletince panel sığar, içi kaydırılabilir
+  const tasksScroll = await js("(function(){state.tasksExpanded=true;render();var el=document.getElementById('tasks');var cs=getComputedStyle(el);var realFits=el.clientHeight<=168;el.innerHTML=Array.from({length:40}).map(function(){return '<div style=\"padding:4px 0;\">görev satırı</div>'}).join('');var capped=el.clientHeight<=168;var canScroll=el.scrollHeight>el.clientHeight;return JSON.stringify({maxH:cs.maxHeight,overflowY:cs.overflowY,realFits:realFits,cappedAt168:capped,scrollableWhenFull:canScroll,scrollH:el.scrollHeight,clientH:el.clientHeight});})()");
+  await wait(150); await shot('shot-tasks-expanded.png');
+  await js("state.tasksExpanded=false; render()");
+
   console.log('menu.display   =', menuVisible);
   console.log('menu.innerText =', JSON.stringify(menuText).slice(0, 100));
   console.log('char.display   =', charVisible);
@@ -147,6 +152,7 @@ async function main() {
   console.log('msg send       =', msgSend);
   console.log('study game     =', study);
   console.log('achievements   =', ach);
+  console.log('tasks scroll   =', tasksScroll);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();
