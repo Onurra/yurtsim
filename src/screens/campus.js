@@ -128,7 +128,7 @@ const d=Math.abs(marker-zoneC);let pts,txt,col;
 if(d<=coreHalf){pts=2;txt='🎯 Mükemmel!';col='#1E7A18'}
 else if(d<=zoneHalf){pts=1.3;txt='👍 İyi';col='#2E7D32'}
 else if(d<=zoneHalf+10){pts=0.6;txt='😐 İdare eder';col='#B36B00'}
-else{pts=0;txt='❌ Işka';col='#C0392B'}
+else{pts=0;txt='❌ Iska';col='#C0392B'}
 total+=pts;feedEl.textContent=txt;feedEl.style.color=col;markEl.style.background=col;
 round++;
 setTimeout(()=>{markEl.style.background='var(--tp)';feedEl.textContent='';if(round>=ROUNDS)end();else newRound()},620);
