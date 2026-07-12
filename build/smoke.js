@@ -140,6 +140,17 @@ async function main() {
   await wait(150); await shot('shot-tasks-expanded.png');
   await js("state.tasksExpanded=false; render()");
 
+  // Faz 2 — Dönem sonu animasyonlu karne
+  await js("(function(){var c=state.guzCourses[0];c.guzVizeNote='AA';c.guzFinalNote='BA';var c2=state.guzCourses[1];if(c2){c2.guzVizeNote='CC';c2.guzFinalNote='FF';}recalculateGANO();state._yeShown=false;state.money=25000;openModal('yearEnd');})()");
+  await wait(60);
+  const karneInit = await js("(function(){var el=document.getElementById('yeGano');var body=document.getElementById('modalBody').innerHTML;return JSON.stringify({ganoEl:!!el,target:el&&el.getAttribute('data-target'),initialText:el&&el.textContent,hasReveal:/yeReveal/.test(body),hasPop:/yePop/.test(body)});})()");
+  await shot('shot-karne-anim.png');
+  await wait(700);
+  const karneDone = await js("(function(){var el=document.getElementById('yeGano');return JSON.stringify({finalText:el&&el.textContent,matchesTarget:el&&el.textContent===el.getAttribute('data-target')});})()");
+  await shot('shot-karne.png');
+  await js("setTheme('dark'); state._yeShown=false; render()"); await wait(750); await shot('shot-karne-dark.png');
+  await js("setTheme('light'); state.money=5000; closeModal()");
+
   console.log('menu.display   =', menuVisible);
   console.log('menu.innerText =', JSON.stringify(menuText).slice(0, 100));
   console.log('char.display   =', charVisible);
@@ -153,6 +164,8 @@ async function main() {
   console.log('study game     =', study);
   console.log('achievements   =', ach);
   console.log('tasks scroll   =', tasksScroll);
+  console.log('karne init     =', karneInit);
+  console.log('karne done     =', karneDone);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();

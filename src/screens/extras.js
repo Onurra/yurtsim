@@ -293,6 +293,13 @@ h+=`<div title="${a.d}" style="display:flex;align-items:center;gap:8px;padding:7
 h+=`</div></div>`;
 return h;
 }
+// GANO'yu 0'dan gerçek değerine sayarak animasyonla artırır (karne açılışında).
+function animateYearEndCountup(){
+const el=document.getElementById('yeGano');if(!el)return;
+const target=parseFloat(el.getAttribute('data-target'))||0;const steps=28;let i=0;
+const tick=()=>{i++;el.textContent=(target*i/steps).toFixed(2);if(i<steps)requestAnimationFrame(tick);else el.textContent=target.toFixed(2)};
+requestAnimationFrame(tick);
+}
 // --- Yıl sonu karne / kazanma-kaybetme / çok yıl ---
 function yearStats(){
 recalculateGANO();
@@ -309,6 +316,11 @@ return {gano:state.gano||0,pass:pass,fail:fail,rows:rows};
 }
 function modalYearEndHtml(){
 const st=yearStats();
+// Görsel animasyon katmanı: yalnızca modal ilk açıldığında oynar (re-render'da tekrarlamaz).
+const anim=!state._yeShown;state._yeShown=true;
+if(anim)setTimeout(animateYearEndCountup,220);
+const A=d=>anim?`animation:yeReveal .45s ease-out both;animation-delay:${d}s;`:'';
+const P=d=>anim?`animation:yePop .5s cubic-bezier(.2,1.2,.4,1) both;animation-delay:${d}s;`:'';
 let title,emoji,color;
 if(st.gano>=3.5){title='Şeref öğrencisi';emoji='🏆';color='#27500A'}
 else if(st.gano>=3.0){title='Yüksek onur';emoji='🎓';color='#27500A'}
@@ -328,26 +340,27 @@ if(st.fail===0&&st.pass>0)badges.push('✅ Hiç ders bırakmadın');
 if(st.fail>=4)badges.push('💀 Bütünlemelik');
 if((state.wardrobe||[]).length>=6)badges.push('👔 Fashion ikonu');
 if((state.fitnessDays||0)>=10)badges.push('💪 Sporcu');
-let h=`<div style="text-align:center;padding:16px 0 12px;background:linear-gradient(180deg,${color}18 0%,white 100%);margin:-2px -2px 14px;border-radius:6px 6px 0 0;border-bottom:0.5px solid ${C.bt};">
-<div style="font-size:46px;line-height:1;margin-bottom:6px;">${emoji}</div>
-<div style="font-size:19px;font-weight:700;color:${color};margin-bottom:3px;">${title}</div>
-<div style="font-size:11px;color:${C.ts};">${(state.year||1)}. Sınıf · Akademik Yıl Bitti</div>
+let h=`<div style="text-align:center;padding:16px 0 12px;background:linear-gradient(180deg,${color}18 0%,var(--surface) 100%);margin:-2px -2px 14px;border-radius:6px 6px 0 0;border-bottom:0.5px solid ${C.bt};">
+<div style="font-size:46px;line-height:1;margin-bottom:6px;${P(0)}">${emoji}</div>
+<div style="font-size:19px;font-weight:700;color:${color};margin-bottom:3px;${A(0.08)}">${title}</div>
+<div style="font-size:11px;color:${C.ts};${A(0.14)}">${(state.year||1)}. Sınıf · Akademik Yıl Bitti</div>
 </div>
-<div style="background:#EAF3DE;border:1px solid #1D9E75;border-radius:8px;padding:14px;text-align:center;margin-bottom:14px;">
+<div style="background:#EAF3DE;border:1px solid #1D9E75;border-radius:8px;padding:14px;text-align:center;margin-bottom:14px;${A(0.22)}">
 <div style="font-size:10px;color:${C.ts};margin-bottom:3px;">Yıl Sonu GANO</div>
-<div style="font-size:34px;font-weight:700;color:#27500A;line-height:1;">${st.gano.toFixed(2)}</div>
+<div id="yeGano" data-target="${st.gano.toFixed(2)}" style="font-size:34px;font-weight:700;color:#27500A;line-height:1;">${anim?'0.00':st.gano.toFixed(2)}</div>
 <div style="font-size:10px;color:${C.ts};margin-top:6px;">${st.pass} ders geçti · ${st.fail} FF · 💰 ${fmt(state.money)}₺</div>
 </div>`;
-if(badges.length){h+=`<div style="font-size:11px;color:${C.tp};font-weight:600;margin-bottom:6px;">🎖️ Rozetler</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;">${badges.map(b=>`<span style="font-size:10.5px;background:#EEEDFE;color:#3C3489;padding:3px 8px;border-radius:6px;font-weight:600;">${b}</span>`).join('')}</div>`}
-h+=`<div style="font-size:11px;color:${C.tp};font-weight:600;margin-bottom:6px;">📋 Yıl Sonu Notları</div><div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;margin-bottom:14px;">`;
-st.rows.forEach((r,i)=>{const ff=r.g==='FF';const good=['AA','BA','BB'].includes(r.g);h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px;${i<st.rows.length-1?'border-bottom:0.5px solid '+C.bt+';':''}font-size:11px;"><div style="flex:1;min-width:0;"><span style="font-weight:600;color:${C.tp};">${r.c.code}</span></div><span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:${ff?'#FCEBEB':good?'#EAF3DE':'#FAEEDA'};color:${ff?'#791F1F':good?'#27500A':'#854F0B'};">${r.g}</span></div>`});
+if(badges.length){h+=`<div style="font-size:11px;color:${C.tp};font-weight:600;margin-bottom:6px;${A(0.3)}">🎖️ Rozetler</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;">${badges.map((b,i)=>`<span style="font-size:10.5px;background:#EEEDFE;color:#3C3489;padding:3px 8px;border-radius:6px;font-weight:600;${P(0.36+i*0.06)}">${b}</span>`).join('')}</div>`}
+const rowBase=0.36+badges.length*0.06+0.1;
+h+=`<div style="font-size:11px;color:${C.tp};font-weight:600;margin-bottom:6px;${A(rowBase)}">📋 Yıl Sonu Notları</div><div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;margin-bottom:14px;">`;
+st.rows.forEach((r,i)=>{const ff=r.g==='FF';const good=['AA','BA','BB'].includes(r.g);h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 12px;${i<st.rows.length-1?'border-bottom:0.5px solid '+C.bt+';':''}font-size:11px;${A(rowBase+0.08+i*0.06)}"><div style="flex:1;min-width:0;"><span style="font-weight:600;color:${C.tp};">${r.c.code}</span></div><span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:${ff?'#FCEBEB':good?'#EAF3DE':'#FAEEDA'};color:${ff?'#791F1F':good?'#27500A':'#854F0B'};">${r.g}</span></div>`});
 h+=`</div>`;
 if(canAdvance){
 h+=`<button onclick="advanceToNextYear()" style="width:100%;font-size:13px;padding:12px;background:#1F4A11;color:white;border:none;border-radius:8px;margin-bottom:8px;cursor:pointer;font-family:inherit;font-weight:700;">🎉 ${(state.year||1)+1}. sınıfa geç</button>`;
 }else{
 h+=`<div style="background:#FCEBEB;border:1px solid #C9333B;border-radius:8px;padding:12px;margin-bottom:8px;font-size:11px;color:#791F1F;line-height:1.5;text-align:center;">📉 GANO 1.00 altında ya da çok fazla FF · sınıfı geçemedin. Daha iyisini yeni bir oyunda dene.</div>`;
 }
-h+=`<button onclick="endGameNewGame()" style="width:100%;font-size:13px;padding:12px;background:${canAdvance?'white':'#3C3489'};color:${canAdvance?C.tp:'white'};border:${canAdvance?'1px solid '+C.bt:'none'};border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;">🆕 Yeni oyun</button>`;
+h+=`<button onclick="endGameNewGame()" style="width:100%;font-size:13px;padding:12px;background:${canAdvance?'var(--surface)':'#3C3489'};color:${canAdvance?C.tp:'white'};border:${canAdvance?'1px solid '+C.bt:'none'};border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;">🆕 Yeni oyun</button>`;
 return h;
 }
 function resetCoursesArr(arr){if(!arr)return;arr.forEach(c=>{c.absent=0;c.bilgi=0;c.handledOnDay=null;c.handledType=null;c.preSigned=false;['guzVizeNote','guzFinalNote','baharVizeNote','baharFinalNote'].forEach(k=>{c[k]=null;c[k+'Missed']=false})})}

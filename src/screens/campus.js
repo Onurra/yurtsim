@@ -412,6 +412,7 @@ return true;
 }
 if(state.semester==='bahar'&&!state.baharEnded&&state.dayOfMonth>=300){
 state.baharEnded=true;
+state._yeShown=false;
 state.activeModal='yearEnd';
 return true;
 }
