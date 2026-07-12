@@ -1,6 +1,6 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-11 (gün sonu) · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅ (test edildi). Mesajlaşma ekranı commit+push edildi (`988578e`) ama ⚠️ HENÜZ TARAYICIDA ELLE TEST EDİLMEDİ (sadece smoke test geçti).** Yarın ilk iş: mesajlaşmayı tarayıcıda test et → sonra Kütüphane çalış mini-oyunu.
+> Son güncelleme: 2026-07-12 · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅, Mesajlaşma ✅ (tarayıcıda doğrulandı: liste/thread/davet/chip-gönderme/dark-mode, hepsi headless Chrome ile gerçek UI üzerinde test edildi).** Sıradaki iş: **Kütüphane çalış mini-oyunu**.
 
 ## ⚠️ ÖNEMLİ: Doğru kaynak sürüm
 Stage A ilk başta yerel `yurtsim (2).html` (2265 satır) üzerine yapılmıştı — ama bu
@@ -168,9 +168,12 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - `loadGame` — bozuk/nesne olmayan kayıtta güvenli fallback.
 - Not: guard `confirm()` ile (resetGame ile tutarlı). İleride oyunun kendi modal stiline çevrilebilir.
 
-### 🔶 KOD BİTTİ ama ⚠️ TARAYICIDA TEST EDİLMEDİ — WhatsApp tarzı Mesajlaşma ekranı (`988578e`)
-- Durum: commit + push edildi, `node build/smoke.js` 0 hata (liste/thread/davet+rozet otomatik doğrulandı).
-  **Ama gerçek tarayıcıda elle test EDİLMEDİ** → yarın önce bu test edilecek, sonrası ona göre.
+### ✅ TAMAM — WhatsApp tarzı Mesajlaşma ekranı (`988578e`, tarayıcıda doğrulandı 2026-07-12)
+- Durum: commit + push edildi. `node build/smoke.js` 0 hata. Headless Chrome ile gerçek UI
+  üzerinde tam akış doğrulandı: liste (8 kişi) · thread (baloncuk+geri+chip) · davet mesaj
+  olarak düşüyor + Kabul/Reddet + okunmamış rozeti · quick-reply chip → giden yeşil baloncuk
+  `state.chats`'e KALICI yazılıyor (save'e girer) · dark-mode okunur. Görüntüler: `shot-messages-*.png`
+  (+`shot-messages-dark.png`). smoke.js'e chip-gönderme + dark-mode mesajlaşma testleri eklendi.
 - "Mesajlar" (💬) app tile → sohbet listesi + kişi thread'i (baloncuklu, geri butonlu).
 - Kişiler: sevgili (varsa) + tüm arkadaşlar (Anne dahil) + ders imza hocası.
 - Davet/imza/tuvalet kağıdı ilgili kişinin thread'ine mesaj olarak düşer; aksiyonlar

@@ -114,7 +114,13 @@ async function main() {
   const msgThread = await js("JSON.stringify({back:/closeChat/.test(document.getElementById('modalBody').innerHTML), chips:/sendChat/.test(document.getElementById('modalBody').innerHTML)})");
   const msgInvite = await js("state.pendingInvite={from:'Mert',fid:'mert',initial:'M',color:'#534AB7',text:'FIFA gel',mins:120,mood:10}; state.chatOpen='mert'; render(); JSON.stringify({unread:chatUnread('mert'), badge:!!getAppBadge('Mesajlar'), acceptBtn:/acceptInvite/.test(document.getElementById('modalBody').innerHTML)})");
   await shot('shot-messages-invite.png');
-  await js("state.pendingInvite=null; state.chatOpen=null; closeModal()");
+  // Quick-reply chip → giden yeşil baloncuk eklenir + state.chats'e kalıcı yazılır
+  await js("state.pendingInvite=null; state.chats={}; state.chatOpen='mert'; render(); sendChat('mert','Görüşürüz')");
+  await wait(200);
+  const msgSend = await js("JSON.stringify({persisted:(state.chats.mert||[]).slice(-1)[0], outBubble:/side:'out'|Görüşürüz/.test('')||/Görüşürüz/.test(document.getElementById('modalBody').innerHTML)})");
+  // Dark-mode mesajlaşma okunabilirlik
+  await js("setTheme('dark'); state.chatOpen='mert'; render()"); await wait(300); await shot('shot-messages-dark.png');
+  await js("setTheme('light'); state.chats={}; state.pendingInvite=null; state.chatOpen=null; closeModal()");
 
   console.log('menu.display   =', menuVisible);
   console.log('menu.innerText =', JSON.stringify(menuText).slice(0, 100));
@@ -125,6 +131,7 @@ async function main() {
   console.log('msg list       =', msgList);
   console.log('msg thread     =', msgThread);
   console.log('msg invite     =', msgInvite);
+  console.log('msg send       =', msgSend);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();
