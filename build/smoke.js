@@ -122,6 +122,14 @@ async function main() {
   await js("setTheme('dark'); state.chatOpen='mert'; render()"); await wait(300); await shot('shot-messages-dark.png');
   await js("setTheme('light'); state.chats={}; state.pendingInvite=null; state.chatOpen=null; closeModal()");
 
+  // Kütüphane çalış mini-oyunu (Stage C) — overlay açılışı + bilgi ölçekleme
+  await js("state.location='Kütüphane'; openModal('library')"); await wait(200); await shot('shot-library.png');
+  await js("var c=state.courses[0]; startStudyGame(c.code)"); await wait(250); await shot('shot-study-game.png');
+  await js("document.getElementById('studyGameOv')&&document.getElementById('studyGameOv').remove(); setTheme('dark'); openModal('library'); var c=state.courses[0]; startStudyGame(c.code)"); await wait(250); await shot('shot-study-game-dark.png');
+  await js("document.getElementById('studyGameOv')&&document.getElementById('studyGameOv').remove(); setTheme('light')");
+  const study = await js("(function(){var c=state.courses[0];state.location='Kütüphane';startStudyGame(c.code);var ov=!!document.getElementById('studyGameOv');document.getElementById('studyGameOv')&&document.getElementById('studyGameOv').remove();var b0=c.bilgi||0;finishStudyGame(c,1);var perfect=c.bilgi-b0;var b1=c.bilgi;finishStudyGame(c,0);var poor=c.bilgi-b1;return JSON.stringify({overlay:ov,perfectGain:perfect,poorGain:poor,btn:typeof startStudyGame==='function'});})()");
+  await js("closeModal()");
+
   console.log('menu.display   =', menuVisible);
   console.log('menu.innerText =', JSON.stringify(menuText).slice(0, 100));
   console.log('char.display   =', charVisible);
@@ -132,6 +140,7 @@ async function main() {
   console.log('msg thread     =', msgThread);
   console.log('msg invite     =', msgInvite);
   console.log('msg send       =', msgSend);
+  console.log('study game     =', study);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();

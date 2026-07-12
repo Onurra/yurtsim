@@ -1,6 +1,6 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-12 · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅, Mesajlaşma ✅ (tarayıcıda doğrulandı: liste/thread/davet/chip-gönderme/dark-mode, hepsi headless Chrome ile gerçek UI üzerinde test edildi).** Sıradaki iş: **Kütüphane çalış mini-oyunu**.
+> Son güncelleme: 2026-07-12 · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅, Mesajlaşma ✅, Kütüphane çalış mini-oyunu ✅ (Odaklanma; tarayıcıda light+dark doğrulandı, smoke 0 hata).** Sıradaki iş: **Achievement/rozet + animasyonlu karne** ya da **Ayarlar ekranı genişletme** (Stage C kalan maddeleri); sonrasında **Stage D — Capacitor paketleme**.
 
 ## ⚠️ ÖNEMLİ: Doğru kaynak sürüm
 Stage A ilk başta yerel `yurtsim (2).html` (2265 satır) üzerine yapılmıştı — ama bu
@@ -22,7 +22,7 @@ branch'inde (base = `origin/claude/laughing-pascal-16yzz7`). Eski (yanlış) ref
 ## Genel Plan (4 aşama)
 - **A. Refaktör** ✅ Tamamlandı
 - **B. Görsel cila + design token + dark mode** ✅ Tamamlandı
-- **C. Yeni özellikler** 🔶 Devam ediyor (Save/Load ✅, Mesajlaşma ✅; sırada Çalış mini-oyunu)
+- **C. Yeni özellikler** 🔶 Devam ediyor (Save/Load ✅, Mesajlaşma ✅, Çalış mini-oyunu ✅; sırada rozet/karne + Ayarlar)
 - **D. Capacitor paketleme** ⬜ Başlamadı
 
 ---
@@ -182,9 +182,28 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - Ana ekran davet banner'ı (#invites) korundu; davet her ikisinde de görünür.
 - Kod: personal.js (modül), campus.js (tile), personal.js renderModal maps, extras.js (ensureExtState+getAppBadge).
 
-## 6) Yarın yapılacaklar (madde madde, sırayla)
+### ✅ TAMAM — Kütüphane çalış mini-oyunu (Odaklanma, `campus.js`, 2026-07-12)
+- Kütüphane modalındaki "📖 Çalış" butonu artık düz +5 yerine **Odaklanma** mini-oyununu açar
+  (`startStudyGame(code)` → `runFocusGame(c)`). Overlay `.phone-screen`'e eklenir (z-index 60,
+  metro 50'nin ÜSTÜ), tema-duyarlı (`var(--sky)`/`var(--tp)`), `metroFadeIn` animasyonu.
+- Mekanik: işaretçi ray üzerinde gidip gelir (her tur hız artar, yeşil alan daralır), oyuncu
+  yeşil "odak" alanındayken **ODAKLAN** butonu ya da **Space** ile basar. 5 tur. Skor: çekirdek=🎯
+  Mükemmel(2), yeşil=👍İyi(1.3), yakın=😐İdare eder(0.6), uzak=❌Işka(0). `Esc`/vazgeç = iptal (gain yok).
+- İsabet oranı bilgi kazancını **+3–10** arası ölçekler (`finishStudyGame`: `gain=round(3+acc*7)`),
+  düz +5 yerine. Bilgi sınav notunun ana çarpanı (`doExam`: `bilgi*0.65`) → mini-oyun notu etkiler.
+  İyi çalışma (acc≥0.7) moral cezasını azaltır. Enerji -15, 2sa, `state.location='Kütüphane'`.
+- Doğrulama: smoke `study game = {overlay:true, perfectGain:10, poorGain:3}`; görüntüler
+  `shot-study-game.png` + `shot-study-game-dark.png` + `shot-library.png` (light+dark okunur).
+- Not: `studyForCourse` (eski düz +5) kodda duruyor ama artık UI'dan çağrılmıyor (fallback/referans).
 
-### İLK İŞ — Mesajlaşma ekranını TARAYICIDA test et
+## 6) Sıradaki işler (madde madde)
+
+### SONRAKİ ADAY — Stage C kalan maddeleri (biriyle devam)
+- **Achievement/rozet sistemi + dönem sonu animasyonlu karne** (mevcut `yearStats`/rozetlerin üstüne).
+- **Ayarlar ekranını genişlet** (tema zaten var; ses opsiyonel, sıfırla, belki dil/zorluk).
+- Sonra **Stage D — Capacitor paketleme**.
+
+<details><summary>(Tamamlanan) İLK İŞ — Mesajlaşma ekranını TARAYICIDA test et</summary>
 1. `index.html`'i tarayıcıda aç (veya GitHub Pages), yeni oyun başlat.
 2. Ana ekranda **💬 Mesajlar** tile'ının çıktığını gör; tıkla → sohbet listesi açılsın.
 3. Bir kişiye tıkla → baloncuklu thread + geri (‹) butonu + quick-reply chip'leri çalışsın.
@@ -195,16 +214,11 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
    - Ana ekran davet banner'ı da (#invites) hâlâ görünsün (ikisi senkron).
 5. İmza hocası thread'inde "İmza iste" → signature modalı; oda arkadaşında tuvalet kağıdı akışı.
 6. Sevgili varken thread + "Sevgili menüsü" butonu; koyu tema (dark) görünümü kontrol.
-7. Sorun çıkarsa düzelt → `node build/smoke.js` (0 hata) → commit + push.
-   (İpucu: davet spawn'ını hızlandırmak istersek küçük bir dev butonu eklenebilir.)
-
-### SONRA — Kütüphane çalış mini-oyunu
-8. Mevcut `state.courses[].bilgi` + `studyForCourse` ÜSTÜNE kur (yeni puan sistemi değil).
-9. Basit etkileşim (ör. tempo/dikkat) → başarı `bilgi` artışını ölçeklesin → vize/final notunu etkilesin.
-10. (Zaman kalırsa) Achievement/rozet + animasyonlu karne, Ayarlar ekranı genişletme.
+7. Tümü ✅ headless Chrome ile doğrulandı (chip-gönderme + dark dahil).
+</details>
 
 ### Her adımda
-11. Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
-12. Her mantıklı checkpoint'te commit + push.
+- Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
+- Her mantıklı checkpoint'te commit + push.
 
-**Görev takibi:** Stage A ✅ · Stage B ✅ · Stage C: Save/Load ✅ · Mesajlaşma 🔶 (kod bitti, tarayıcı testi bekliyor) · Çalış mini-oyunu ⬜ · Stage D ⬜.
+**Görev takibi:** Stage A ✅ · Stage B ✅ · Stage C: Save/Load ✅ · Mesajlaşma ✅ · Çalış mini-oyunu ✅ · (sırada: rozet/karne + Ayarlar) · Stage D ⬜.

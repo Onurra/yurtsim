@@ -56,13 +56,97 @@ if(atSchool)state.location='Kütüphane';
 closeModal();advance(120);
 msg('📖 '+c.code+' çalıştın · bilgi +'+gain+' · mood -12 ('+c.bilgi+'/100)');
 }
+// ── Odaklanma çalışma mini-oyunu ──────────────────────────────
+// studyForCourse'un yerine geçer: işaretçi ray üzerinde gidip gelir, oyuncu
+// yeşil "odak" alanındayken basar (buton veya Space). İsabet oranı bilgi
+// kazancını düz +5 yerine +3–10 arası ölçekler → vize/final notunu etkiler.
+function startStudyGame(code){
+const c=state.courses.find(x=>x.code===code);if(!c)return;
+const atYurt=/yur[td]/i.test(state.location);
+const atSchool=/Kampüs|Kütüphane/i.test(state.location);
+if(!atYurt&&!atSchool){msg('🏠 Önce yurda ya da 🎓 kampüse git');return}
+if(state.energy<12){msg('😴 Çok yorgunsun · önce biraz dinlen');return}
+closeModal();
+runFocusGame(c);
+}
+function finishStudyGame(c,acc){
+acc=Math.max(0,Math.min(1,acc));
+const gain=Math.round(3+acc*7);
+c.bilgi=Math.min(100,(c.bilgi||0)+gain);
+if(/Kampüs|Kütüphane/i.test(state.location))state.location='Kütüphane';
+state.energy=clamp(state.energy-15);
+state.mood=clamp(state.mood-12+(acc>=0.7?6:acc>=0.4?2:0));
+advance(120);
+const rank=acc>=0.85?'🔥 tam odaklandın':acc>=0.6?'👍 iyi çalışma':acc>=0.35?'😐 dağınıktı':'😵 hiç odaklanamadın';
+msg('📖 '+c.code+' · '+rank+' · bilgi +'+gain+' ('+c.bilgi+'/100)');
+render();
+}
+function runFocusGame(c){
+const screen=document.querySelector('.phone-screen');
+if(!screen){finishStudyGame(c,0.55);return}
+const ROUNDS=5;
+let round=0,total=0,marker=4,dir=1,speed=1,zoneC=50,zoneHalf=12,coreHalf=4,locked=true,raf=0,last=0;
+const ov=document.createElement('div');
+ov.id='studyGameOv';
+ov.style.cssText='position:absolute;inset:0;z-index:60;background:var(--sky,#DCE9F3);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:26px;animation:metroFadeIn .25s ease-out;font-family:inherit;';
+ov.innerHTML=`<div style="width:100%;max-width:330px;text-align:center;color:var(--tp);">
+<div style="font-size:13px;font-weight:800;">📖 ${c.code} · Odaklanma</div>
+<div style="font-size:10.5px;color:var(--ts);margin-top:3px;">İşaretçi <b style="color:#1E7A18;">yeşil</b> alandayken bas — ortası tam isabet</div>
+<div id="sgRounds" style="font-size:10.5px;color:var(--ts);margin-top:10px;font-weight:700;">Tur 1/${ROUNDS}</div>
+<div style="position:relative;height:28px;margin:12px 0 2px;border-radius:14px;background:var(--bg3);overflow:hidden;border:1px solid var(--bt);">
+<div id="sgZone" style="position:absolute;top:0;bottom:0;background:#79C85A;"></div>
+<div id="sgCore" style="position:absolute;top:0;bottom:0;background:#1E7A18;"></div>
+<div id="sgMarker" style="position:absolute;top:-3px;bottom:-3px;width:5px;background:var(--tp);border-radius:3px;box-shadow:0 0 7px rgba(0,0,0,.35);"></div>
+</div>
+<div id="sgFeed" style="font-size:13px;font-weight:800;height:20px;margin-top:8px;"></div>
+<button id="sgBtn" style="margin-top:12px;width:100%;padding:17px;font-size:15px;font-weight:800;background:#185FA5;color:white;border:none;border-radius:14px;cursor:pointer;font-family:inherit;">🎯 ODAKLAN</button>
+<button id="sgQuit" style="margin-top:10px;background:none;border:none;color:var(--ts);font-size:11px;cursor:pointer;font-family:inherit;text-decoration:underline;">vazgeç</button>
+</div>`;
+screen.appendChild(ov);
+const $=id=>ov.querySelector('#'+id);
+const zoneEl=$('sgZone'),coreEl=$('sgCore'),markEl=$('sgMarker'),feedEl=$('sgFeed'),roundsEl=$('sgRounds'),btn=$('sgBtn');
+function cleanup(){cancelAnimationFrame(raf);document.removeEventListener('keydown',onKey);ov.remove()}
+function newRound(){
+speed=0.85+round*0.32;zoneHalf=Math.max(7,13-round*1.3);coreHalf=Math.max(2.5,zoneHalf*0.32);
+zoneC=zoneHalf+Math.random()*(100-2*zoneHalf);
+zoneEl.style.left=(zoneC-zoneHalf)+'%';zoneEl.style.width=(2*zoneHalf)+'%';
+coreEl.style.left=(zoneC-coreHalf)+'%';coreEl.style.width=(2*coreHalf)+'%';
+roundsEl.textContent='Tur '+(round+1)+'/'+ROUNDS;
+marker=(round%2===0)?4:96;dir=(round%2===0)?1:-1;locked=false;last=0;
+raf=requestAnimationFrame(frame);
+}
+function frame(ts){
+if(!last)last=ts;const dt=Math.min(48,ts-last);last=ts;
+marker+=dir*speed*(dt/16);
+if(marker>=100){marker=100;dir=-1}else if(marker<=0){marker=0;dir=1}
+markEl.style.left='calc('+marker+'% - 2.5px)';
+if(!locked)raf=requestAnimationFrame(frame);
+}
+function lock(){
+if(locked)return;locked=true;cancelAnimationFrame(raf);
+const d=Math.abs(marker-zoneC);let pts,txt,col;
+if(d<=coreHalf){pts=2;txt='🎯 Mükemmel!';col='#1E7A18'}
+else if(d<=zoneHalf){pts=1.3;txt='👍 İyi';col='#2E7D32'}
+else if(d<=zoneHalf+10){pts=0.6;txt='😐 İdare eder';col='#B36B00'}
+else{pts=0;txt='❌ Işka';col='#C0392B'}
+total+=pts;feedEl.textContent=txt;feedEl.style.color=col;markEl.style.background=col;
+round++;
+setTimeout(()=>{markEl.style.background='var(--tp)';feedEl.textContent='';if(round>=ROUNDS)end();else newRound()},620);
+}
+function end(){const acc=total/(ROUNDS*2);cleanup();finishStudyGame(c,acc)}
+function onKey(e){if(e.code==='Space'||e.key===' '){e.preventDefault();lock()}else if(e.key==='Escape'){cleanup();render()}}
+btn.addEventListener('click',lock);
+$('sgQuit').addEventListener('click',()=>{cleanup();render()});
+document.addEventListener('keydown',onKey);
+newRound();
+}
 function modalLibraryHtml(){
 const atYurt=/yur[td]/i.test(state.location);
 const atSchool=/Kampüs|Kütüphane/i.test(state.location);
 const canStudy=atYurt||atSchool;
 let h='';
-if(atSchool){h+=`<div style="background:#EEEDFE;border:1px solid #185FA5;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11.5px;color:#3C3489;"><div style="font-weight:700;">🎓 Okul kütüphanesindesin</div><div style="font-size:10.5px;margin-top:2px;">+5 bilgi · 2sa · -15 enerji · -12 mood</div></div>`}
-else if(atYurt){h+=`<div style="background:#EAF3DE;border:1px solid #1D9E75;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11.5px;color:#27500A;"><div style="font-weight:700;">🏠 Yurt kütüphanesindesin</div><div style="font-size:10.5px;margin-top:2px;">+5 bilgi · 2sa · -15 enerji · -12 mood</div></div>`}
+if(atSchool){h+=`<div style="background:#EEEDFE;border:1px solid #185FA5;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11.5px;color:#3C3489;"><div style="font-weight:700;">🎓 Okul kütüphanesindesin</div><div style="font-size:10.5px;margin-top:2px;">🎯 Odaklanma oyunu · 2sa · isabete göre +3–10 bilgi · -15 enerji</div></div>`}
+else if(atYurt){h+=`<div style="background:#EAF3DE;border:1px solid #1D9E75;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11.5px;color:#27500A;"><div style="font-weight:700;">🏠 Yurt kütüphanesindesin</div><div style="font-size:10.5px;margin-top:2px;">🎯 Odaklanma oyunu · 2sa · isabete göre +3–10 bilgi · -15 enerji</div></div>`}
 else{h+=`<div style="background:#FCEBEB;border:1px solid #C9333B;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:11.5px;color:#791F1F;"><div style="font-weight:700;">📍 Kütüphaneye git</div><div style="font-size:10.5px;margin-top:2px;">Yurda dön ya da kampüse git, sonra çalış</div></div>`}
 h+=`<div style="font-size:11px;color:${C.ts};margin-bottom:6px;font-weight:600;">Hangi derse çalışacaksın?</div>`;
 state.courses.forEach(c=>{
@@ -81,7 +165,7 @@ h+=`<div style="background:var(--surface);border:0.5px solid ${C.bt};border-radi
 <div style="font-size:10px;color:${C.ts};margin-top:2px;">Bilgi <span style="color:${bC};font-weight:700;">${bilgi}/100</span> · <span style="color:${examUrg?'#791F1F':C.ts};${examUrg?'font-weight:700;':''}">${examInfo}${examUrg?' ⚠':''}</span></div>
 </div>
 <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
-<button onclick="studyForCourse('${c.code}')" style="font-size:10.5px;padding:7px 12px;background:${canStudy?'#185FA5':'rgba(95,94,90,0.65)'};color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">${canStudy?'📖 +5':'📍 git'}</button>
+<button onclick="startStudyGame('${c.code}')" style="font-size:10.5px;padding:7px 12px;background:${canStudy?'#185FA5':'rgba(95,94,90,0.65)'};color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;">${canStudy?'📖 Çalış':'📍 git'}</button>
 ${canStudy?`<button onclick="studyNight('${c.code}')" style="font-size:10px;padding:6px 12px;background:#3C3489;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" title="Sabaha kadar çalış: +12 bilgi ama -35 enerji -20 moral">🌙 +12</button>`:''}
 </div>
 </div>`;
