@@ -1,6 +1,9 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-12 · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅, Mesajlaşma ✅, Çalış mini-oyunu ✅, Başarım sistemi ✅ (Faz 1), Animasyonlu karne ✅ (Faz 2), Görevler paneli scroll bugfix ✅.** Sıradaki iş: **Ayarlar ekranı genişletme** (Stage C son maddesi) veya doğrudan **Stage D — Capacitor paketleme**.
+> Son güncelleme: 2026-07-12 · Kaldığımız yer: **Stage C TAMAMLANDI ✅** — Save/Load, Mesajlaşma,
+> Çalış mini-oyunu (Odaklanma), Başarım sistemi (Faz 1) ve Animasyonlu karne (Faz 2) bitti + push'landı;
+> Görevler paneli scroll bugfix'i de yapıldı. **Ayarlar ekranı genişletme ATLANDI** (kullanıcı kararı).
+> Sıradaki iş: **Stage D — Capacitor paketleme** — ⬜ HENÜZ BAŞLANMADI (kullanıcı karar verince başlanacak).
 
 ## ⚠️ ÖNEMLİ: Doğru kaynak sürüm
 Stage A ilk başta yerel `yurtsim (2).html` (2265 satır) üzerine yapılmıştı — ama bu
@@ -22,8 +25,8 @@ branch'inde (base = `origin/claude/laughing-pascal-16yzz7`). Eski (yanlış) ref
 ## Genel Plan (4 aşama)
 - **A. Refaktör** ✅ Tamamlandı
 - **B. Görsel cila + design token + dark mode** ✅ Tamamlandı
-- **C. Yeni özellikler** 🔶 Devam ediyor (Save/Load ✅, Mesajlaşma ✅, Çalış mini-oyunu ✅; sırada rozet/karne + Ayarlar)
-- **D. Capacitor paketleme** ⬜ Başlamadı
+- **C. Yeni özellikler** ✅ Tamamlandı (Save/Load, Mesajlaşma, Çalış mini-oyunu, Başarım+Karne; Ayarlar genişletme atlandı)
+- **D. Capacitor paketleme** ⬜ Başlamadı (sırada bu var — kullanıcı karar verince başlanacak)
 
 ---
 
@@ -136,12 +139,12 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
   CSS değişkenlerine köprüleyen bir yaklaşım gerekebilir (ör. `C` değerlerini
   `var(--color-...)` okuyacak şekilde ya da JS tarafında token map'i).
 
-### Stage C — Yeni özellikler
-- Save/Load'u sağlamlaştır + "Yeni oyun" guard'ları (zaten var olanı geliştir).
-- WhatsApp tarzı **Mesajlaşma ekranı** (arkadaşlar + sevgili; davetler buradan gelsin).
-- Kütüphane **çalış mini-oyunu** → mevcut `bilgi` puanını artırsın → vize/final notunu etkilesin.
-- **Achievement/rozet** sistemi + dönem sonu **animasyonlu karne** (GANO).
-- **Ayarlar ekranı**: tema, ses (opsiyonel), sıfırla.
+### Stage C — Yeni özellikler ✅ TAMAMLANDI
+- ✅ Save/Load'u sağlamlaştır + "Yeni oyun" guard'ları.
+- ✅ WhatsApp tarzı **Mesajlaşma ekranı** (arkadaşlar + sevgili; davetler buradan geliyor).
+- ✅ Kütüphane **çalış mini-oyunu** (Odaklanma) → `bilgi`'yi ölçekli artırıyor → vize/final notunu etkiliyor.
+- ✅ **Achievement/rozet** sistemi + dönem sonu **animasyonlu karne** (GANO sayaç).
+- ⏭️ **Ayarlar ekranı genişletme**: ATLANDI (tema zaten Stage B'de eklendi).
 
 ### Stage D — Capacitor paketleme
 - `capacitor.config`, `package.json` scriptleri.
@@ -228,8 +231,15 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
   `karne done={matchesTarget:true}`; görüntüler `shot-karne.png` + `shot-karne-dark.png` (light+dark okunur). 0 hata.
 - NOT: Başarımları karneye ayrı entegre etmedim (mevcut ad-hoc badge listesi korundu, "mantığı bozma" gereği). İstenirse sonra birleştirilebilir.
 
-### SONRA — Ayarlar genişletme / Stage D
-- Ayarlar: ses opsiyonel, belki zorluk. Sonra **Stage D — Capacitor paketleme**.
+### ⏭️ ATLANDI — Ayarlar ekranı genişletme (kullanıcı kararı)
+- Stage C'nin bu son maddesi yapılmadı. Tema seçici zaten var (Stage B). Ses/zorluk gibi eklemeler
+  şimdilik gerekmiyor; istenirse ileride ayrı bir iş olarak açılabilir.
+
+### ⬜ SIRADA — Stage D: Capacitor paketleme (HENÜZ BAŞLANMADI)
+- Kullanıcı karar verince başlanacak. Planlanan adımlar (Bölüm 3'teki Stage D notlarıyla aynı):
+  `capacitor.config` + `package.json` scriptleri; telefon çerçevesi sadece web önizlemede, cihazda
+  tam ekran (responsive); safe-area (notch) desteği; placeholder app icon + splash; README'ye
+  `npx cap add ios/android` + build adımları.
 
 <details><summary>(Tamamlanan) İLK İŞ — Mesajlaşma ekranını TARAYICIDA test et</summary>
 1. `index.html`'i tarayıcıda aç (veya GitHub Pages), yeni oyun başlat.
@@ -249,4 +259,4 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
 - Her mantıklı checkpoint'te commit + push.
 
-**Görev takibi:** Stage A ✅ · Stage B ✅ · Stage C: Save/Load ✅ · Mesajlaşma ✅ · Çalış mini-oyunu ✅ · Başarım Faz 1 ✅ · Animasyonlu karne Faz 2 ✅ · Görevler scroll bugfix ✅ · Ayarlar ⬜ · Stage D ⬜.
+**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅ TAMAMLANDI** (Save/Load ✅ · Mesajlaşma ✅ · Çalış mini-oyunu ✅ · Başarım Faz 1 ✅ · Animasyonlu karne Faz 2 ✅ · Görevler scroll bugfix ✅ · Ayarlar ⏭️ atlandı) · **Stage D ⬜ başlanmadı** (sırada, kullanıcı kararı bekliyor).
