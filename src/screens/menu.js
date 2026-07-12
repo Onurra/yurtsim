@@ -109,6 +109,8 @@ return `<div style="background:var(--surface);border:0.5px solid ${C.bt};border-
 
 ${themeSectionHtml()}
 
+${achievementsSectionHtml()}
+
 <div style="background:#FFF7E0;border:1px solid #B89540;border-radius:8px;padding:14px;margin-bottom:14px;">
 <div style="font-size:11px;color:#5C4A1A;margin-bottom:8px;font-weight:700;">🧪 Test Araçları</div>
 <div style="font-size:10.5px;color:${C.ts};line-height:1.4;margin-bottom:10px;">Geliştirme/test için — dönem geçişlerini hızlıca dene</div>

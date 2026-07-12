@@ -1,6 +1,6 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-12 · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅, Mesajlaşma ✅, Kütüphane çalış mini-oyunu ✅ (Odaklanma; tarayıcıda light+dark doğrulandı, smoke 0 hata).** Sıradaki iş: **Achievement/rozet + animasyonlu karne** ya da **Ayarlar ekranı genişletme** (Stage C kalan maddeleri); sonrasında **Stage D — Capacitor paketleme**.
+> Son güncelleme: 2026-07-12 · Kaldığımız yer: **Stage C sürüyor — Save/Load ✅, Mesajlaşma ✅, Çalış mini-oyunu ✅, Başarım sistemi Faz 1 ✅ (kod+smoke, kullanıcı tarayıcı testi bekliyor).** Sıradaki iş: **Faz 2 — Dönem sonu animasyonlu karne** (Faz 1 test edilince); sonrasında Ayarlar genişletme / **Stage D — Capacitor**.
 
 ## ⚠️ ÖNEMLİ: Doğru kaynak sürüm
 Stage A ilk başta yerel `yurtsim (2).html` (2265 satır) üzerine yapılmıştı — ama bu
@@ -198,10 +198,28 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 
 ## 6) Sıradaki işler (madde madde)
 
-### SONRAKİ ADAY — Stage C kalan maddeleri (biriyle devam)
-- **Achievement/rozet sistemi + dönem sonu animasyonlu karne** (mevcut `yearStats`/rozetlerin üstüne).
-- **Ayarlar ekranını genişlet** (tema zaten var; ses opsiyonel, sıfırla, belki dil/zorluk).
-- Sonra **Stage D — Capacitor paketleme**.
+### 🔶 Başarım sistemi Faz 1 — KOD BİTTİ, ⚠️ kullanıcı tarayıcı testi bekliyor (`extras.js`)
+- İkiye bölündü (kullanıcı isteği): **Faz 1 = başarım sistemi** (bu), **Faz 2 = animasyonlu karne** (aşağıda).
+- `ACHIEVEMENTS` kataloğu (15 başarım) + `checkAchievements()` (render sarmalında çağrılır, extras.js).
+  `state.achievements` = {id→açılış günü}, save'e girer; `ensureExtState`'te `{}` ile doldurulur.
+- Açılınca: `pushNotif` + `showAchievementToast()` — üstten kayan altın çerçeveli koyu kart
+  (`#achToasts`, z70, `achIn` keyframe, 3.2sn sonra kaybolur, çoklu açılış üst üste yığılır).
+- Ayarlar modalında **"🏅 Başarımlar"** bölümü (`achievementsSectionHtml()`, tema bölümünden sonra):
+  2 sütunlu grid, açık=renkli emoji, kilitli=🔒 + "???", X/15 sayaç.
+- Flag'ler ilgili aksiyonlara kondu: `_achAttended` (attendCourse), `_achExam`/`_achAA` (doExam),
+  `_achFocusPerfect` (finishStudyGame acc≥0.999), `_achNight` (studyNight), `_achSick` (makeSick).
+  Diğerleri doğrudan state'ten okunur (money/fitnessDays/relationship/affinity/iddiaLevel/wardrobe/year/gano).
+- Doğrulama: smoke `achievements = {catalog:15, unlockedNight:true, unlockedRich:true, toast:true,
+  settingsSection:true}`; görüntü `shot-achievements.png` (toast + Ayarlar bölümü, okunur). 0 hata.
+- ⚠️ Kullanıcı tarayıcıda test edecek → sonra Faz 2.
+
+### SONRAKİ — Faz 2: Dönem sonu animasyonlu karne
+- `modalYearEndHtml` içinde CSS ile satır kademeli açılışı + rozet pop + GANO 0'dan sayaç (`animateYearEndCountup`).
+- Başarımları (`state.achievements`) yıl sonu karnesine entegre et (mevcut ad-hoc badge listesi yerine).
+- Keyframe'ler: `yeReveal`, `yePop` (henüz eklenmedi — Faz 2'de). `achIn` zaten eklendi.
+
+### SONRA — Ayarlar genişletme / Stage D
+- Ayarlar: ses opsiyonel, belki zorluk. Sonra **Stage D — Capacitor paketleme**.
 
 <details><summary>(Tamamlanan) İLK İŞ — Mesajlaşma ekranını TARAYICIDA test et</summary>
 1. `index.html`'i tarayıcıda aç (veya GitHub Pages), yeni oyun başlat.
@@ -221,4 +239,4 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
 - Her mantıklı checkpoint'te commit + push.
 
-**Görev takibi:** Stage A ✅ · Stage B ✅ · Stage C: Save/Load ✅ · Mesajlaşma ✅ · Çalış mini-oyunu ✅ · (sırada: rozet/karne + Ayarlar) · Stage D ⬜.
+**Görev takibi:** Stage A ✅ · Stage B ✅ · Stage C: Save/Load ✅ · Mesajlaşma ✅ · Çalış mini-oyunu ✅ · Başarım Faz 1 🔶 (kod bitti, kullanıcı testi bekliyor) · Animasyonlu karne Faz 2 ⬜ · Ayarlar ⬜ · Stage D ⬜.

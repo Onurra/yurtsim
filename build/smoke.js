@@ -130,6 +130,11 @@ async function main() {
   const study = await js("(function(){var c=state.courses[0];state.location='Kütüphane';startStudyGame(c.code);var ov=!!document.getElementById('studyGameOv');document.getElementById('studyGameOv')&&document.getElementById('studyGameOv').remove();var b0=c.bilgi||0;finishStudyGame(c,1);var perfect=c.bilgi-b0;var b1=c.bilgi;finishStudyGame(c,0);var poor=c.bilgi-b1;return JSON.stringify({overlay:ov,perfectGain:perfect,poorGain:poor,btn:typeof startStudyGame==='function'});})()");
   await js("closeModal()");
 
+  // Başarım sistemi (Faz 1) — katalog, flag ile açılma + toast + Ayarlar bölümü
+  const ach = await js("(function(){state.achievements={};state._achNight=true;state.money=25000;render();var unlockedNight=!!state.achievements.gece_kusu;var unlockedRich=!!state.achievements.zengin;var toast=!!document.getElementById('achToasts');openModal('settings');var sec=/🏅 Başarımlar/.test(document.getElementById('modalBody').innerHTML);var count=Object.keys(state.achievements).length;return JSON.stringify({catalog:ACHIEVEMENTS.length,unlockedNight:unlockedNight,unlockedRich:unlockedRich,toast:toast,settingsSection:sec,count:count});})()");
+  await wait(200); await shot('shot-achievements.png');
+  await js("state.money=5000; state._achNight=false; closeModal()");
+
   console.log('menu.display   =', menuVisible);
   console.log('menu.innerText =', JSON.stringify(menuText).slice(0, 100));
   console.log('char.display   =', charVisible);
@@ -141,6 +146,7 @@ async function main() {
   console.log('msg invite     =', msgInvite);
   console.log('msg send       =', msgSend);
   console.log('study game     =', study);
+  console.log('achievements   =', ach);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();

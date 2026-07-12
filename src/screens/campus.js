@@ -71,6 +71,7 @@ runFocusGame(c);
 }
 function finishStudyGame(c,acc){
 acc=Math.max(0,Math.min(1,acc));
+if(acc>=0.999)state._achFocusPerfect=true;
 const gain=Math.round(3+acc*7);
 c.bilgi=Math.min(100,(c.bilgi||0)+gain);
 if(/Kampüs|Kütüphane/i.test(state.location))state.location='Kütüphane';
@@ -291,6 +292,7 @@ const bilgiGain=c.type==='lab'?5:2;
 const targetC=c.parentCode?(state.courses.find(x=>x.code===c.parentCode)||c):c;
 targetC.bilgi=Math.min(100,(targetC.bilgi||0)+bilgiGain);
 state.location='Kampüs';
+state._achAttended=true;
 c.handledOnDay=state.dayOfMonth;c.handledType='attended';
 advance(dur);
 msg(c.type==='lab'?'🔬 '+c.code+' · '+targetC.code+' bilgi +'+bilgiGain+' ('+targetC.bilgi+'/100)':'📚 '+c.code+' · bilgi +'+bilgiGain+' ('+targetC.bilgi+'/100)');
@@ -373,6 +375,7 @@ const randF=Math.random()*12-2;
 const score=Math.max(0,Math.min(100,knowF+energyF+moodF+careF+randF));
 const note=scoreToNote(score);
 c[noteField]=note;
+state._achExam=true;if(note==='AA')state._achAA=true;
 state.mood=clamp(state.mood-(note==='FF'?15:note==='DD'||note==='DC'?5:0)+(note==='AA'?15:note==='BA'?10:note==='BB'?5:0));
 state.energy=clamp(state.energy-15);
 msg('📝 '+c.code+' '+(sem==='guz'?'güz':'bahar')+' '+type+': '+note+' ('+Math.round(score)+'/100)');

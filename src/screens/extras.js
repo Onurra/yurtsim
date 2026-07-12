@@ -18,6 +18,7 @@ if(!state.firedCalendar)state.firedCalendar={};
 if(state.theme===undefined)state.theme='light';
 if(state.chats===undefined)state.chats={};
 if(state.chatOpen===undefined)state.chatOpen=null;
+if(state.achievements===undefined)state.achievements={};
 if(!state.weather)rollWeather();
 }
 
@@ -60,6 +61,7 @@ function makeSick(sev){
 const severity=sev||((state.illnessRisk||0)>=70?3:(state.illnessRisk||0)>=55?2:1);
 const names={1:'Hafif soğuk algınlığı',2:'Gribe yakalandın',3:'Ağır hasta · ateşli grip'};
 state.sick={severity:severity,daysLeft:severity+1,name:names[severity]};
+state._achSick=true;
 state.energy=clamp(state.energy-10*severity);
 state.mood=clamp(state.mood-8*severity);
 pushNotif('health','🤒 '+names[severity]+' · dinlen ya da doktora git');
@@ -133,6 +135,7 @@ const atYurt=/yur[td]/i.test(state.location);const atSchool=/Kampüs|Kütüphane
 if(!atYurt&&!atSchool){msg('🏠 Önce yurda ya da 🎓 kampüse git');return}
 if(state.energy<20){msg('⚡ Çok yorgunsun, gece çalışamazsın · önce dinlen');return}
 const gain=12;
+state._achNight=true;
 c.bilgi=Math.min(100,(c.bilgi||0)+gain);
 state.energy=clamp(state.energy-35);
 state.mood=clamp(state.mood-20);
@@ -235,6 +238,61 @@ return `<div style="text-align:center;padding:20px 0 14px;background:linear-grad
 <button onclick="endGameNewGame()" style="width:100%;font-size:13px;padding:13px;background:#791F1F;color:white;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;">🆕 Yeni oyun başlat</button>`;
 }
 
+// --- Başarım / rozet sistemi (oyun boyunca kalıcı, save'e girer) ---
+const ACHIEVEMENTS=[
+{id:'ilk_ders',e:'📚',n:'İlk Ders',d:'İlk kez derse gittin',c:s=>s._achAttended},
+{id:'ilk_sinav',e:'📝',n:'Sınav Zamanı',d:'İlk sınavına girdin',c:s=>s._achExam},
+{id:'aa_notu',e:'🌟',n:'Tam Not',d:'Bir dersten AA aldın',c:s=>s._achAA},
+{id:'odak_usta',e:'🎯',n:'Odak Ustası',d:'Çalışırken 5/5 tam isabet yaptın',c:s=>s._achFocusPerfect},
+{id:'gece_kusu',e:'🌙',n:'Gece Kuşu',d:'Sabaha kadar çalıştın',c:s=>s._achNight},
+{id:'sporcu',e:'💪',n:'Sporcu',d:'10 gün spor yaptın',c:s=>(s.fitnessDays||0)>=10},
+{id:'zengin',e:'💰',n:'Zengin Öğrenci',d:'20.000₺ biriktirdin',c:s=>s.money>=20000},
+{id:'meteliksiz',e:'🪙',n:'Meteliksiz',d:'Cebinde 50₺ ve altına düştün',c:s=>s.money<=50},
+{id:'asik',e:'❤️',n:'Âşık',d:'İlişki puanın 70+ oldu',c:s=>!!s.girlfriend&&(s.relationship||0)>=70},
+{id:'sadik_dost',e:'🤝',n:'Sadık Dost',d:'Bir arkadaşının yakınlığı 95+ oldu',c:s=>Math.max(0,...(s.friends||[]).map(f=>f.affinity||0))>=95},
+{id:'kumarbaz',e:'🎰',n:'Kumarbaz',d:'İddaa seviyen 20+ oldu',c:s=>(s.iddiaLevel||0)>=20},
+{id:'fashion',e:'👔',n:'Fashion İkonu',d:'6 parça kıyafet topladın',c:s=>(s.wardrobe||[]).length>=6},
+{id:'hastalik',e:'🤒',n:'Yatağa Düştün',d:'İlk kez hastalandın',c:s=>s._achSick},
+{id:'sinif_atla',e:'🎓',n:'Sınıf Atladın',d:'Bir üst sınıfa geçtin',c:s=>(s.year||1)>=2},
+{id:'seref',e:'🏆',n:'Şeref Öğrencisi',d:'GANO 3.50 ve üzeri',c:s=>(s.gano||0)>=3.5}
+];
+function checkAchievements(){
+if(!state.achievements)state.achievements={};
+ACHIEVEMENTS.forEach(a=>{
+if(state.achievements[a.id])return;
+let ok=false;try{ok=!!a.c(state)}catch(e){}
+if(!ok)return;
+state.achievements[a.id]=state.dayOfMonth;
+pushNotif('academic','🏅 Başarım açıldı: '+a.e+' '+a.n);
+showAchievementToast(a);
+});
+}
+function showAchievementToast(a){
+const screen=document.querySelector('.phone-screen');if(!screen)return;
+let box=document.getElementById('achToasts');
+if(!box){box=document.createElement('div');box.id='achToasts';box.style.cssText='position:absolute;top:44px;left:0;right:0;z-index:70;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;padding:0 14px;';screen.appendChild(box)}
+const card=document.createElement('div');
+card.style.cssText='background:#1F1F1D;color:white;border-radius:12px;padding:9px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 18px rgba(0,0,0,.28);max-width:320px;width:100%;border:1px solid #C2A24A;animation:achIn .35s cubic-bezier(.2,1.1,.4,1) both;';
+card.innerHTML='<span style="font-size:22px;line-height:1;">'+a.e+'</span><div style="min-width:0;"><div style="font-size:9.5px;color:#C2A24A;font-weight:700;letter-spacing:.5px;">🏅 BAŞARIM AÇILDI</div><div style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+a.n+'</div></div>';
+box.appendChild(card);
+setTimeout(()=>{card.style.transition='opacity .4s,transform .4s';card.style.opacity='0';card.style.transform='translateY(-10px)';setTimeout(()=>{card.remove();if(box&&!box.children.length)box.remove()},420)},3200);
+}
+function achievementsSectionHtml(){
+if(!state.achievements)state.achievements={};
+const unlocked=ACHIEVEMENTS.filter(a=>state.achievements[a.id]).length;
+let h=`<div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:8px;padding:14px;margin-bottom:14px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:11px;color:${C.tp};font-weight:700;">🏅 Başarımlar</span><span style="font-size:11px;color:${C.ts};font-weight:600;">${unlocked}/${ACHIEVEMENTS.length}</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">`;
+ACHIEVEMENTS.forEach(a=>{
+const on=!!state.achievements[a.id];
+h+=`<div title="${a.d}" style="display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;background:${on?'#EEEDFE':'var(--bg3)'};border:0.5px solid ${on?'#6B61D9':C.bt};${on?'':'opacity:0.6;'}">
+<span style="font-size:18px;line-height:1;">${on?a.e:'🔒'}</span>
+<div style="min-width:0;"><div style="font-size:10.5px;font-weight:700;color:${on?'#3C3489':C.ts};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.n}</div><div style="font-size:9px;color:${C.ts};line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${on?a.d:'???'}</div></div>
+</div>`;
+});
+h+=`</div></div>`;
+return h;
+}
 // --- Yıl sonu karne / kazanma-kaybetme / çok yıl ---
 function yearStats(){
 recalculateGANO();
@@ -392,7 +450,7 @@ const u=unreadCount();
 if(nc){nc.textContent=u>0?String(u):'';nc.style.display=u>0?'inline-flex':'none'}
 }
 const _origRenderExt=render;
-render=function(){ensureExtState();if(state.gameOver&&state.activeModal!=='gameOver')state.activeModal='gameOver';_origRenderExt();updateExtrasUI()};
+render=function(){ensureExtState();if(state.gameOver&&state.activeModal!=='gameOver')state.activeModal='gameOver';_origRenderExt();checkAchievements();updateExtrasUI()};
 
 // Tema'yı olabildiğince erken uygula (splash beklemeden), sonra boot
 ensureExtState();applyTheme();
