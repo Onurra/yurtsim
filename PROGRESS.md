@@ -1,9 +1,91 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-12 · Kaldığımız yer: **Stage C TAMAMLANDI ✅** — Save/Load, Mesajlaşma,
-> Çalış mini-oyunu (Odaklanma), Başarım sistemi (Faz 1) ve Animasyonlu karne (Faz 2) bitti + push'landı;
-> Görevler paneli scroll bugfix'i de yapıldı. **Ayarlar ekranı genişletme ATLANDI** (kullanıcı kararı).
-> Sıradaki iş: **Stage D — Capacitor paketleme** — ⬜ HENÜZ BAŞLANMADI (kullanıcı karar verince başlanacak).
+> Son güncelleme: 2026-07-14 · Kaldığımız yer: **Stage D ÖNCESİ "OYUN ELDEN GEÇİRME" işi SÜRÜYOR** (kullanıcı
+> "önce oyunu elden geçir, hepsini yap" dedi; denge şiddeti = **Orta**). Buglar ✅ bitti, içerik ⏳ yarım,
+> denge ⏳ yarım, UX ⬜ başlanmadı. **Bir edit REDDEDİLDİ** (yeni rastgele olaylar bloğu) — aşağıda saklı,
+> kullanıcı kararı bekliyor. Ayrıntı: **"🔧 OYUN ELDEN GEÇİRME" bölümü (en aşağıda değil, hemen aşağıda)**.
+> Stage D (Capacitor) hâlâ SIRADA ama elden geçirme bitince.
+
+---
+
+## 🔧 OYUN ELDEN GEÇİRME (2026-07-14) — DEVAM EDİYOR
+
+Kullanıcı Stage D'den önce oyunu 4 boyutta elden geçirmek istedi: **denge, bug avı, içerik, UX** ("hepsini yap").
+4 paralel keşif ajanı raporladı; bulgular birleştirildi. Denge şiddeti kullanıcı seçimi = **Orta**.
+
+### ✅ BİTEN — Buglar (hepsi düzeltildi, smoke test 0 hata + `exam flow` testi eklendi)
+1. **KRİTİK — Sınav gece yarısı otomatik FF.** `checkExamsToday` (campus.js) artık okulda değilsen sınavı
+   erken FF yapmıyor (`atSchool` guard). Uyuyarak sınav gününe giren oyuncu artık "Sınava gir" butonuyla
+   girebiliyor; girmezse ertesi gün `failMissedExams` FF+kaçırıldı yapıyor. **smoke.js'e `exam flow` testi
+   eklendi** (asleepNoAutoFF / atSchoolGraded / missedFF → hepsi geçiyor).
+2. **Sevgili tatili günleri yutuyordu** (saat ilerliyor, dayOfMonth artmıyordu → kira/takvim desenkron).
+   `gfAction` trip kolu artık `processDayTransition()`'ı gün başına çağırıyor (life.js).
+3. **Kız HUK113 güz finali alınamadan FF oluyordu** (dönem gün 134'te bitiyor, final gün 135). Güz bitiş
+   eşiği **134 → 136** yapıldı (campus.js `checkSemesterEnd`). Erkek son final gün 133, etkilenmiyor.
+4. **Sevgili widget avatarında "undefined"** — date objelerinde `initial` yok; `${gf.initial}` → `${(gf.name||'?')[0]}` (life.js).
+5. **Akbil metni tutarsızlığı** — "-31.27 ₺" gösteriliyor, kod 31₺ kesiyor. Metin "-31 ₺" yapıldı (campus.js).
+6. **inviteTemplates cinsiyet bug'ı** — tek liste sadece erkek id'leri içeriyordu; kız oyununda affinity
+   ıskalanıyor + yanlış isim çıkıyordu. `inviteTemplatesErkek` + `inviteTemplatesKiz` + `getInviteTemplates()`
+   yapıldı (data.js), `maybeSpawnInvite` güncellendi. Yeni davetler de eklendi (erkek: Salih/Evren/Kerem-çalışma;
+   kız: Leyla/Sude/Nazlı/Eylül/Umay/Yıldız).
+
+### ✅ BİTEN — Refaktör (CLAUDE.md'nin uyardığı duplicate yok edildi)
+- **`processDayTransition(autoMissed)`** engine.js'e eklendi. Gün-geçiş bloğu ESKİDEN advance() ve doSleep()'te
+  KOPYALANMIŞTI (satır ~447/~1691 uyarısı) → artık tek kaynak. advance(), doSleep() ve gf-trip bunu çağırıyor.
+- **`ALLOWANCE=7000`** sabiti (harçlık, eski 10000). Denge değişikliği + tek kaynak (artık çift-edit yok).
+  ⚠️ CLAUDE.md'deki "gün-geçiş bloğu iki yerde kopya" notu ARTIK GEÇERSİZ — bitince CLAUDE.md güncellenecek.
+
+### ✅ BİTEN — İçerik (kısmen)
+- inviteTemplates cinsiyet fix + genişletme (yukarıda, bug #6).
+- **`acceptInvite`'a genel "risk/yakalanma" mekaniği eklendi** (campus.js): `caughtChance/caughtMood/
+  caughtAcademic/caughtMoney/caughtMsg` alanları. ⚠️ ŞU AN KULLANAN YOK — tek tüketicisi `kopya_teflif`
+  olayıydı, o da REDDEDİLEN blokta (aşağı bak). Zararsız dormant kod; blok eklenince aktif olur.
+
+### ❌ REDDEDİLDİ — Yeni rastgele olaylar bloğu (kullanıcı "no" dedi, KARAR BEKLİYOR)
+Aşağıdaki 8 olay `engine.js` `randomEvents` dizisine (toilet_paper'dan sonra) eklenecekti; kullanıcı bu edit'i
+reddetti. Muhtemelen gözden geçirmek/azaltmak istiyor. Karar verilince eklenecek. **Verbatim taslak:**
+
+```js
+{id:'sinav_stres',weight:3,cooldown:6,condition:()=>state.courses.some(c=>['guzVize','guzFinal','baharVize','baharFinal'].some(k=>{const d=c[k];if(!d)return false;const dl=daysUntilDate(d);return dl>=0&&dl<=3&&!c[k+'Note']})),fire:()=>{state.mood=clamp(state.mood-6);state.energy=clamp(state.energy-4);msg('😰 Sınav haftası stresi · kütüphaneler tıklım tıklım · mood -6')}},
+{id:'harc_yatir',weight:2,cooldown:40,condition:()=>state.money>=1200,fire:()=>{const h=800+Math.floor(Math.random()*400);state.money=Math.max(0,state.money-h);state.mood=clamp(state.mood-5);msg('🧾 Katkı payı/harç son gün · '+h+'₺ yatırdın · mood -5')}},
+{id:'edevlet',weight:2,cooldown:25,condition:()=>true,fire:()=>{state.mood=clamp(state.mood-3);msg('📄 Öğrenci belgesi lazım oldu, e-Devlet çöktü · 40 dk uğraştın · mood -3')}},
+{id:'hoca_muhabbet',weight:2,cooldown:10,condition:()=>/Kampüs|Kütüphane/i.test(state.location),fire:()=>{state.academic=clamp(state.academic+3);state.mood=clamp(state.mood+4);msg('👨‍🏫 Hocayla koridorda sohbet · "aferin, derse devam et" · başarı +3')}},
+{id:'kantin_muhabbet',weight:3,cooldown:5,condition:()=>true,fire:()=>{state.mood=clamp(state.mood+6);msg('☕ Kantinde çay muhabbeti · dünyayı çözdünüz · mood +6')}},
+{id:'bit_pazari',weight:1,cooldown:20,condition:()=>state.money>=200,fire:()=>{if(Math.random()<0.5){state.money-=150;state.academic=clamp(state.academic+2);state.mood=clamp(state.mood+6);msg('📚 Bit pazarında 2. el ders kitabı · 150₺ · kelepir · başarı +2')}else{state.money-=100;state.mood=clamp(state.mood+5);msg('🛒 Bit pazarından ikinci el mont · kelepir · mood +5')}}},
+{id:'metro_arizasi',weight:2,cooldown:8,condition:()=>true,fire:()=>{state.mood=clamp(state.mood-4);state.energy=clamp(state.energy-3);msg('🚇 M2 arızalandı, herkes perona yığıldı · 30 dk rötar · mood -4')}},
+{id:'kopya_teflif',weight:2,cooldown:15,condition:()=>!state.pendingInvite&&/Kampüs|Kütüphane/i.test(state.location)&&state.courses.some(c=>['guzVize','guzFinal','baharVize','baharFinal'].some(k=>{const d=c[k];if(!d)return false;const dl=daysUntilDate(d);return dl>=0&&dl<=2&&!c[k+'Note']})),fire:()=>{state.pendingInvite={from:'Sınıftan biri',initial:'?',color:'#7A4B11',text:'Sınavda kopya çekelim mi, kağıdı paylaşırız. Riskli ama...',label:'kopya (riskli)',cost:0,mood:-8,academic:5,mins:5,caughtChance:0.35,caughtMood:20,caughtAcademic:8,caughtMsg:'😱 Gözetmen kopyayı gördü! Sınav iptal + disiplin · başarı -8 · mood -20'};msg('😬 Kopya teklifi geldi · görevlere bak')}}
+```
+Ekleme yeri: `engine.js`, `{id:'toilet_paper',...}` satırının SONUNA `,` koyup bu 8 satır, sonra `];`.
+Not: `kopya_teflif` `acceptInvite`'taki caught mekaniğini kullanır (o kod zaten eklendi).
+
+### ⏳ KALAN — Denge (Orta; harçlık ✅ yapıldı, gerisi bekliyor)
+- ✅ Harçlık 10000→7000 (ALLOWANCE).
+- ⬜ Kira 1000→1500 (`state.rentDue`, state.js:10; ayrıca `rentCycle`/`payRent` extras.js kontrol et).
+- ⬜ İddia kumarını +EV olmaktan çıkar (ödeme 1.8→1.5 veya seviye tavanı; data.js `gamble` iddia + life.js).
+- ⬜ Sınav notu formülü: `randF=Math.random()*12-2` → `*12-6` (ort 0); bilgi katsayısı 0.65→0.75,
+  energy/mood 0.10→0.07 (campus.js `doExam`).
+- ⬜ Hijyen düşüşü 0.02→0.035/dk (engine.js `advance` stat decay).
+- (Sert seçenekler — geçme eşiği 1.0→1.5, min uyku, iş maaşları — Orta'da ATLANDI.)
+
+### ⬜ KALAN — İçerik (davet fix dışındakiler)
+- REDDEDİLEN rastgele olaylar (yukarıda, karar bekliyor).
+- Yeni mekânlar: ev partisi/nargile/konser/PS cafe (`data.js` `entertainment.outings`).
+- Yeni işler (`data.js` `jobs`/`jobsKiz` — özellikle kıza freelance dengi).
+- Yeni takvim günleri: 18 Mart, 23 Nisan, 1 Mayıs, vize haftası (`extras.js` `calendarEvents`).
+
+### ⬜ KALAN — UX / his (hiç başlanmadı) — ajan raporundan öncelik sırası
+1. **Toast'ı ekran ortasından ALTA taşı** (en yüksek etki) — `index.html` `#toast` `top:50%`→`bottom:96px`;
+   `engine.js` msg()'deki transform değerlerini güncelle. Şu an toast tıklanan içeriği kapatıyor.
+2. Stat çubuklarına `transition:width` + kritikte (≤20) kırmızı/pulse — `ui.js` bar render.
+3. Başarım toast'larını kuyruğa al (yıl sonu "siyah duvar" bitsin) — `extras.js` showAchievementToast.
+4. Kullanılmayan `screenFade`'i modallara uygula — `ui.js`/`styles.css:108`.
+5. Para değişiminde flash + kısa sayaç — `ui.js` `#money`.
+6. Modal geri oku alt-navigasyon bilsin (mesaj thread'i); locationPill affordance; rozetleri tıklanabilir yap.
+
+### Doğrulama komutu
+`node build/smoke.js` — 0 hata olmalı; `exam flow` + `msg invite` satırlarına bak.
+
+---
 
 ## ⚠️ ÖNEMLİ: Doğru kaynak sürüm
 Stage A ilk başta yerel `yurtsim (2).html` (2265 satır) üzerine yapılmıştı — ama bu

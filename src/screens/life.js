@@ -149,17 +149,18 @@ state.money-=item.cost;
 state.relationship=Math.min(100,state.relationship+item.rel);
 state.mood=clamp(state.mood+item.mood);
 if(category==='trip'){
-const skipMins=item.days*8*60;
-state.minute+=skipMins;
-while(state.minute>=60){state.minute-=60;state.hour++}
-while(state.hour>=24){state.hour-=24}
+// Tatil boyunca takvim gerçekten ilerlesin (eskiden saat ilerliyor ama dayOfMonth artmıyordu →
+// kira/takvim desenkron). Her gün için gün-geçiş mantığını çalıştır; saat aynı kalır.
+const autoMissed=[];
+for(let i=0;i<item.days;i++){processDayTransition(autoMissed)}
 state.energy=Math.min(100,state.energy+25);
 state.hygiene=Math.min(100,state.hygiene+10);
 state.hunger=Math.min(100,state.hunger+35);
-state.daysUntilRent=Math.max(0,state.daysUntilRent-item.days);
 state.relationshipDays+=item.days;
 state.location=item.name;
-msg(gf.name+' ile '+item.name+' harikaydı · ilişki +'+item.rel);
+let tripMsg=gf.name+' ile '+item.name+' harikaydı · ilişki +'+item.rel;
+if(autoMissed.length)tripMsg+=' · ⚠ '+autoMissed.length+' ders kaçtı';
+msg(tripMsg);
 }else if(category==='gift'){
 advance(30);
 msg(gf.name+'\'e '+item.name+' aldın · çok sevindi');
@@ -283,7 +284,7 @@ const gf=getGf();
 const relColor=state.relationship>=75?'#27500A':state.relationship>=50?'#3B6D11':state.relationship>=25?'#854F0B':'#791F1F';
 document.getElementById('gfWidgetBody').innerHTML=`
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-<div style="width:24px;height:24px;border-radius:50%;background:${gf.color};color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${gf.initial}</div>
+<div style="width:24px;height:24px;border-radius:50%;background:${gf.color};color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">${(gf.name||'?')[0]}</div>
 <div style="flex:1;min-width:0;">
 <div style="font-size:11px;font-weight:600;color:${C.tp};">${gf.name}</div>
 <div style="font-size:9px;color:${C.ts};">${state.relationshipDays} gündür birlikte</div>

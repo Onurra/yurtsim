@@ -151,6 +151,10 @@ async function main() {
   await js("setTheme('dark'); state._yeShown=false; render()"); await wait(750); await shot('shot-karne-dark.png');
   await js("setTheme('light'); state.money=5000; closeModal()");
 
+  // Sınav akışı (KRİTİK bug fix) — uyurken otomatik FF OLMAMALI; okuldayken not verilmeli;
+  // girilmezse ertesi gün failMissedExams FF+kaçırıldı yapmalı.
+  const examFlow = await js("(function(){var c=state.guzCourses[0];c.guzVizeNote=null;c.absent=0;c.bilgi=85;state.semester='guz';state.courses=state.guzCourses;state.energy=85;state.mood=85;state.hygiene=85;state.dayOfMonth=76;state.location=getYurtName();checkExamsToday();var asleep=c.guzVizeNote;c.guzVizeNote=null;state.location='Kampüs';checkExamsToday();var atSchool=c.guzVizeNote;var c2=state.guzCourses[1];c2.guzVizeNote=null;c2.absent=0;state.dayOfMonth=90;failMissedExams();var missedNote=c2.guzVizeNote,missedFlag=c2.guzVizeNoteMissed;return JSON.stringify({asleepNoAutoFF:asleep===null,atSchoolGraded:!!atSchool&&atSchool!=='FF',atSchoolNote:atSchool,missedFF:missedNote==='FF'&&missedFlag===true});})()");
+
   console.log('menu.display   =', menuVisible);
   console.log('menu.innerText =', JSON.stringify(menuText).slice(0, 100));
   console.log('char.display   =', charVisible);
@@ -166,6 +170,7 @@ async function main() {
   console.log('tasks scroll   =', tasksScroll);
   console.log('karne init     =', karneInit);
   console.log('karne done     =', karneDone);
+  console.log('exam flow      =', examFlow);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();

@@ -4,13 +4,23 @@ function maybeSpawnInvite(){
 if(state.pendingInvite||state.activeModal)return;
 if(state.hour<10||state.hour>23)return;
 if(Math.random()>0.35)return;
-const eligible=inviteTemplates.filter(i=>state.hour>=i.hours[0]&&state.hour<=i.hours[1]);
+const eligible=getInviteTemplates().filter(i=>state.hour>=i.hours[0]&&state.hour<=i.hours[1]);
 if(!eligible.length)return;
 state.pendingInvite=eligible[Math.floor(Math.random()*eligible.length)];
 }
 function acceptInvite(){
 const i=state.pendingInvite;if(!i)return;
 if(i.cost&&state.money<i.cost){msg('Param yetmedi.');return}
+// Riskli davetler (ör. kopya teklifi): yakalanma şansı → ödül yerine ceza.
+if(i.caughtChance&&Math.random()<i.caughtChance){
+state.pendingInvite=null;
+state.mood=clamp(state.mood-(i.caughtMood||20));
+if(i.caughtMoney)state.money=Math.max(0,state.money-i.caughtMoney);
+if(i.caughtAcademic)state.academic=clamp(state.academic-i.caughtAcademic);
+if(i.fid){const f=state.friends.find(x=>x.id===i.fid);if(f)f.affinity=Math.max(0,f.affinity-3)}
+msg(i.caughtMsg||'😱 Yakalandın!');
+advance(i.mins||5);render();return;
+}
 state.money-=(i.cost||0);
 if(i.mood)state.mood=clamp(state.mood+i.mood);
 if(i.energy)state.energy=clamp(state.energy+i.energy);
@@ -242,7 +252,7 @@ overlay.innerHTML=`
 <span style="color:#1D9E75;">${state.gender==='kız'?'Beşiktaş':'Ayazağa'}</span>
 </div>
 <div style="background:rgba(127,182,247,0.08);border:1px solid rgba(127,182,247,0.25);border-radius:5px;padding:5px 12px;color:#7FB6F7;font-size:10px;display:inline-flex;align-items:center;gap:6px;">
-<i class="ti ti-credit-card"></i> Akbil aktarma · -31.27 ₺
+<i class="ti ti-credit-card"></i> Akbil aktarma · -31 ₺
 </div>
 </div>
 <button id="metroSkipBtn" style="position:absolute;bottom:14px;right:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#ccc;padding:4px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:inherit;">atla →</button>
@@ -396,6 +406,12 @@ tc+=credits;tp+=g*credits;
 if(tc>0)state.gano=+(tp/tc).toFixed(2);
 }
 function checkExamsToday(){
+// Gün-geçişinde (gece yarısı) çağrılır. Oyuncu okulda DEĞİLSE sınavı erkenden FF'e çevirme —
+// aksi halde uyuyarak sınav gününe giren herkes tüm sınavları kaybediyordu (bug).
+// Okulda değilse sınav gün boyunca "Sınava gir" butonuyla verilebilir; verilmezse ertesi gün
+// failMissedExams FF+kaçırıldı yapar. Okuldaysan (ör. gece kütüphanede çalıştıysan) otomatik girilir.
+const atSchool=/Kampüs|Kütüphane/i.test(state.location);
+if(!atSchool)return;
 state.courses.forEach(c=>{
 ['guz','bahar'].forEach(sem=>{
 const vD=c[sem+'Vize'];const fD=c[sem+'Final'];
@@ -405,7 +421,7 @@ if(fD&&matchesDate(fD)&&!c[sem+'FinalNote']){doExam(c,sem,'final');recalculateGA
 });
 }
 function checkSemesterEnd(){
-if(state.semester==='guz'&&!state.guzEnded&&state.dayOfMonth>=134){
+if(state.semester==='guz'&&!state.guzEnded&&state.dayOfMonth>=136){
 state.guzEnded=true;
 state.activeModal='semesterSummary';
 return true;

@@ -76,12 +76,26 @@ const loanOptions=[
 {id:'kerem',name:"Kerem'den ödünç",note:'Kerem affinity -10',amount:800,usedFlag:'keremLoanUsed',friendAff:{kerem:-10}},
 {id:'bank',name:'Banka kredisi',note:'Geri ödeme 3600₺',amount:3000,debt:3600}
 ];
-const inviteTemplates=[
+// Davet şablonları cinsiyete göre (BUG FIX: eskiden tek liste sadece erkek id'leri içeriyordu →
+// kız oyununda acceptInvite affinity artışını ıskalıyor ve yanlış isim gösteriyordu).
+const inviteTemplatesErkek=[
 {from:'Mert',fid:'mert',initial:'M',color:'#534AB7',text:"FIFA'ya gel mi",label:'2 saat',cost:0,mood:20,energy:-10,mins:120,aff:5,hours:[15,23]},
 {from:'Emre',fid:'emre',initial:'E',color:'#0F6E56',text:'halısahaya gelir misin',label:'2 saat',cost:200,mood:25,energy:-25,hygiene:-15,mins:120,aff:5,hours:[16,22]},
 {from:'Kerem',fid:'kerem',initial:'K',color:'#BA7517',text:'müsait misin',label:'30 dk',cost:0,mood:15,mins:30,aff:5,hours:[10,23]},
-{from:'Selin',fid:'selin',initial:'S',color:'#3B6D11',text:'ödevi karşılaştıralım',label:'1 saat',cost:0,mood:-3,academic:3,mins:60,aff:3,hours:[10,20]}
+{from:'Selin',fid:'selin',initial:'S',color:'#3B6D11',text:'ödevi karşılaştıralım',label:'1 saat',cost:0,mood:-3,academic:3,mins:60,aff:3,hours:[10,20]},
+{from:'Salih',fid:'salih',initial:'S',color:'#527E32',text:'maça çıkalım mı, kadro eksik',label:'halısaha',cost:200,mood:24,energy:-28,hygiene:-15,mins:120,aff:6,hours:[16,21]},
+{from:'Evren',fid:'evren',initial:'E',color:'#1B3A5C',text:'maç var akşam, çayı koydum gel',label:'maç izle',cost:0,mood:16,energy:-5,mins:120,aff:5,hours:[19,23]},
+{from:'Kerem',fid:'kerem',initial:'K',color:'#BA7517',text:'kafede ders çalışalım mı',label:'çalışma',cost:40,mood:-2,academic:4,energy:-8,mins:90,aff:4,hours:[10,18]}
 ];
+const inviteTemplatesKiz=[
+{from:'Leyla',fid:'leyla',initial:'L',color:'#C9333B',text:'kafede piyasa yapalım mı',label:'kafe',cost:250,mood:22,energy:-8,mins:90,aff:6,hours:[12,20]},
+{from:'Sude',fid:'sude',initial:'S',color:'#4A6FA5',text:'dizi maratonu bu akşam?',label:'dizi',cost:0,mood:18,energy:-5,mins:120,aff:6,hours:[19,23]},
+{from:'Nazlı',fid:'nazli',initial:'N',color:'#6B61D9',text:'kütüphanede çalışalım mı',label:'çalışma',cost:0,mood:-2,academic:4,energy:-8,mins:90,aff:4,hours:[10,18]},
+{from:'Eylül',fid:'eylul',initial:'E',color:'#1D9E75',text:'sabah pilatese gelsene',label:'spor',cost:150,mood:16,energy:-20,hygiene:-12,mins:90,aff:5,hours:[8,12]},
+{from:'Umay',fid:'umay',initial:'U',color:'#5C7A8C',text:'sergiye gidelim mi bugün',label:'sergi',cost:100,mood:20,energy:-6,mins:120,aff:5,hours:[11,18]},
+{from:'Yıldız',fid:'yildiz',initial:'Y',color:'#D4A656',text:'brunch var, gelmiyor musun',label:'brunch',cost:450,mood:24,energy:-5,mins:120,aff:5,hours:[10,15]}
+];
+function getInviteTemplates(){return state.gender==='kız'?inviteTemplatesKiz:inviteTemplatesErkek}
 const carePlaces=[
 {id:'shower',name:'Duş al',note:'Yurtta · sıcak su',price:0,hygiene:25,mood:2,mins:20,gate:()=>/yur[td]/i.test(state.location),gateText:'Yurtta olman gerek'},
 {id:'shave',name:'Kendin tıraş ol',note:'Odadan, jilet ile',price:0,hygiene:8,mood:3,mins:10,gate:()=>/yur[td]/i.test(state.location),gateText:'Yurtta olman gerek'},

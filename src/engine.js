@@ -41,13 +41,20 @@ break;
 }
 }
 }
+const ALLOWANCE=7000; // babadan harçlık (denge: eski 10000 → 7000)
+// Gün-geçiş bloğu. ESKİDEN advance() ve doSleep() içinde KOPYALANMIŞTI (CLAUDE.md uyarısı);
+// artık tek kaynak burada. Çağıran taraf state.hour-=24'ü kendi yapar; bu fn takvimi bir gün ilerletir.
+function processDayTransition(autoMissed){
+state.courses.forEach(c=>{if(c.handledOnDay===state.dayOfMonth)return;const s=c.schedule.find(s=>s.day===state.dayName);if(!s)return;if(c.preSigned){c.preSigned=false;c.handledOnDay=state.dayOfMonth;c.handledType='attended';return}if(c.absent<c.max)c.absent++;c.handledOnDay=state.dayOfMonth;c.handledType='missed';if(autoMissed)autoMissed.push(c)});
+state.dayOfMonth++;state.dayName=nextDay(state.dayName);state.daysUntilRent=Math.max(0,state.daysUntilRent-1);state.daysSinceHaircut=(state.daysSinceHaircut||0)+1;state.daysSinceLaundry=(state.daysSinceLaundry||0)+1;if(state.daysSinceHaircut>20)state.mood=clamp(state.mood-1);if(state.daysSinceLaundry>7)state.mood=clamp(state.mood-1);if(state.toiletPaperPending){state.toiletPaperDays=(state.toiletPaperDays||0)+1;state.toiletPaperSnoozed=false;if(state.toiletPaperDays>=2){state.mood=clamp(state.mood-3);const evren=state.friends.find(f=>f.id==='evren');if(evren)evren.affinity=Math.max(0,evren.affinity-1);const grumbles=['🧻 Evren: "abi kağıt bitti ya, ne yapacağız" · mood -3','🧻 Oda arkadaşların: "sabun da yok artık" · mood -3','🧻 Evren mırın kırın ediyor · sıra sendeydi · mood -3','🧻 Evren: "ben mi alayım hep" · mood -3','🧻 Banyoda sabun yok, herkes sinirli · mood -3'];msg(grumbles[Math.floor(Math.random()*grumbles.length)])}}state.dates.forEach(d=>d.msgsToday=0);if(state.abonman){state.abonmanDays--;if(state.abonmanDays<=0){state.abonman=false;state.abonmanTrips=0;state.abonmanDays=0;msg("🚇 Abonmanın süresi doldu (30 gün geçti)")}}checkExamsToday();failMissedExams();checkSemesterEnd();while(state.dayOfMonth>=state.nextAllowanceDay){state.money+=ALLOWANCE;state.mood=clamp(state.mood+8);msg("💸 Babadan harçlık geldi · +"+ALLOWANCE.toLocaleString('tr-TR')+"₺ ("+state.dayOfMonth+". günde)");state.nextAllowanceDay+=30}onNewDay();
+}
 function advance(mins){
 const autoMissed=[];
 state.minute+=mins;
 while(state.minute>=60){state.minute-=60;state.hour++}
 while(state.hour>=24){
-state.courses.forEach(c=>{if(c.handledOnDay===state.dayOfMonth)return;const s=c.schedule.find(s=>s.day===state.dayName);if(!s)return;if(c.preSigned){c.preSigned=false;c.handledOnDay=state.dayOfMonth;c.handledType='attended';return}if(c.absent<c.max)c.absent++;c.handledOnDay=state.dayOfMonth;c.handledType='missed';autoMissed.push(c)});
-state.hour-=24;state.dayOfMonth++;state.dayName=nextDay(state.dayName);state.daysUntilRent=Math.max(0,state.daysUntilRent-1);state.daysSinceHaircut=(state.daysSinceHaircut||0)+1;state.daysSinceLaundry=(state.daysSinceLaundry||0)+1;if(state.daysSinceHaircut>20)state.mood=clamp(state.mood-1);if(state.daysSinceLaundry>7)state.mood=clamp(state.mood-1);if(state.toiletPaperPending){state.toiletPaperDays=(state.toiletPaperDays||0)+1;state.toiletPaperSnoozed=false;if(state.toiletPaperDays>=2){state.mood=clamp(state.mood-3);const evren=state.friends.find(f=>f.id==='evren');if(evren)evren.affinity=Math.max(0,evren.affinity-1);const grumbles=['🧻 Evren: "abi kağıt bitti ya, ne yapacağız" · mood -3','🧻 Oda arkadaşların: "sabun da yok artık" · mood -3','🧻 Evren mırın kırın ediyor · sıra sendeydi · mood -3','🧻 Evren: "ben mi alayım hep" · mood -3','🧻 Banyoda sabun yok, herkes sinirli · mood -3'];msg(grumbles[Math.floor(Math.random()*grumbles.length)])}}state.dates.forEach(d=>d.msgsToday=0);if(state.abonman){state.abonmanDays--;if(state.abonmanDays<=0){state.abonman=false;state.abonmanTrips=0;state.abonmanDays=0;msg("🚇 Abonmanın süresi doldu (30 gün geçti)")}}checkExamsToday();failMissedExams();checkSemesterEnd();while(state.dayOfMonth>=state.nextAllowanceDay){state.money+=10000;state.mood=clamp(state.mood+8);msg("💸 Babadan harçlık geldi · +10.000₺ ("+state.dayOfMonth+". günde)");state.nextAllowanceDay+=30}onNewDay();
+state.hour-=24;
+processDayTransition(autoMissed);
 }
 state.courses.forEach(c=>{if(c.handledOnDay===state.dayOfMonth)return;const s=c.schedule.find(s=>s.day===state.dayName);if(!s)return;const endMins=s.end*60;const curMins=state.hour*60+state.minute;if(curMins<endMins)return;if(c.preSigned){c.preSigned=false;c.handledOnDay=state.dayOfMonth;c.handledType='attended';return}if(c.absent<c.max)c.absent++;c.handledOnDay=state.dayOfMonth;c.handledType='missed';autoMissed.push(c)});
 state.energy=clamp(state.energy-mins*0.05);
