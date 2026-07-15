@@ -1,10 +1,16 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-16 · Kaldığımız yer: **STAGE D (Capacitor) BAŞLADI — iskele + deps + cap init ✅ yapıldı;
-> `npx cap add android/ios` (native projeler) KULLANICIDA (Android Studio/Xcode gerektirir)**.
+> Son güncelleme: 2026-07-16 · ⏸️ **BUGÜNLÜK DURDUK.** Kaldığımız yer: **STAGE D (Capacitor) BAŞLADI — iskele
+> + deps + cap init ✅ yapıldı; `npx cap add android/ios` (native projeler) KULLANICIDA (Android Studio/Xcode gerektirir)**.
 > Elden geçirme ✅ (bug/refaktör/içerik/denge/UX-ilk3). Stage D detayı: aşağıda "🚀 STAGE D" bölümü.
 > appId=`com.onurra.yurtsim`, appName="Yurt Simülatör", webDir=`www` (build/www.js montajı). Capacitor 8.4.2.
-> Sıradaki iş: kullanıcı `npx cap add android` çalıştırıp cihazda dener; sonra offline ikon fontu + splash cilası.
+>
+> **▶ Yarın devam noktası:** (1) kullanıcı `npx cap add android` → cihazda/emülatörde tam ekran+safe-area'yı
+> görsün; (2) sonra kod tarafı takip işleri: offline ikon fontu → splash/status-bar eklentileri. Ayrıntı: "🚀 STAGE D".
+>
+> **Oluşan dosyalar (Stage D):** `package.json`, `package-lock.json`, `capacitor.config.ts`, `build/www.js`,
+> `assets/logo.svg` + değişenler: `index.html` (viewport/meta + `.app-frame`/`.app-bezel`), `src/styles.css`
+> (mobil media query), `README.md`, `.gitignore` (`www/`). node_modules/ ve www/ gitignore'da (üretilen).
 
 ---
 
