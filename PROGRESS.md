@@ -78,7 +78,10 @@ Not: `kopya_teflif` `acceptInvite`'taki caught mekaniğini kullanır (o kod zate
    `transform` `translate(-50%,-50%)`→`translateX(-50%)`; `engine.js` msg() göster/gizle transform'ları
    güncellendi (alttan yukarı kayarak girer, aşağı kayarak çıkar). Artık tıklanan içeriği kapatmıyor.
    (Ayrıca: `personal.js` cüzdan modalındaki hardcoded "10.000₺" harçlık → `${fmt(ALLOWANCE)}₺` = 7.000, tutarsızlık giderildi.)
-2. ⬜ Stat çubuklarına `transition:width` + kritikte (≤20) kırmızı/pulse — `ui.js` bar render.
+2. ✅ **Stat çubukları animasyonlu + kritik uyarı** — `ui.js` bar render "bir kez kur, sonra yamala" yapısına
+   çevrildi (fill div stabil id'li → `transition:width 0.45s` gerçekten animasyon yapar; eski wholesale
+   innerHTML'de olmuyordu). Kritikte (val≤20) `.barCrit` class + kırmızı (#E5484D) + `barPulse` yanıp sönme
+   (`styles.css`). smoke: `bars ux={hasTransition,critClass,critColor,normalNotCrit,clearsWhenRecovered,widthTracks}` hepsi ✅.
 3. Başarım toast'larını kuyruğa al (yıl sonu "siyah duvar" bitsin) — `extras.js` showAchievementToast.
 4. Kullanılmayan `screenFade`'i modallara uygula — `ui.js`/`styles.css:108`.
 5. Para değişiminde flash + kısa sayaç — `ui.js` `#money`.

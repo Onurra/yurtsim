@@ -155,6 +155,10 @@ async function main() {
   // girilmezse ertesi gün failMissedExams FF+kaçırıldı yapmalı.
   const examFlow = await js("(function(){var c=state.guzCourses[0];c.guzVizeNote=null;c.absent=0;c.bilgi=85;state.semester='guz';state.courses=state.guzCourses;state.energy=85;state.mood=85;state.hygiene=85;state.dayOfMonth=76;state.location=getYurtName();checkExamsToday();var asleep=c.guzVizeNote;c.guzVizeNote=null;state.location='Kampüs';checkExamsToday();var atSchool=c.guzVizeNote;var c2=state.guzCourses[1];c2.guzVizeNote=null;c2.absent=0;state.dayOfMonth=90;failMissedExams();var missedNote=c2.guzVizeNote,missedFlag=c2.guzVizeNoteMissed;return JSON.stringify({asleepNoAutoFF:asleep===null,atSchoolGraded:!!atSchool&&atSchool!=='FF',atSchoolNote:atSchool,missedFF:missedNote==='FF'&&missedFlag===true});})()");
 
+  // Stat çubukları — transition:width var mı, kritikte (≤20) barCrit+kırmızı, düzelince temizlenir, genişlik takip eder.
+  const barsUx = await js("(function(){state.energy=15;state.hygiene=80;render();var f0=document.getElementById('barFill0');var f1=document.getElementById('barFill1');var hasTrans=/width/.test(f0.style.transition);var crit=f0.classList.contains('barCrit');var normalNotCrit=!f1.classList.contains('barCrit');var col=f0.style.background;state.energy=90;render();var f0b=document.getElementById('barFill0');var clears=!f0b.classList.contains('barCrit');var widthTracks=f0b.style.width==='90%';return JSON.stringify({hasTransition:hasTrans,critClass:crit,critColor:col,normalNotCrit:normalNotCrit,clearsWhenRecovered:clears,widthTracks:widthTracks});})()");
+  await js("state.energy=85;state.hygiene=85;render()");
+
   console.log('menu.display   =', menuVisible);
   console.log('menu.innerText =', JSON.stringify(menuText).slice(0, 100));
   console.log('char.display   =', charVisible);
@@ -171,6 +175,7 @@ async function main() {
   console.log('karne init     =', karneInit);
   console.log('karne done     =', karneDone);
   console.log('exam flow      =', examFlow);
+  console.log('bars ux        =', barsUx);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();

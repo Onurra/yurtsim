@@ -44,7 +44,17 @@ const bars=[
 {label:'Tokluk',val:state.hunger,color:'#BA7517',emoji:'🍖'},
 {label:'Moral',val:state.mood,color:'#D4537E',emoji:'😊'}
 ];
-document.getElementById('bars').innerHTML=bars.map(b=>`<div><div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:${C.ts};margin-bottom:4px;"><span style="display:flex;align-items:center;gap:4px;"><span style="font-size:12px;">${b.emoji}</span> ${b.label}</span><span style="font-weight:600;color:${C.tp};">${b.val}%</span></div><div style="height:6px;background:${C.bg3};border-radius:3px;overflow:hidden;"><div style="height:100%;width:${b.val}%;background:${b.color};"></div></div></div>`).join('');
+const barsEl=document.getElementById('bars');
+if(!barsEl._built){
+barsEl.innerHTML=bars.map((b,i)=>`<div><div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:${C.ts};margin-bottom:4px;"><span style="display:flex;align-items:center;gap:4px;"><span style="font-size:12px;">${b.emoji}</span> ${b.label}</span><span id="barVal${i}" style="font-weight:600;">${b.val}%</span></div><div style="height:6px;background:${C.bg3};border-radius:3px;overflow:hidden;"><div id="barFill${i}" style="height:100%;width:${b.val}%;background:${b.color};transition:width 0.45s cubic-bezier(0.16,1,0.3,1),background 0.3s ease;"></div></div></div>`).join('');
+barsEl._built=true;
+}
+bars.forEach((b,i)=>{
+const crit=b.val<=20;
+const fill=document.getElementById('barFill'+i);const valEl=document.getElementById('barVal'+i);
+if(fill){fill.style.width=b.val+'%';fill.style.background=crit?'#E5484D':b.color;fill.classList.toggle('barCrit',crit)}
+if(valEl){valEl.textContent=b.val+'%';valEl.style.color=crit?'#E5484D':C.tp}
+});
 renderModal();
 }
 document.getElementById('modalCloseBtn').onclick=closeModal;
