@@ -126,7 +126,7 @@ games:[
 gamble:[
 {id:'sweet',name:'Şeker oyunu',note:'Slot · ev kazanır',winRate:0.28,payMin:1.5,payMax:3.0,mins:5,emoji:'🍭'},
 {id:'bj',name:'Blackjack',note:'21 karşı krupiye',winRate:0.33,payMin:2.0,payMax:2.0,mins:10,emoji:'♠️'},
-{id:'iddia',name:'İddia',note:'Maç tahmini · seviye var',winRate:0.45,payMin:1.8,payMax:1.8,mins:15,levels:true,emoji:'⚽'}
+{id:'iddia',name:'İddia',note:'Maç tahmini · seviye var',winRate:0.45,payMin:1.5,payMax:1.5,mins:15,levels:true,emoji:'⚽'}
 ]
 };
 const gfDates=[

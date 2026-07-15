@@ -377,11 +377,11 @@ const noteField=sem+(type==='vize'?'VizeNote':'FinalNote');
 if(c.absent>=c.max){c[noteField]='FF';msg('📝 '+c.code+' '+type+': FF (devamsızlık dolu)');return{c,type,note:'FF',reason:'devamsızlık'}}
 if(!atSchool){c[noteField]='FF';msg('📝 '+c.code+' '+type+': FF (sınava gitmedin)');return{c,type,note:'FF',reason:'gitmedin'}}
 const bilgi=c.bilgi||0;
-const knowF=bilgi*0.65;
-const energyF=state.energy*0.10;
-const moodF=state.mood*0.10;
+const knowF=bilgi*0.75;
+const energyF=state.energy*0.07;
+const moodF=state.mood*0.07;
 const careF=(state.hygiene>50?3:0)+(state.daysSinceHaircut<25?3:0);
-const randF=Math.random()*12-2;
+const randF=Math.random()*12-6;
 const score=Math.max(0,Math.min(100,knowF+energyF+moodF+careF+randF));
 const note=scoreToNote(score);
 c[noteField]=note;

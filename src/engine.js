@@ -67,7 +67,7 @@ processDayTransition(autoMissed);
 state.courses.forEach(c=>{if(c.handledOnDay===state.dayOfMonth)return;const s=c.schedule.find(s=>s.day===state.dayName);if(!s)return;const endMins=s.end*60;const curMins=state.hour*60+state.minute;if(curMins<endMins)return;if(c.preSigned){c.preSigned=false;c.handledOnDay=state.dayOfMonth;c.handledType='attended';return}if(c.absent<c.max)c.absent++;c.handledOnDay=state.dayOfMonth;c.handledType='missed';autoMissed.push(c)});
 state.energy=clamp(state.energy-mins*0.05);
 state.hunger=clamp(state.hunger-mins*0.10);
-state.hygiene=clamp(state.hygiene-mins*0.02);
+state.hygiene=clamp(state.hygiene-mins*0.035);
 const moodBefore=state.mood;
 state.mood=clamp(state.mood-mins*0.06);
 if(state.hunger<25)state.mood=clamp(state.mood-mins*0.03);

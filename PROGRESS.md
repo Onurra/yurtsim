@@ -59,13 +59,12 @@ Aşağıdaki 8 olay `engine.js` `randomEvents` dizisine (toilet_paper'dan sonra)
 Ekleme yeri: `engine.js`, `{id:'toilet_paper',...}` satırının SONUNA `,` koyup bu 8 satır, sonra `];`.
 Not: `kopya_teflif` `acceptInvite`'taki caught mekaniğini kullanır (o kod zaten eklendi).
 
-### ⏳ KALAN — Denge (Orta; harçlık ✅ yapıldı, gerisi bekliyor)
+### ✅ BİTEN — Denge (Orta; hepsi yapıldı 2026-07-15)
 - ✅ Harçlık 10000→7000 (ALLOWANCE).
-- ⬜ Kira 1000→1500 (`state.rentDue`, state.js:10; ayrıca `rentCycle`/`payRent` extras.js kontrol et).
-- ⬜ İddia kumarını +EV olmaktan çıkar (ödeme 1.8→1.5 veya seviye tavanı; data.js `gamble` iddia + life.js).
-- ⬜ Sınav notu formülü: `randF=Math.random()*12-2` → `*12-6` (ort 0); bilgi katsayısı 0.65→0.75,
-  energy/mood 0.10→0.07 (campus.js `doExam`).
-- ⬜ Hijyen düşüşü 0.02→0.035/dk (engine.js `advance` stat decay).
+- ✅ Kira 1000→1500 (`state.rentDue`, state.js:10; `rentCycle`/`payRent` state.rentDue'yu okur, tek kaynak yeterli).
+- ✅ İddia +EV değil artık: ödeme 1.8→1.5 (data.js). Seviye tavanı 0.60 × 1.5 = 0.90 EV (<1) → hep -EV.
+- ✅ Sınav notu formülü: `randF *12-2`→`*12-6` (ort 0); bilgi 0.65→0.75, energy/mood 0.10→0.07 (campus.js `doExam`).
+- ✅ Hijyen düşüşü 0.02→0.035/dk (engine.js `advance` stat decay).
 - (Sert seçenekler — geçme eşiği 1.0→1.5, min uyku, iş maaşları — Orta'da ATLANDI.)
 
 ### ⬜ KALAN — İçerik (davet fix dışındakiler)
