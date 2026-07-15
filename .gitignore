@@ -10,6 +10,8 @@ Thumbs.db
 # Bağımlılıklar (ileride Capacitor eklenirse)
 node_modules/
 dist/
+# Capacitor webDir (build/www.js ile üretilir — kaynak değil)
+www/
 .gradle/
 *.iml
 

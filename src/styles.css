@@ -109,3 +109,19 @@ button:active{transform:scale(0.97)}
 
 /* Screen-content fade — added on each render for a subtle refresh feel. */
 @keyframes screenFade{from{opacity:0.4;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Capacitor / mobil cihaz: telefon çerçevesini kaldır, tam ekran yap ──
+   Web önizlemede (geniş ekran) bezel'li 390x830 telefon görünür; cihazda / dar
+   ekranda uygulama tüm viewport'u kaplar. Safe-area (çentik) env() ile korunur. */
+@media (max-width:480px){
+  body{padding:0!important;background:#1F1F1D!important}
+  .app-frame{padding:0!important;min-height:100vh;min-height:100dvh;align-items:stretch!important;background:#1F1F1D!important}
+  .app-bezel{padding:0!important;border-radius:0!important;box-shadow:none!important;width:100%}
+  .phone-screen{
+    width:100vw!important;
+    height:100vh!important;height:100dvh!important;
+    border-radius:0!important;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+}

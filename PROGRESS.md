@@ -1,11 +1,10 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-15 · Kaldığımız yer: **"OYUN ELDEN GEÇİRME" TAMAMLANDI ✅ · SIRADA STAGE D (Capacitor)**.
-> Buglar ✅ · Refaktör ✅ · İçerik ✅ (8 rastgele olay) · Denge ✅ (Orta: harçlık/kira/iddia/sınav formülü/hijyen) ·
-> UX ✅ (toast alta + harçlık metni fix, stat çubukları animasyon+kritik, başarım toast kuyruğu).
-> UX'in kalan maddeleri (modal fade, para flash, navigasyon iyileştirmeleri) **kullanıcı kararıyla ATLANDI** (gerek yok).
-> **Kullanıcı Stage D öncesi genel test yapacak.** Oyunu açma: `index.html`'i doğrudan tarayıcıda aç (file://
-> çalışıyor, sunucu şart değil) — bkz. aşağıda "Oyunu çalıştırma". Sonra Stage D'ye geçilecek.
+> Son güncelleme: 2026-07-16 · Kaldığımız yer: **STAGE D (Capacitor) BAŞLADI — iskele + deps + cap init ✅ yapıldı;
+> `npx cap add android/ios` (native projeler) KULLANICIDA (Android Studio/Xcode gerektirir)**.
+> Elden geçirme ✅ (bug/refaktör/içerik/denge/UX-ilk3). Stage D detayı: aşağıda "🚀 STAGE D" bölümü.
+> appId=`com.onurra.yurtsim`, appName="Yurt Simülatör", webDir=`www` (build/www.js montajı). Capacitor 8.4.2.
+> Sıradaki iş: kullanıcı `npx cap add android` çalıştırıp cihazda dener; sonra offline ikon fontu + splash cilası.
 
 ---
 
@@ -128,7 +127,7 @@ branch'inde (base = `origin/claude/laughing-pascal-16yzz7`). Eski (yanlış) ref
 - **B. Görsel cila + design token + dark mode** ✅ Tamamlandı
 - **C. Yeni özellikler** ✅ Tamamlandı (Save/Load, Mesajlaşma, Çalış mini-oyunu, Başarım+Karne; Ayarlar genişletme atlandı)
 - **Elden geçirme (D öncesi)** ✅ Tamamlandı (bug/refaktör/içerik/denge/UX — bkz. en üstteki "🔧 OYUN ELDEN GEÇİRME")
-- **D. Capacitor paketleme** ⬜ **SIRADA** (kullanıcı önce genel test yapacak, sonra başlanacak)
+- **D. Capacitor paketleme** ⏳ **BAŞLADI** (iskele+deps+cap init ✅; `cap add` native kısmı kullanıcıda — bkz. "🚀 STAGE D")
 
 ---
 
@@ -337,11 +336,41 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - Stage C'nin bu son maddesi yapılmadı. Tema seçici zaten var (Stage B). Ses/zorluk gibi eklemeler
   şimdilik gerekmiyor; istenirse ileride ayrı bir iş olarak açılabilir.
 
-### ⬜ SIRADA — Stage D: Capacitor paketleme (HENÜZ BAŞLANMADI)
-- Kullanıcı karar verince başlanacak. Planlanan adımlar (Bölüm 3'teki Stage D notlarıyla aynı):
-  `capacitor.config` + `package.json` scriptleri; telefon çerçevesi sadece web önizlemede, cihazda
-  tam ekran (responsive); safe-area (notch) desteği; placeholder app icon + splash; README'ye
-  `npx cap add ios/android` + build adımları.
+## 🚀 STAGE D — Capacitor paketleme (2026-07-16, DEVAM EDİYOR)
+
+Kullanıcı seçimleri: appId=`com.onurra.yurtsim`, appName="Yurt Simülatör", platform=Android+iOS,
+kapsam="iskele + npm install + cap init". Capacitor **8.4.2**.
+
+### ✅ BİTEN (bu turda)
+- **`package.json`** — scriptler: `build:www`, `smoke`, `sync` (build:www+cap sync), `copy`, `assets`
+  (capacitor-assets), `open:android`, `open:ios`. Deps: `@capacitor/core`+`cli`+`android`+`ios`,
+  devDep `@capacitor/assets`. `npm install` yapıldı (node_modules gitignore'da).
+- **`build/www.js`** — webDir montaj scripti: `www/`'yi temizleyip `index.html`+`src/`'yi kopyalar
+  (bundler yok; `yurtsim (2).html`/build/ hariç). `www/` **gitignore'da** (üretilen, kaynak değil).
+- **`capacitor.config.ts`** — `npx cap init` ile üretildi: appId/appName/webDir=`www`.
+- **Responsive + safe-area** (`index.html` + `styles.css`): viewport meta (`viewport-fit=cover`,
+  `user-scalable=no`) + apple-mobile-web-app meta'ları + `theme-color`. Çerçeve div'lerine
+  `.app-frame`/`.app-bezel` class'ı verildi. `@media (max-width:480px)`: bezel/padding/border-radius
+  sıfırlanır, `.phone-screen` `100dvh`/`100vw` tam ekran olur, `env(safe-area-inset-*)` ile çentik korunur.
+  Web önizlemede (geniş ekran) 390x830 telefon görünümü aynen durur.
+- **Placeholder ikon** — `assets/logo.svg` (kahve gradyan + krem çiçek motifi + "YS" monogram).
+  `npm run assets` bundan tüm boyutları üretir (capacitor-assets, SVG kaynağı destekler).
+- **README.md** — mobil derleme adımları (önkoşullar, `cap add`, assets, sync/copy, open, smoke).
+- Doğrulama: `node build/www.js` OK; `node build/smoke.js` 0 hata (viewport/responsive değişiklikleri kırmadı).
+
+### ⬜ KALAN — kullanıcı (native, bu makinede/Mac'te)
+- **`npx cap add android`** → `android/` native projesi (Android Studio + JDK 17 gerekir). Sonra
+  `npm run sync` → `npm run open:android` → cihazda/emülatörde Run.
+- **`npx cap add ios`** → yalnızca **macOS** + Xcode + CocoaPods. Windows'ta yapılamaz (config hazır, sonraya).
+- **`npm run assets`** ile gerçek ikon/splash üret (logo.svg placeholder; istersen daha iyi bir logo koy).
+
+### ⬜ KALAN — takip işleri (kod tarafı, sonra)
+- **Offline ikon fontu:** şu an Tabler Icons CDN'den (`index.html` head). Cihaz offline'ken ikonlar
+  gelmez. Çözüm: fontu `assets/`e indir, `build/www.js` kopyalasın, `index.html` yerel yolu kullansın.
+- **Splash/status-bar eklentileri:** `@capacitor/splash-screen` + `@capacitor/status-bar` eklenip
+  `capacitor.config.ts`'e config yazılabilir (şu an native varsayılan splash/status bar).
+- **Native status bar örtüşmesi:** safe-area padding eklendi ama cihazda oyunun kendi sahte
+  statusbar'ı ile OS statusbar'ının ince ayarı test edilince netleşecek.
 
 <details><summary>(Tamamlanan) İLK İŞ — Mesajlaşma ekranını TARAYICIDA test et</summary>
 1. `index.html`'i tarayıcıda aç (veya GitHub Pages), yeni oyun başlat.
@@ -361,4 +390,4 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
 - Her mantıklı checkpoint'te commit + push.
 
-**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅** (Save/Load · Mesajlaşma · Çalış mini-oyunu · Başarım · Animasyonlu karne · Görevler scroll; Ayarlar ⏭️) · **Elden geçirme ✅** (bug/refaktör/içerik/denge/UX-ilk3; UX kalan 3 ⏭️) · **Stage D ⬜ SIRADA** (kullanıcı önce genel test yapıyor).
+**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅** (Save/Load · Mesajlaşma · Çalış mini-oyunu · Başarım · Animasyonlu karne · Görevler scroll; Ayarlar ⏭️) · **Elden geçirme ✅** (bug/refaktör/içerik/denge/UX-ilk3; UX kalan 3 ⏭️) · **Stage D ⏳ BAŞLADI** (iskele+deps+cap init ✅; `cap add` native kısmı kullanıcıda).
