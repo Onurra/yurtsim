@@ -256,6 +256,7 @@ const ACHIEVEMENTS=[
 {id:'sinif_atla',e:'🎓',n:'Sınıf Atladın',d:'Bir üst sınıfa geçtin',c:s=>(s.year||1)>=2},
 {id:'seref',e:'🏆',n:'Şeref Öğrencisi',d:'GANO 3.50 ve üzeri',c:s=>(s.gano||0)>=3.5}
 ];
+let _achQueue=[];let _achPumping=false;
 function checkAchievements(){
 if(!state.achievements)state.achievements={};
 ACHIEVEMENTS.forEach(a=>{
@@ -264,8 +265,23 @@ let ok=false;try{ok=!!a.c(state)}catch(e){}
 if(!ok)return;
 state.achievements[a.id]=state.dayOfMonth;
 pushNotif('academic','🏅 Başarım açıldı: '+a.e+' '+a.n);
-showAchievementToast(a);
+_achQueue.push(a);
 });
+pumpAchQueue();
+}
+// Kuyruk: aynı anda çok başarım açılınca (ör. yıl sonu karne) toast'lar üst üste yığılıp
+// ekranı kaplamasın ("siyah duvar"). En fazla 3 kart görünür, gerisi damla damla akar.
+function pumpAchQueue(){
+if(_achPumping)return;
+_achPumping=true;
+(function step(){
+if(!_achQueue.length){_achPumping=false;return}
+const box=document.getElementById('achToasts');
+const visible=box?box.children.length:0;
+if(visible>=3){setTimeout(step,450);return}
+showAchievementToast(_achQueue.shift());
+setTimeout(step,650);
+})();
 }
 function showAchievementToast(a){
 const screen=document.querySelector('.phone-screen');if(!screen)return;

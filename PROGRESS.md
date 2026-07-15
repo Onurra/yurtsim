@@ -82,7 +82,10 @@ Not: `kopya_teflif` `acceptInvite`'taki caught mekaniğini kullanır (o kod zate
    çevrildi (fill div stabil id'li → `transition:width 0.45s` gerçekten animasyon yapar; eski wholesale
    innerHTML'de olmuyordu). Kritikte (val≤20) `.barCrit` class + kırmızı (#E5484D) + `barPulse` yanıp sönme
    (`styles.css`). smoke: `bars ux={hasTransition,critClass,critColor,normalNotCrit,clearsWhenRecovered,widthTracks}` hepsi ✅.
-3. Başarım toast'larını kuyruğa al (yıl sonu "siyah duvar" bitsin) — `extras.js` showAchievementToast.
+3. ✅ **Başarım toast'ları kuyruğa alındı** (yıl sonu "siyah duvar" fix) — `extras.js` `checkAchievements`
+   artık anında `showAchievementToast` çağırmıyor, `_achQueue`'ya push edip `pumpAchQueue()` çağırıyor.
+   Pump aynı anda en fazla **3 kart** gösterir, gerisini ~650ms aralıkla damla damla akıtır. smoke:
+   `ach queue={unlocked:11,visibleImmediately:1,stillQueued:10,capped:true}` + `ach drain={visibleMid:3,cappedMid:true,queueShrinking:true}`.
 4. Kullanılmayan `screenFade`'i modallara uygula — `ui.js`/`styles.css:108`.
 5. Para değişiminde flash + kısa sayaç — `ui.js` `#money`.
 6. Modal geri oku alt-navigasyon bilsin (mesaj thread'i); locationPill affordance; rozetleri tıklanabilir yap.

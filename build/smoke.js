@@ -135,6 +135,14 @@ async function main() {
   await wait(200); await shot('shot-achievements.png');
   await js("state.money=5000; state._achNight=false; closeModal()");
 
+  // Başarım toast KUYRUĞU (yıl sonu "siyah duvar" fix) — aynı anda çok açılınca hepsi yığılmaz,
+  // en fazla 3 görünür, gerisi kuyrukta damla damla akar.
+  await js("var b=document.getElementById('achToasts');if(b)b.remove();_achQueue.length=0;_achPumping=false;");
+  const achQueue = await js("(function(){state.achievements={};state._achNight=true;state._achAttended=true;state._achExam=true;state._achAA=true;state._achFocusPerfect=true;state._achSick=true;state.fitnessDays=10;state.money=25000;state.iddiaLevel=20;state.year=2;state.gano=3.6;render();var box=document.getElementById('achToasts');var immediate=box?box.children.length:0;return JSON.stringify({unlocked:Object.keys(state.achievements).length,visibleImmediately:immediate,stillQueued:_achQueue.length,capped:immediate<=3});})()");
+  await wait(2200);
+  const achDrain = await js("(function(){var box=document.getElementById('achToasts');var v=box?box.children.length:0;return JSON.stringify({visibleMid:v,cappedMid:v<=3,queueShrinking:_achQueue.length<10});})()");
+  await js("state.money=5000;state.year=1;state.gano=null;state.fitnessDays=0;state.iddiaLevel=0;state._achNight=false;state._achAttended=false;state._achExam=false;state._achAA=false;state._achFocusPerfect=false;state._achSick=false;var b=document.getElementById('achToasts');if(b)b.remove();_achQueue.length=0;_achPumping=false;render();");
+
   // Görevler paneli scroll (bugfix) — genişletince panel sığar, içi kaydırılabilir
   const tasksScroll = await js("(function(){state.tasksExpanded=true;render();var el=document.getElementById('tasks');var cs=getComputedStyle(el);var realFits=el.clientHeight<=168;el.innerHTML=Array.from({length:40}).map(function(){return '<div style=\"padding:4px 0;\">görev satırı</div>'}).join('');var capped=el.clientHeight<=168;var canScroll=el.scrollHeight>el.clientHeight;return JSON.stringify({maxH:cs.maxHeight,overflowY:cs.overflowY,realFits:realFits,cappedAt168:capped,scrollableWhenFull:canScroll,scrollH:el.scrollHeight,clientH:el.clientHeight});})()");
   await wait(150); await shot('shot-tasks-expanded.png');
@@ -176,6 +184,8 @@ async function main() {
   console.log('karne done     =', karneDone);
   console.log('exam flow      =', examFlow);
   console.log('bars ux        =', barsUx);
+  console.log('ach queue      =', achQueue);
+  console.log('ach drain      =', achDrain);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();
