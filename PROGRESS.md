@@ -1,17 +1,27 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-15 · Kaldığımız yer: **Stage D ÖNCESİ "OYUN ELDEN GEÇİRME" işi SÜRÜYOR** (kullanıcı
-> "önce oyunu elden geçir, hepsini yap" dedi; denge şiddeti = **Orta**). Buglar ✅ bitti, içerik ⏳ yarım
-> (8 rastgele olay ✅ eklendi 07-15), denge ⏳ yarım (sadece harçlık ✅), UX ⬜ başlanmadı.
-> **SIRADA: kalan denge ayarları** (kira, iddia +EV, sınav formülü, hijyen decay) → sonra içerik → sonra UX.
-> Stage D (Capacitor) hâlâ SIRADA ama elden geçirme bitince.
+> Son güncelleme: 2026-07-15 · Kaldığımız yer: **"OYUN ELDEN GEÇİRME" TAMAMLANDI ✅ · SIRADA STAGE D (Capacitor)**.
+> Buglar ✅ · Refaktör ✅ · İçerik ✅ (8 rastgele olay) · Denge ✅ (Orta: harçlık/kira/iddia/sınav formülü/hijyen) ·
+> UX ✅ (toast alta + harçlık metni fix, stat çubukları animasyon+kritik, başarım toast kuyruğu).
+> UX'in kalan maddeleri (modal fade, para flash, navigasyon iyileştirmeleri) **kullanıcı kararıyla ATLANDI** (gerek yok).
+> **Kullanıcı Stage D öncesi genel test yapacak.** Oyunu açma: `index.html`'i doğrudan tarayıcıda aç (file://
+> çalışıyor, sunucu şart değil) — bkz. aşağıda "Oyunu çalıştırma". Sonra Stage D'ye geçilecek.
 
 ---
 
-## 🔧 OYUN ELDEN GEÇİRME (2026-07-14) — DEVAM EDİYOR
+## 🔧 OYUN ELDEN GEÇİRME (2026-07-14 → 07-15) — ✅ TAMAMLANDI
 
 Kullanıcı Stage D'den önce oyunu 4 boyutta elden geçirmek istedi: **denge, bug avı, içerik, UX** ("hepsini yap").
 4 paralel keşif ajanı raporladı; bulgular birleştirildi. Denge şiddeti kullanıcı seçimi = **Orta**.
+**Sonuç:** Buglar ✅ · Refaktör ✅ · İçerik ✅ · Denge ✅ · UX ✅ (ilk 3 madde; kalan 3 madde kullanıcı kararıyla atlandı).
+
+### 🖥️ Oyunu çalıştırma (genel test için)
+- **En basit:** `index.html`'e çift tıkla / tarayıcıya sürükle. Modüller klasik `<script src>` olduğu için
+  `file://` üzerinden sorunsuz yükleniyor (smoke testi de `file:///…/index.html` ile 0 hata veriyor).
+- **Yerel sunucu (istersen):** proje kökünde `python -m http.server 8000` → `http://localhost:8000`.
+- **Canlı:** GitHub Pages → `https://Onurra.github.io/yurtsim/` (push edilen `main` yayınlanır; şu an
+  çalışma `stage-a-refactor` branch'inde — Pages'e yansıması için main'e merge gerekir).
+- **Otomatik smoke:** `node build/smoke.js` (headless Chrome, 0 hata beklenir).
 
 ### ✅ BİTEN — Buglar (hepsi düzeltildi, smoke test 0 hata + `exam flow` testi eklendi)
 1. **KRİTİK — Sınav gece yarısı otomatik FF.** `checkExamsToday` (campus.js) artık okulda değilsen sınavı
@@ -73,7 +83,7 @@ Not: `kopya_teflif` `acceptInvite`'taki caught mekaniğini kullanır (o kod zate
 - Yeni işler (`data.js` `jobs`/`jobsKiz` — özellikle kıza freelance dengi).
 - Yeni takvim günleri: 18 Mart, 23 Nisan, 1 Mayıs, vize haftası (`extras.js` `calendarEvents`).
 
-### ⏳ UX / his (başladı 2026-07-15) — ajan raporundan öncelik sırası
+### ✅ UX / his (2026-07-15) — ilk 3 madde yapıldı, kalan 3 kullanıcı kararıyla ATLANDI
 1. ✅ **Toast ekran ortasından ALTA taşındı** — `index.html` `#toast` `top:50%`→`bottom:96px`,
    `transform` `translate(-50%,-50%)`→`translateX(-50%)`; `engine.js` msg() göster/gizle transform'ları
    güncellendi (alttan yukarı kayarak girer, aşağı kayarak çıkar). Artık tıklanan içeriği kapatmıyor.
@@ -86,9 +96,10 @@ Not: `kopya_teflif` `acceptInvite`'taki caught mekaniğini kullanır (o kod zate
    artık anında `showAchievementToast` çağırmıyor, `_achQueue`'ya push edip `pumpAchQueue()` çağırıyor.
    Pump aynı anda en fazla **3 kart** gösterir, gerisini ~650ms aralıkla damla damla akıtır. smoke:
    `ach queue={unlocked:11,visibleImmediately:1,stillQueued:10,capped:true}` + `ach drain={visibleMid:3,cappedMid:true,queueShrinking:true}`.
-4. Kullanılmayan `screenFade`'i modallara uygula — `ui.js`/`styles.css:108`.
-5. Para değişiminde flash + kısa sayaç — `ui.js` `#money`.
-6. Modal geri oku alt-navigasyon bilsin (mesaj thread'i); locationPill affordance; rozetleri tıklanabilir yap.
+4. ⏭️ ATLANDI — Kullanılmayan `screenFade`'i modallara uygula (`ui.js`/`styles.css:108`).
+5. ⏭️ ATLANDI — Para değişiminde flash + kısa sayaç (`ui.js` `#money`).
+6. ⏭️ ATLANDI — Modal geri oku alt-navigasyon bilsin; locationPill affordance; rozetleri tıklanabilir yap.
+   (Kullanıcı "UX'i burada kesiyoruz, kalanlar gerek yok" dedi 2026-07-15. İstenirse ileride açılabilir.)
 
 ### Doğrulama komutu
 `node build/smoke.js` — 0 hata olmalı; `exam flow` + `msg invite` satırlarına bak.
@@ -112,11 +123,12 @@ branch'inde (base = `origin/claude/laughing-pascal-16yzz7`). Eski (yanlış) ref
 - `origin/main`: tek "İlk commit" (2114 satır, eski taban).
 - `origin/claude/laughing-pascal-16yzz7`: 11 commit, en güncel monolit (bizim base'imiz).
 
-## Genel Plan (4 aşama)
+## Genel Plan (4 aşama + elden geçirme)
 - **A. Refaktör** ✅ Tamamlandı
 - **B. Görsel cila + design token + dark mode** ✅ Tamamlandı
 - **C. Yeni özellikler** ✅ Tamamlandı (Save/Load, Mesajlaşma, Çalış mini-oyunu, Başarım+Karne; Ayarlar genişletme atlandı)
-- **D. Capacitor paketleme** ⬜ Başlamadı (sırada bu var — kullanıcı karar verince başlanacak)
+- **Elden geçirme (D öncesi)** ✅ Tamamlandı (bug/refaktör/içerik/denge/UX — bkz. en üstteki "🔧 OYUN ELDEN GEÇİRME")
+- **D. Capacitor paketleme** ⬜ **SIRADA** (kullanıcı önce genel test yapacak, sonra başlanacak)
 
 ---
 
@@ -349,4 +361,4 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
 - Her mantıklı checkpoint'te commit + push.
 
-**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅ TAMAMLANDI** (Save/Load ✅ · Mesajlaşma ✅ · Çalış mini-oyunu ✅ · Başarım Faz 1 ✅ · Animasyonlu karne Faz 2 ✅ · Görevler scroll bugfix ✅ · Ayarlar ⏭️ atlandı) · **Stage D ⬜ başlanmadı** (sırada, kullanıcı kararı bekliyor).
+**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅** (Save/Load · Mesajlaşma · Çalış mini-oyunu · Başarım · Animasyonlu karne · Görevler scroll; Ayarlar ⏭️) · **Elden geçirme ✅** (bug/refaktör/içerik/denge/UX-ilk3; UX kalan 3 ⏭️) · **Stage D ⬜ SIRADA** (kullanıcı önce genel test yapıyor).
