@@ -1,9 +1,9 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-14 · Kaldığımız yer: **Stage D ÖNCESİ "OYUN ELDEN GEÇİRME" işi SÜRÜYOR** (kullanıcı
-> "önce oyunu elden geçir, hepsini yap" dedi; denge şiddeti = **Orta**). Buglar ✅ bitti, içerik ⏳ yarım,
-> denge ⏳ yarım, UX ⬜ başlanmadı. **Bir edit REDDEDİLDİ** (yeni rastgele olaylar bloğu) — aşağıda saklı,
-> kullanıcı kararı bekliyor. Ayrıntı: **"🔧 OYUN ELDEN GEÇİRME" bölümü (en aşağıda değil, hemen aşağıda)**.
+> Son güncelleme: 2026-07-15 · Kaldığımız yer: **Stage D ÖNCESİ "OYUN ELDEN GEÇİRME" işi SÜRÜYOR** (kullanıcı
+> "önce oyunu elden geçir, hepsini yap" dedi; denge şiddeti = **Orta**). Buglar ✅ bitti, içerik ⏳ yarım
+> (8 rastgele olay ✅ eklendi 07-15), denge ⏳ yarım (sadece harçlık ✅), UX ⬜ başlanmadı.
+> **SIRADA: kalan denge ayarları** (kira, iddia +EV, sınav formülü, hijyen decay) → sonra içerik → sonra UX.
 > Stage D (Capacitor) hâlâ SIRADA ama elden geçirme bitince.
 
 ---
@@ -41,9 +41,10 @@ Kullanıcı Stage D'den önce oyunu 4 boyutta elden geçirmek istedi: **denge, b
   caughtAcademic/caughtMoney/caughtMsg` alanları. ⚠️ ŞU AN KULLANAN YOK — tek tüketicisi `kopya_teflif`
   olayıydı, o da REDDEDİLEN blokta (aşağı bak). Zararsız dormant kod; blok eklenince aktif olur.
 
-### ❌ REDDEDİLDİ — Yeni rastgele olaylar bloğu (kullanıcı "no" dedi, KARAR BEKLİYOR)
-Aşağıdaki 8 olay `engine.js` `randomEvents` dizisine (toilet_paper'dan sonra) eklenecekti; kullanıcı bu edit'i
-reddetti. Muhtemelen gözden geçirmek/azaltmak istiyor. Karar verilince eklenecek. **Verbatim taslak:**
+### ✅ EKLENDİ — Yeni rastgele olaylar bloğu (kullanıcı "hepsini ekle" dedi, 2026-07-15)
+Aşağıdaki 8 olay `engine.js` `randomEvents` dizisine (toilet_paper'dan sonra) eklendi. `kopya_teflif`
+`acceptInvite`'taki caught/yakalanma mekaniğini aktive etti (artık dormant değil). smoke test 0 hata.
+**Eklenen olaylar (verbatim):**
 
 ```js
 {id:'sinav_stres',weight:3,cooldown:6,condition:()=>state.courses.some(c=>['guzVize','guzFinal','baharVize','baharFinal'].some(k=>{const d=c[k];if(!d)return false;const dl=daysUntilDate(d);return dl>=0&&dl<=3&&!c[k+'Note']})),fire:()=>{state.mood=clamp(state.mood-6);state.energy=clamp(state.energy-4);msg('😰 Sınav haftası stresi · kütüphaneler tıklım tıklım · mood -6')}},
