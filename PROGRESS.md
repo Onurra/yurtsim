@@ -73,10 +73,12 @@ Not: `kopya_teflif` `acceptInvite`'taki caught mekaniğini kullanır (o kod zate
 - Yeni işler (`data.js` `jobs`/`jobsKiz` — özellikle kıza freelance dengi).
 - Yeni takvim günleri: 18 Mart, 23 Nisan, 1 Mayıs, vize haftası (`extras.js` `calendarEvents`).
 
-### ⬜ KALAN — UX / his (hiç başlanmadı) — ajan raporundan öncelik sırası
-1. **Toast'ı ekran ortasından ALTA taşı** (en yüksek etki) — `index.html` `#toast` `top:50%`→`bottom:96px`;
-   `engine.js` msg()'deki transform değerlerini güncelle. Şu an toast tıklanan içeriği kapatıyor.
-2. Stat çubuklarına `transition:width` + kritikte (≤20) kırmızı/pulse — `ui.js` bar render.
+### ⏳ UX / his (başladı 2026-07-15) — ajan raporundan öncelik sırası
+1. ✅ **Toast ekran ortasından ALTA taşındı** — `index.html` `#toast` `top:50%`→`bottom:96px`,
+   `transform` `translate(-50%,-50%)`→`translateX(-50%)`; `engine.js` msg() göster/gizle transform'ları
+   güncellendi (alttan yukarı kayarak girer, aşağı kayarak çıkar). Artık tıklanan içeriği kapatmıyor.
+   (Ayrıca: `personal.js` cüzdan modalındaki hardcoded "10.000₺" harçlık → `${fmt(ALLOWANCE)}₺` = 7.000, tutarsızlık giderildi.)
+2. ⬜ Stat çubuklarına `transition:width` + kritikte (≤20) kırmızı/pulse — `ui.js` bar render.
 3. Başarım toast'larını kuyruğa al (yıl sonu "siyah duvar" bitsin) — `extras.js` showAchievementToast.
 4. Kullanılmayan `screenFade`'i modallara uygula — `ui.js`/`styles.css:108`.
 5. Para değişiminde flash + kısa sayaç — `ui.js` `#money`.

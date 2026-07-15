@@ -111,9 +111,9 @@ if(/yetmedi|kapalı|olamaz|olmadı|reddet|boşa|bozul|doldu|sınır|tutmad|sık�
 else if(/sevgilin oldu|harika|özledim|günaydın|seni|iyi ki|tatlı mesaj/.test(l)){icon.className='ti ti-heart-filled';icon.style.color='#FF6B9D'}
 else if(/kazandın|ödendi|geldi|attı|aktif|bedava|güzel|iyi geldi|keyif/.test(l)){icon.className='ti ti-check';icon.style.color='#5DD96B'}
 else{icon.className='ti ti-info-circle';icon.style.color='#7FB6F7'}
-toast.style.opacity='1';toast.style.transform='translate(-50%,-50%) translateY(0)';
+toast.style.opacity='1';toast.style.transform='translateX(-50%) translateY(0)';
 if(toastTimeout)clearTimeout(toastTimeout);
-toastTimeout=setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translate(-50%,-50%) translateY(-25px)'},3000);
+toastTimeout=setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translateX(-50%) translateY(20px)'},3000);
 }
 function openModal(name){state.activeModal=name;render()}
 function closeModal(){state.activeModal=null;state.laundryFullPrompt=false;render()}
