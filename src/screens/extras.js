@@ -484,5 +484,23 @@ render=function(){ensureExtState();if(state.gameOver&&state.activeModal!=='gameO
 // Tema'yı olabildiğince erken uygula (splash beklemeden), sonra boot
 ensureExtState();applyTheme();
 
+// --- Native kabuk (Capacitor) — sadece cihazda; tarayıcı/smoke'ta sessizce atlanır ---
+function initNativeShell(){
+  var Cap=window.Capacitor;
+  if(!Cap||typeof Cap.isNativePlatform!=='function'||!Cap.isNativePlatform())return;
+  var P=Cap.Plugins||{};
+  // Durum çubuğu: koyu üst bar (#1F1F1D) + açık (beyaz) metin
+  try{
+    if(P.StatusBar){
+      P.StatusBar.setStyle({style:'DARK'});               // koyu zeminde açık ikon/metin
+      P.StatusBar.setOverlaysWebView({overlay:false});     // web içeriği bara girmesin
+      if(Cap.getPlatform&&Cap.getPlatform()==='android')P.StatusBar.setBackgroundColor({color:'#1F1F1D'});
+    }
+  }catch(e){}
+  // Native splash'ı gizle (web #appSplash zaten üstte; launchAutoHide yedeğidir bu)
+  try{if(P.SplashScreen)P.SplashScreen.hide();}catch(e){}
+}
+initNativeShell();
+
 // App başlangıç: splash → ana menü
 setTimeout(()=>{const splash=document.getElementById('appSplash');if(splash){splash.style.opacity='0';setTimeout(()=>{splash.style.display='none';showMainMenu()},500)}},1500);

@@ -15,11 +15,11 @@ fs.mkdirSync(WWW, { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'index.html'), path.join(WWW, 'index.html'));
 fs.cpSync(path.join(ROOT, 'src'), path.join(WWW, 'src'), { recursive: true });
 
-// Offline ikon fontu varsa (assets/fonts) onu da taşı — şimdilik yoksa atla.
-const iconFont = path.join(ROOT, 'assets', 'tabler-icons.min.css');
-if (fs.existsSync(iconFont)) {
-  fs.mkdirSync(path.join(WWW, 'assets'), { recursive: true });
-  fs.copyFileSync(iconFont, path.join(WWW, 'assets', 'tabler-icons.min.css'));
+// assets/ (offline Tabler ikon fontu: assets/tabler/ + logo.svg) → www/assets/
+// Cihaz offline'ken ikonlar CDN'den değil bu yerel kopyadan gelir.
+const ASSETS = path.join(ROOT, 'assets');
+if (fs.existsSync(ASSETS)) {
+  fs.cpSync(ASSETS, path.join(WWW, 'assets'), { recursive: true });
 }
 
-console.log('www/ hazır → index.html + src/ kopyalandı (Capacitor webDir).');
+console.log('www/ hazır → index.html + src/ + assets/ kopyalandı (Capacitor webDir).');

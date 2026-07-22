@@ -21,6 +21,8 @@ https://Onurra.github.io/yurtsim/
 - `src/` — oyun mantığı, 12 JS modülü (`data`, `state`, `engine`, `ui`, `screens/*`, `extras`) + `styles.css`.
 - `build/` — yardımcı scriptler (`www.js` webDir montajı, `smoke.js` headless test, `slice.js`).
 - `assets/logo.svg` — uygulama ikonu kaynağı (Capacitor asset üreteci bunu kullanır).
+- `assets/tabler/` — offline Tabler Icons webfontu (CSS + woff2/woff/ttf); cihaz internetsizken
+  ikonlar bu yerel kopyadan gelir. `build/www.js` bunu `www/assets/`'e kopyalar.
 
 ## Mobil uygulama (Capacitor)
 
@@ -68,9 +70,9 @@ npm run smoke                   # headless Chrome boot testi (0 hata beklenir)
 ## Teknoloji
 
 - Saf HTML / CSS / JavaScript (modüler; bundler yok).
-- Capacitor (Android + iOS paketleme).
-- İkonlar için Tabler Icons (CDN). ⚠️ Offline cihazda ikonlar için fontu yerelleştirmek
-  gerekir (bkz. PROGRESS.md — Stage D takip maddesi).
+- Capacitor (Android + iOS paketleme) + `@capacitor/splash-screen` + `@capacitor/status-bar`
+  (native splash/durum çubuğu, `capacitor.config.ts` + `extras.js` `initNativeShell()`).
+- İkonlar için Tabler Icons — **offline yerel webfont** (`assets/tabler/`, CDN'e bağımlı değil).
 
 ## Lisans
 

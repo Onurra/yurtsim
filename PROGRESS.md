@@ -1,16 +1,18 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-16 · ⏸️ **BUGÜNLÜK DURDUK.** Kaldığımız yer: **STAGE D (Capacitor) BAŞLADI — iskele
-> + deps + cap init ✅ yapıldı; `npx cap add android/ios` (native projeler) KULLANICIDA (Android Studio/Xcode gerektirir)**.
+> Son güncelleme: 2026-07-22 · **STAGE D (Capacitor) DEVAM.** iskele + deps + cap init ✅; **offline ikon fontu ✅**
+> (Tabler webfont `assets/tabler/`'e indirildi, CDN bağımlılığı kalktı); **splash-screen + status-bar eklentileri ✅**
+> (config + `initNativeShell()` boot). Kalan: `npx cap add android/ios` (native projeler) KULLANICIDA (Android Studio/Xcode gerektirir).
 > Elden geçirme ✅ (bug/refaktör/içerik/denge/UX-ilk3). Stage D detayı: aşağıda "🚀 STAGE D" bölümü.
 > appId=`com.onurra.yurtsim`, appName="Yurt Simülatör", webDir=`www` (build/www.js montajı). Capacitor 8.4.2.
 >
-> **▶ Yarın devam noktası:** (1) kullanıcı `npx cap add android` → cihazda/emülatörde tam ekran+safe-area'yı
-> görsün; (2) sonra kod tarafı takip işleri: offline ikon fontu → splash/status-bar eklentileri. Ayrıntı: "🚀 STAGE D".
+> **▶ Devam noktası:** kullanıcı `npx cap add android` → cihazda/emülatörde tam ekran+safe-area + native
+> splash/status-bar + offline ikonları görsün. Kod tarafı takip işleri (offline font, splash/status-bar) ✅ bitti.
 >
 > **Oluşan dosyalar (Stage D):** `package.json`, `package-lock.json`, `capacitor.config.ts`, `build/www.js`,
-> `assets/logo.svg` + değişenler: `index.html` (viewport/meta + `.app-frame`/`.app-bezel`), `src/styles.css`
-> (mobil media query), `README.md`, `.gitignore` (`www/`). node_modules/ ve www/ gitignore'da (üretilen).
+> `assets/logo.svg`, `assets/tabler/` (offline webfont) + değişenler: `index.html` (viewport/meta +
+> `.app-frame`/`.app-bezel` + yerel font linki), `src/styles.css` (mobil media query), `src/screens/extras.js`
+> (`initNativeShell()`), `README.md`, `.gitignore` (`www/`). node_modules/ ve www/ gitignore'da (üretilen).
 
 ---
 
@@ -370,13 +372,24 @@ kapsam="iskele + npm install + cap init". Capacitor **8.4.2**.
 - **`npx cap add ios`** → yalnızca **macOS** + Xcode + CocoaPods. Windows'ta yapılamaz (config hazır, sonraya).
 - **`npm run assets`** ile gerçek ikon/splash üret (logo.svg placeholder; istersen daha iyi bir logo koy).
 
-### ⬜ KALAN — takip işleri (kod tarafı, sonra)
-- **Offline ikon fontu:** şu an Tabler Icons CDN'den (`index.html` head). Cihaz offline'ken ikonlar
-  gelmez. Çözüm: fontu `assets/`e indir, `build/www.js` kopyalasın, `index.html` yerel yolu kullansın.
-- **Splash/status-bar eklentileri:** `@capacitor/splash-screen` + `@capacitor/status-bar` eklenip
-  `capacitor.config.ts`'e config yazılabilir (şu an native varsayılan splash/status bar).
-- **Native status bar örtüşmesi:** safe-area padding eklendi ama cihazda oyunun kendi sahte
-  statusbar'ı ile OS statusbar'ının ince ayarı test edilince netleşecek.
+### ✅ BİTEN — takip işleri (kod tarafı, 2026-07-22)
+- **Offline ikon fontu ✅:** Tabler Icons webfontu (`@tabler/icons-webfont@3.31.0`) yerelleştirildi.
+  `assets/tabler/tabler-icons.min.css` + `assets/tabler/fonts/tabler-icons.woff2` (woff/ttf fallback'leri
+  atıldı — Android WebView/iOS WKWebView ikisi de woff2 destekler; CSS src'i woff2-only'ye indirildi,
+  `./fonts/` göreli yolu korundu → başka url rewrite gerekmedi; toplam ~1.1MB). `index.html` head artık CDN yerine
+  `assets/tabler/tabler-icons.min.css`'i kullanıyor. `build/www.js` tüm `assets/`'i (logo.svg dahil)
+  `www/assets/`'e kopyalar. Cihaz offline'ken ikonlar bu yerel kopyadan gelir. smoke: 0 hata (resource yükleme hatası yok).
+- **Splash/status-bar eklentileri ✅:** `@capacitor/splash-screen@^8` + `@capacitor/status-bar@^8`
+  eklendi (`package.json` deps). `capacitor.config.ts`'e `plugins.SplashScreen` config (launchShowDuration
+  1200, autoHide, backgroundColor #1F1F1D, spinner yok, fullscreen/immersive). `extras.js` boot'una
+  `initNativeShell()` eklendi: **native platformda** (`Capacitor.isNativePlatform()` guard'lı, tarayıcı/smoke'ta
+  sessizce atlanır) StatusBar.setStyle('DARK' = açık metin) + setOverlaysWebView(false) + (Android)
+  setBackgroundColor(#1F1F1D) + SplashScreen.hide(). Web `#appSplash` zaten üstte olduğu için native→web geçiş sorunsuz.
+  ⚠️ Native projeler (android/ios) henüz yok → `cap sync` yapılmadı; kullanıcı `npx cap add android` yapınca eklentiler otomatik alınır.
+
+### ⬜ KALAN — kullanıcı (cihazda ince ayar)
+- **Native status bar örtüşmesi:** safe-area padding + `initNativeShell()` eklendi ama cihazda oyunun
+  kendi sahte statusbar'ı ile OS statusbar'ının ince ayarı (renk/overlay) çalışınca netleşecek.
 
 <details><summary>(Tamamlanan) İLK İŞ — Mesajlaşma ekranını TARAYICIDA test et</summary>
 1. `index.html`'i tarayıcıda aç (veya GitHub Pages), yeni oyun başlat.
