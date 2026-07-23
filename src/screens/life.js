@@ -272,9 +272,24 @@ return `<div style="padding:4px 0;display:flex;justify-content:space-between;ali
 }).join('');
 if(tasks.length>3&&!showAll)h+=`<div onclick="toggleTasks()" style="text-align:center;padding:5px 0 1px;font-size:9.5px;color:${C.ts};cursor:pointer;font-weight:600;">+${tasks.length-3} daha göster</div>`;
 else if(showAll&&tasks.length>3)h+=`<div onclick="toggleTasks()" style="text-align:center;padding:5px 0 1px;font-size:9.5px;color:${C.ts};cursor:pointer;font-weight:600;">küçült</div>`;
-document.getElementById('tasks').innerHTML=h;
+const el=document.getElementById('tasks');
+el.innerHTML=h;
 document.getElementById('taskCount').textContent=tasks.length;
 document.getElementById('taskChevron').className='ti '+(showAll?'ti-chevron-up':'ti-chevron-down');
+if(!el.dataset.fadeBound){
+el.addEventListener('scroll',updateTasksFade,{passive:true});
+window.addEventListener('resize',updateTasksFade);
+el.dataset.fadeBound='1';
+}
+updateTasksFade();
+}
+// Görev listesi kaydırılabilir mi + sonuna gelindi mi → alt fade ipucunu aç/kapat.
+function updateTasksFade(){
+const el=document.getElementById('tasks');if(!el)return;
+const wrap=el.parentElement;if(!wrap||!wrap.classList.contains('tasks-wrap'))return;
+const scrollable=el.scrollHeight-el.clientHeight>4;
+const atBottom=el.scrollTop+el.clientHeight>=el.scrollHeight-4;
+wrap.classList.toggle('is-scrollable',scrollable&&!atBottom);
 }
 function renderGfWidget(){
 const widget=document.getElementById('gfWidget');
