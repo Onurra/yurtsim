@@ -1,13 +1,16 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-22 · **STAGE D (Capacitor) DEVAM.** iskele + deps + cap init ✅; **offline ikon fontu ✅**
-> (Tabler webfont `assets/tabler/`'e indirildi, CDN bağımlılığı kalktı); **splash-screen + status-bar eklentileri ✅**
-> (config + `initNativeShell()` boot). Kalan: `npx cap add android/ios` (native projeler) KULLANICIDA (Android Studio/Xcode gerektirir).
+> Son güncelleme: 2026-07-24 · **STAGE D (Capacitor) DEVAM.** iskele + deps + cap init ✅; **offline ikon fontu ✅**
+> (Tabler webfont `assets/tabler/`'e indirildi, CDN bağımlılığı kalktı); **splash-screen + status-bar eklentileri ✅**;
+> **Görevler paneli mobil scroll/esnek yükseklik ✅** (iPhone 11 doğrulandı; küçük SE ekranı **opsiyonel ertelendi**,
+> 4-sütun ızgara değişikliği **yapılmayacak** — kullanıcı kararı).
+> Kalan: `npx cap add android/ios` (native projeler) KULLANICIDA (Android Studio/Xcode gerektirir).
 > Elden geçirme ✅ (bug/refaktör/içerik/denge/UX-ilk3). Stage D detayı: aşağıda "🚀 STAGE D" bölümü.
 > appId=`com.onurra.yurtsim`, appName="Yurt Simülatör", webDir=`www` (build/www.js montajı). Capacitor 8.4.2.
 >
-> **▶ Devam noktası:** kullanıcı `npx cap add android` → cihazda/emülatörde tam ekran+safe-area + native
-> splash/status-bar + offline ikonları görsün. Kod tarafı takip işleri (offline font, splash/status-bar) ✅ bitti.
+> **▶ Devam noktası (SIRADA):** (1) **Gerçek app ikonu** (logo.svg placeholder yerine) → `npm run assets`.
+> (2) **Codemagic ile iOS build** (Windows'ta Xcode yok → CI'da derle/imzala; `.ipa` / TestFlight).
+> Ardından kullanıcı `npx cap add android/ios` ile native projeleri açar.
 >
 > **Oluşan dosyalar (Stage D):** `package.json`, `package-lock.json`, `capacitor.config.ts`, `build/www.js`,
 > `assets/logo.svg`, `assets/tabler/` (offline webfont) + değişenler: `index.html` (viewport/meta +
@@ -344,6 +347,17 @@ Yükleme sırası: data → state → engine → screens(campus,life,schedule,mi
 - Stage C'nin bu son maddesi yapılmadı. Tema seçici zaten var (Stage B). Ses/zorluk gibi eklemeler
   şimdilik gerekmiyor; istenirse ileride ayrı bir iş olarak açılabilir.
 
+### ✅ TAMAM — Görevler paneli mobil scroll/esnek yükseklik (`index.html`+`styles.css`, commit `76ae0d9`+`61e1def`, 2026-07-24)
+iPhone Safari/Capacitor'da ana ekran Görevler paneli sorunluydu (sabit yükseklik + araç çubukları yüzünden alta itilip kesiliyordu). **Yalnızca panel + kısa-viewport ızgarası** dokunuldu; **oyun mantığı değişmedi**. **iPhone 11'de doğrulandı.**
+- **Esnek yükseklik (`76ae0d9`):** sabit `max-height:168px` kaldırıldı → `clamp(84px, 22dvh, 168px)` (px→vh→dvh sıralı fallback, eski Safari). `.tasks-card`'a açık `min-height:112px` (flex item'da sayısal min-height, içeriğe dayalı otomatik minimumu devre dışı bırakır → kart gerçekten küçülür ama sıfıra inmez).
+- **iOS akıcı scroll:** `-webkit-overflow-scrolling:touch` + `overscroll-behavior:contain` (scroll zinciri sayfaya taşmaz) + `touch-action:pan-y`.
+- **Kaydırma ipucu:** `.tasks-wrap::after` alt kenar fade; yalnızca kaydırılabilir + sona gelinmemişken görünür (`updateTasksFade`, scroll/resize'a bağlı).
+- **Kısa ekranda ikon ızgarası sıkışması (`61e1def`):** iOS'ta `100dvh`≈730px'e düşünce 5 satırlık ikon ızgarası paneli aşağı itiyordu. **Sadece dar+kısa viewport'ta** ikonlar küçülür: `≤820px` yükseklik → ikon 56→46px, padding 8→4, gap 6→4, etiket 10.5→10px; `≤700px` → ikon 40px, padding 3, etiket 9.5px. Masaüstü önizlemedeki 390×830 telefon (genişlik >480px) **hiç etkilenmez**.
+- Ölçüm (headless Chrome, taşma / liste yüksekliği): 730→-16/84px · 780→-60/134px · 812→-92/166px · 844→-16/85px. `npm run smoke`: 0 hata.
+
+### ⏭️ ERTELENDİ (opsiyonel) — Küçük SE ekranı (kullanıcı kararı, 2026-07-24)
+Kullanıcı **iPhone 11 kullanıyor**, iPhone SE gibi çok küçük ekran onu etkilemiyor. Bu yüzden SE için ayrıca planlanan **4-sütun ikon ızgarası değişikliği YAPILMAYACAK** (opsiyonel olarak ertelendi). İhtiyaç olursa ileride ayrı iş olarak açılabilir; mevcut kısa-viewport ölçekleme (yukarıda) çoğu küçük ekranda zaten yeterli.
+
 ## 🚀 STAGE D — Capacitor paketleme (2026-07-16, DEVAM EDİYOR)
 
 Kullanıcı seçimleri: appId=`com.onurra.yurtsim`, appName="Yurt Simülatör", platform=Android+iOS,
@@ -366,11 +380,19 @@ kapsam="iskele + npm install + cap init". Capacitor **8.4.2**.
 - **README.md** — mobil derleme adımları (önkoşullar, `cap add`, assets, sync/copy, open, smoke).
 - Doğrulama: `node build/www.js` OK; `node build/smoke.js` 0 hata (viewport/responsive değişiklikleri kırmadı).
 
+### ⬜ SIRADA — (1) Gerçek ikon → (2) Codemagic iOS build (2026-07-24 kullanıcı önceliği)
+1. **Gerçek app ikonu:** `assets/logo.svg` şu an placeholder. Daha iyi bir logo koy → `npm run assets`
+   (capacitor-assets) tüm ikon/splash boyutlarını üretir. (Native proje eklenmeden önce/sonra çalıştırılabilir.)
+2. **Codemagic ile iOS build:** Windows'ta Xcode yok → iOS derleme/imzalama **CI'da** yapılacak.
+   Gerekenler: `codemagic.yaml` (workflow: `npm ci` → `npm run build:www` → `npx cap sync ios` → xcodebuild/imzalama),
+   Apple Developer hesabı + imzalama sertifikaları (Codemagic'te App Store Connect entegrasyonu), çıktı `.ipa` / TestFlight.
+   NOT: `ios/` native projesi CI'da `npx cap add ios` ile üretilebilir ya da repo'ya commit'lenebilir (karar verilecek).
+
 ### ⬜ KALAN — kullanıcı (native, bu makinede/Mac'te)
 - **`npx cap add android`** → `android/` native projesi (Android Studio + JDK 17 gerekir). Sonra
   `npm run sync` → `npm run open:android` → cihazda/emülatörde Run.
-- **`npx cap add ios`** → yalnızca **macOS** + Xcode + CocoaPods. Windows'ta yapılamaz (config hazır, sonraya).
-- **`npm run assets`** ile gerçek ikon/splash üret (logo.svg placeholder; istersen daha iyi bir logo koy).
+- **`npx cap add ios`** → yalnızca **macOS** + Xcode + CocoaPods (yerelde). Windows'ta yapılamaz → iOS için
+  Codemagic CI kullanılacak (yukarı bak).
 
 ### ✅ BİTEN — takip işleri (kod tarafı, 2026-07-22)
 - **Offline ikon fontu ✅:** Tabler Icons webfontu (`@tabler/icons-webfont@3.31.0`) yerelleştirildi.
@@ -409,4 +431,4 @@ kapsam="iskele + npm install + cap init". Capacitor **8.4.2**.
 - Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
 - Her mantıklı checkpoint'te commit + push.
 
-**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅** (Save/Load · Mesajlaşma · Çalış mini-oyunu · Başarım · Animasyonlu karne · Görevler scroll; Ayarlar ⏭️) · **Elden geçirme ✅** (bug/refaktör/içerik/denge/UX-ilk3; UX kalan 3 ⏭️) · **Stage D ⏳ BAŞLADI** (iskele+deps+cap init ✅; `cap add` native kısmı kullanıcıda).
+**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅** (Save/Load · Mesajlaşma · Çalış mini-oyunu · Başarım · Animasyonlu karne · Görevler scroll; Ayarlar ⏭️) · **Elden geçirme ✅** (bug/refaktör/içerik/denge/UX-ilk3; UX kalan 3 ⏭️) · **Stage D ⏳ BAŞLADI** (iskele+deps+cap init ✅ · offline font ✅ · splash/status-bar ✅ · **Görevler paneli mobil ✅** [SE opsiyonel ⏭️]; **SIRADA: gerçek ikon → Codemagic iOS build**; `cap add` native kısmı kullanıcıda).
