@@ -1,19 +1,20 @@
 # Yurt Simülatör — İlerleme Notları
 
-> Son güncelleme: 2026-07-24 · **STAGE D (Capacitor) DEVAM.** iskele + deps + cap init ✅; **offline ikon fontu ✅**
+> Son güncelleme: 2026-07-25 · **STAGE D (Capacitor) DEVAM.** iskele + deps + cap init ✅; **offline ikon fontu ✅**
 > (Tabler webfont `assets/tabler/`'e indirildi, CDN bağımlılığı kalktı); **splash-screen + status-bar eklentileri ✅**;
 > **Görevler paneli mobil scroll/esnek yükseklik ✅** (iPhone 11 doğrulandı; küçük SE ekranı **opsiyonel ertelendi**,
-> 4-sütun ızgara değişikliği **yapılmayacak** — kullanıcı kararı).
+> 4-sütun ızgara değişikliği **yapılmayacak** — kullanıcı kararı); **gerçek app ikonu + splash ✅**
+> (şeritli "YurtSim" varyantı — kullanıcı seçimi; `build/icon.js` üretir, `assets/*.png` commit'li).
 > Kalan: `npx cap add android/ios` (native projeler) KULLANICIDA (Android Studio/Xcode gerektirir).
 > Elden geçirme ✅ (bug/refaktör/içerik/denge/UX-ilk3). Stage D detayı: aşağıda "🚀 STAGE D" bölümü.
 > appId=`com.onurra.yurtsim`, appName="Yurt Simülatör", webDir=`www` (build/www.js montajı). Capacitor 8.4.2.
 >
-> **▶ Devam noktası (SIRADA):** (1) **Gerçek app ikonu** (logo.svg placeholder yerine) → `npm run assets`.
-> (2) **Codemagic ile iOS build** (Windows'ta Xcode yok → CI'da derle/imzala; `.ipa` / TestFlight).
-> Ardından kullanıcı `npx cap add android/ios` ile native projeleri açar.
+> **▶ Devam noktası (SIRADA):** **Codemagic ile iOS build** (Windows'ta Xcode yok → CI'da derle/imzala;
+> `.ipa` / TestFlight). Ardından kullanıcı `npx cap add android/ios` ile native projeleri açar.
 >
 > **Oluşan dosyalar (Stage D):** `package.json`, `package-lock.json`, `capacitor.config.ts`, `build/www.js`,
-> `assets/logo.svg`, `assets/tabler/` (offline webfont) + değişenler: `index.html` (viewport/meta +
+> `build/icon.js`, `assets/*.png` (ikon+splash kaynakları), `assets/tabler/` (offline webfont) +
+> değişenler: `index.html` (viewport/meta +
 > `.app-frame`/`.app-bezel` + yerel font linki), `src/styles.css` (mobil media query), `src/screens/extras.js`
 > (`initNativeShell()`), `README.md`, `.gitignore` (`www/`). node_modules/ ve www/ gitignore'da (üretilen).
 
@@ -375,15 +376,37 @@ kapsam="iskele + npm install + cap init". Capacitor **8.4.2**.
   `.app-frame`/`.app-bezel` class'ı verildi. `@media (max-width:480px)`: bezel/padding/border-radius
   sıfırlanır, `.phone-screen` `100dvh`/`100vw` tam ekran olur, `env(safe-area-inset-*)` ile çentik korunur.
   Web önizlemede (geniş ekran) 390x830 telefon görünümü aynen durur.
-- **Placeholder ikon** — `assets/logo.svg` (kahve gradyan + krem çiçek motifi + "YS" monogram).
-  `npm run assets` bundan tüm boyutları üretir (capacitor-assets, SVG kaynağı destekler).
+- ~~**Placeholder ikon** — `assets/logo.svg`~~ → gerçek ikonla değiştirildi (aşağıya bak).
 - **README.md** — mobil derleme adımları (önkoşullar, `cap add`, assets, sync/copy, open, smoke).
 - Doğrulama: `node build/www.js` OK; `node build/smoke.js` 0 hata (viewport/responsive değişiklikleri kırmadı).
 
-### ⬜ SIRADA — (1) Gerçek ikon → (2) Codemagic iOS build (2026-07-24 kullanıcı önceliği)
-1. **Gerçek app ikonu:** `assets/logo.svg` şu an placeholder. Daha iyi bir logo koy → `npm run assets`
-   (capacitor-assets) tüm ikon/splash boyutlarını üretir. (Native proje eklenmeden önce/sonra çalıştırılabilir.)
-2. **Codemagic ile iOS build:** Windows'ta Xcode yok → iOS derleme/imzalama **CI'da** yapılacak.
+### ✅ TAMAM — Gerçek app ikonu + splash (`build/icon.js` + `assets/*.png`, 2026-07-25)
+Kullanıcı seçimi: **"Şeritli"** varyant, şerit metni **"YurtSim"** (4 aday gerçek cihaz boyutlarında
+sunuldu). Tasarım menüdeki `APP_ICON_SVG` ile aynı geometriden türetildi: krem gradyan zemin +
+çiçek/artı battaniye deseni + −13° kahverengi şerit; metin Georgia italik (wordmark'ın fontu).
+- **Üreteç `build/icon.js`** — 4 varyant (`a-serit` seçildi, `b-rozet`/`c-ranza-desen`/`d-ranza` duruyor).
+  `--preview` → `build/_icon-preview/index.html` (adaylar 60/48/29/20pt + iOS/Android maskeleri, gitignore'da).
+  `--write <varyant>` → `assets/*.png`.
+- **Çıktı (commit'li):** `icon-only.png` 1024² (alfasız), `icon-foreground.png` 1024² (saydam),
+  `icon-background.png` 1024², `splash.png` / `splash-dark.png` 2732².
+- **Neden PNG, neden bu adlar (iki tuzak):**
+  1. Şerit metni Georgia ile diziliyor → SVG kaynak bırakılsaydı Codemagic/CI'da font bulunmayıp
+     başka bir serif'e düşerdi. Raster burada yapılıp commit'lendi.
+  2. Tam taşma ikonun adı **`icon-only.png`** — `icon.png` olsaydı capacitor-assets onu *logo* sayıp
+     splash'leri beyaz zeminde logodan üretir ve bizim `splash.png`'nin üzerine yazardı.
+- **Android adaptive:** katmanlar **tam ölçekte** veriliyor; 108dp→72dp oturtmayı üreticinin yazdığı
+  `ic_launcher.xml` `<inset 16.7%>` ile kendisi yapıyor (SVG'de ayrıca küçültmek %44'e düşürüyordu).
+  Desen zemin katmanında, kelime işareti ön katmanda → launcher parallax'ında şerit desenin üstünde oynuyor.
+- **Splash:** oyunun ana menüsüyle aynı kompozisyon — sayfa zemininde (açık `#F5F4EE` / koyu `#161410`)
+  yuvarlak köşeli krem kutucuk. Native splash'tan web splash'a geçiş sıçramasız.
+- **Doğrulama:** scratchpad'de sahte native iskeletle `capacitor-assets generate` çalıştırıldı →
+  74 Android + 7 iOS varlık üretildi; `ic_launcher_*` katmanları inset+daire maskesiyle birleştirilip
+  iOS `AppIcon-512@2x` ile karşılaştırıldı, aynı kompozisyon. `npm run smoke`: 0 hata.
+- **Yan düzeltme:** `build/www.js` artık `assets/*.png`'yi webDir'e kopyalamıyor (web tarafı kullanmıyor;
+  ~300KB boşuna app paketine giriyordu). `assets/tabler/` kopyalanmaya devam ediyor.
+
+### ⬜ SIRADA — Codemagic iOS build (2026-07-24 kullanıcı önceliği)
+1. **Codemagic ile iOS build:** Windows'ta Xcode yok → iOS derleme/imzalama **CI'da** yapılacak.
    Gerekenler: `codemagic.yaml` (workflow: `npm ci` → `npm run build:www` → `npx cap sync ios` → xcodebuild/imzalama),
    Apple Developer hesabı + imzalama sertifikaları (Codemagic'te App Store Connect entegrasyonu), çıktı `.ipa` / TestFlight.
    NOT: `ios/` native projesi CI'da `npx cap add ios` ile üretilebilir ya da repo'ya commit'lenebilir (karar verilecek).
@@ -399,8 +422,8 @@ kapsam="iskele + npm install + cap init". Capacitor **8.4.2**.
   `assets/tabler/tabler-icons.min.css` + `assets/tabler/fonts/tabler-icons.woff2` (woff/ttf fallback'leri
   atıldı — Android WebView/iOS WKWebView ikisi de woff2 destekler; CSS src'i woff2-only'ye indirildi,
   `./fonts/` göreli yolu korundu → başka url rewrite gerekmedi; toplam ~1.1MB). `index.html` head artık CDN yerine
-  `assets/tabler/tabler-icons.min.css`'i kullanıyor. `build/www.js` tüm `assets/`'i (logo.svg dahil)
-  `www/assets/`'e kopyalar. Cihaz offline'ken ikonlar bu yerel kopyadan gelir. smoke: 0 hata (resource yükleme hatası yok).
+  `assets/tabler/tabler-icons.min.css`'i kullanıyor. `build/www.js` `assets/`'i (ikon/splash PNG'leri
+  hariç — 2026-07-25) `www/assets/`'e kopyalar. Cihaz offline'ken ikonlar bu yerel kopyadan gelir. smoke: 0 hata (resource yükleme hatası yok).
 - **Splash/status-bar eklentileri ✅:** `@capacitor/splash-screen@^8` + `@capacitor/status-bar@^8`
   eklendi (`package.json` deps). `capacitor.config.ts`'e `plugins.SplashScreen` config (launchShowDuration
   1200, autoHide, backgroundColor #1F1F1D, spinner yok, fullscreen/immersive). `extras.js` boot'una
@@ -431,4 +454,4 @@ kapsam="iskele + npm install + cap init". Capacitor **8.4.2**.
 - Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
 - Her mantıklı checkpoint'te commit + push.
 
-**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅** (Save/Load · Mesajlaşma · Çalış mini-oyunu · Başarım · Animasyonlu karne · Görevler scroll; Ayarlar ⏭️) · **Elden geçirme ✅** (bug/refaktör/içerik/denge/UX-ilk3; UX kalan 3 ⏭️) · **Stage D ⏳ BAŞLADI** (iskele+deps+cap init ✅ · offline font ✅ · splash/status-bar ✅ · **Görevler paneli mobil ✅** [SE opsiyonel ⏭️]; **SIRADA: gerçek ikon → Codemagic iOS build**; `cap add` native kısmı kullanıcıda).
+**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅** (Save/Load · Mesajlaşma · Çalış mini-oyunu · Başarım · Animasyonlu karne · Görevler scroll; Ayarlar ⏭️) · **Elden geçirme ✅** (bug/refaktör/içerik/denge/UX-ilk3; UX kalan 3 ⏭️) · **Stage D ⏳ BAŞLADI** (iskele+deps+cap init ✅ · offline font ✅ · splash/status-bar ✅ · **Görevler paneli mobil ✅** [SE opsiyonel ⏭️]; **gerçek app ikonu ✅**; **SIRADA: Codemagic iOS build**; `cap add` native kısmı kullanıcıda).

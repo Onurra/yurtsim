@@ -29,3 +29,6 @@ build/_*.txt
 
 # Eski monolit yedeği (yerelde durur, izlenmez)
 yurtsim (2).html
+
+# Ikon onizleme cikti klasoru (build/icon.js --preview)
+build/_icon-preview/

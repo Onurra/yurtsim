@@ -15,11 +15,17 @@ fs.mkdirSync(WWW, { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'index.html'), path.join(WWW, 'index.html'));
 fs.cpSync(path.join(ROOT, 'src'), path.join(WWW, 'src'), { recursive: true });
 
-// assets/ (offline Tabler ikon fontu: assets/tabler/ + logo.svg) → www/assets/
+// assets/ (offline Tabler ikon fontu: assets/tabler/) → www/assets/
 // Cihaz offline'ken ikonlar CDN'den değil bu yerel kopyadan gelir.
+// assets/*.png (app ikonu + splash kaynakları) KOPYALANMAZ: onları web tarafı
+// kullanmaz, capacitor-assets doğrudan assets/'ten okur — webDir'e girerse
+// ~300KB'ı boşuna app paketine girer.
 const ASSETS = path.join(ROOT, 'assets');
 if (fs.existsSync(ASSETS)) {
-  fs.cpSync(ASSETS, path.join(WWW, 'assets'), { recursive: true });
+  fs.cpSync(ASSETS, path.join(WWW, 'assets'), {
+    recursive: true,
+    filter: src => !src.endsWith('.png'),
+  });
 }
 
 console.log('www/ hazır → index.html + src/ + assets/ kopyalandı (Capacitor webDir).');

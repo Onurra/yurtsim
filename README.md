@@ -19,8 +19,10 @@ https://Onurra.github.io/yurtsim/
 
 - `index.html` — HTML kabuğu (statusbar, telefon çerçevesi, modal iskeleti).
 - `src/` — oyun mantığı, 12 JS modülü (`data`, `state`, `engine`, `ui`, `screens/*`, `extras`) + `styles.css`.
-- `build/` — yardımcı scriptler (`www.js` webDir montajı, `smoke.js` headless test, `slice.js`).
-- `assets/logo.svg` — uygulama ikonu kaynağı (Capacitor asset üreteci bunu kullanır).
+- `build/` — yardımcı scriptler (`www.js` webDir montajı, `smoke.js` headless test, `slice.js`,
+  `icon.js` app ikonu/splash üreteci).
+- `assets/*.png` — app ikonu ve splash kaynakları (`icon-only`, `icon-foreground`,
+  `icon-background`, `splash`, `splash-dark`). Elle düzenlenmez: `build/icon.js` üretir.
 - `assets/tabler/` — offline Tabler Icons webfontu (CSS + woff2/woff/ttf); cihaz internetsizken
   ikonlar bu yerel kopyadan gelir. `build/www.js` bunu `www/assets/`'e kopyalar.
 
@@ -42,11 +44,24 @@ npx cap add android             # android/ native projesini oluşturur
 npx cap add ios                 # (yalnızca macOS'ta) ios/ native projesini oluşturur
 ```
 
-### İkon + splash üret (opsiyonel)
-`assets/logo.svg` kaynağından tüm boyutları üretir:
+### İkon + splash
+Kaynaklar `assets/` altında PNG olarak **commit'li** — native projeler eklendikten sonra
+tek komutla tüm boyutlara açılır:
 ```bash
 npm run assets                  # capacitor-assets generate --android --ios
 ```
+(`android/` veya `ios/` yoksa uyarı verip çıkar; önce `npx cap add ...` gerekir.)
+
+Tasarımı değiştirmek gerekirse kaynakları `build/icon.js` üretir:
+```bash
+node build/icon.js --preview            # build/_icon-preview/index.html — adaylar, gerçek boyutlarda
+node build/icon.js --write a-serit      # assets/*.png (seçili varyant)
+```
+Notlar:
+- Şerit metni Georgia italik ile diziliyor, o yüzden kaynaklar **PNG** olarak commit'leniyor;
+  CI'da (Codemagic) font bulunmasa da ikon birebir aynı çıkar.
+- Tam taşma ikonun adı bilerek `icon-only.png`; `icon.png` olsaydı üretici onu *logo* sayıp
+  splash'leri beyaz zeminde logodan türetir ve `splash.png`'nin üzerine yazardı.
 
 ### Geliştirme döngüsü
 Web tarafında değişiklik yaptıktan sonra native projeye senkronla:
