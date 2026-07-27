@@ -15,12 +15,17 @@ www/
 .gradle/
 *.iml
 
-# Capacitor / iOS / Android (ileride eklenirse)
-ios/App/Pods/
-ios/App/build/
-android/.gradle/
-android/app/build/
-android/build/
+# Capacitor native projeleri — ÜRETİLEN, kaynak değil.
+# ios/ her Codemagic build'inde `npx cap add ios` ile yeniden üretilir (codemagic.yaml).
+# android/ da yerelde `npx cap add android` ile üretilir.
+ios/
+android/
+
+# Codemagic/xcodebuild çıktıları (CI'da oluşur)
+build/ios-dd/
+build/ios/
+build/ipa/
+build/*.ipa
 
 # Refaktör/doğrulama artıkları (üretime dahil değil — build/ scriptleri tutulur)
 build/shot-*.png

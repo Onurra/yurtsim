@@ -34,7 +34,8 @@ Oyun Capacitor ile native Android/iOS uygulamasına paketlenir. Web önizlemede 
 ### Önkoşullar
 - **Node.js** (kuruldu) + `npm install` (bağımlılıklar `package.json`'da).
 - **Android** için: Android Studio + JDK 17.
-- **iOS** için: macOS + Xcode + CocoaPods. (Windows'ta iOS derlenmez, sadece config hazır.)
+- **iOS** için: macOS + Xcode + CocoaPods. Windows'ta iOS derlenmez → bulutta **Codemagic**
+  ile derlenir (aşağıda "Codemagic (iOS bulut derleme)").
 
 ### Kurulum (bir kez)
 ```bash
@@ -42,6 +43,7 @@ npm install                     # Capacitor bağımlılıkları
 npm run build:www               # index.html + src/ → www/ (webDir)
 npx cap add android             # android/ native projesini oluşturur
 npx cap add ios                 # (yalnızca macOS'ta) ios/ native projesini oluşturur
+                                # Windows'ta gerekmez — Codemagic her build'de kendisi üretir
 ```
 
 ### İkon + splash
@@ -70,6 +72,46 @@ npm run sync                    # build:www + cap sync (kod + eklentileri kopyal
 # veya sadece web dosyaları değiştiyse:
 npm run copy                    # build:www + cap copy
 ```
+
+### Codemagic (iOS bulut derleme)
+
+Windows'ta Xcode olmadığı için iOS derleme/imzalama **Codemagic**'te (macOS runner) yapılır.
+Yapılandırma: [`codemagic.yaml`](codemagic.yaml) — iki workflow:
+
+| Workflow | Ne yapar | Apple hesabı |
+|---|---|---|
+| `ios-testflight` | İmzalı `.ipa` üretir → **TestFlight**'a yükler (telefona kurulabilir) | Gerekir |
+| `ios-unsigned` | İmzasız derler; "proje gerçekten build oluyor mu" kontrolü | Gerekmez |
+
+> `ios/` native projesi **repo'da tutulmaz** (`.gitignore`'da). Her build'de
+> `npx cap add ios` ile üretilir — tek kaynak `capacitor.config.ts`. Native dosyalara
+> elle müdahale gerekirse bu karar gözden geçirilmeli.
+
+**Bir kerelik kurulum:**
+
+1. **App Store Connect API key** — [appstoreconnect.apple.com](https://appstoreconnect.apple.com)
+   → Users and Access → Integrations → App Store Connect API → **+** ile key oluştur
+   (rol: *App Manager* yeterli). **Issuer ID**, **Key ID** ve inen **`.p8`** dosyasını sakla
+   (`.p8` bir kez indirilir).
+2. **App ID + app kaydı** — Developer portalında Identifiers → **`com.onurra.yurtsim`**;
+   sonra App Store Connect → My Apps → **+** → New App (aynı bundle ID, platform iOS).
+3. **Codemagic** — [codemagic.io](https://codemagic.io) → GitHub ile giriş → `Onurra/yurtsim`
+   reposunu ekle. Codemagic `codemagic.yaml`'ı otomatik bulur.
+4. **Integration** — Codemagic → Teams/Personal → Integrations → **App Store Connect** → Add key:
+   issuer ID + key ID + `.p8`. **Key adı birebir `YurtSim ASC` olmalı** — `codemagic.yaml` içindeki
+   `integrations.app_store_connect` bu adı arar (başka ad verirsen yaml'ı da güncelle).
+5. **Derle** — Codemagic'te app → *Start new build* → workflow **`ios-testflight`** → Start.
+   ~15–25 dk sonra `.ipa` artifact olarak iner ve TestFlight'a yüklenir; telefonda
+   **TestFlight** uygulamasından kurulur.
+
+Notlar:
+- Build numarası Codemagic'in artan sayacından (`$PROJECT_BUILD_NUMBER`) gelir — TestFlight
+  aynı numarayı iki kez kabul etmez, bu yüzden her build benzersiz.
+- Sürüm numarası (`MARKETING_VERSION`) Capacitor'ın ürettiği Xcode projesinden gelir (1.0).
+  Yükseltmek için `ios/App/App.xcodeproj` CI'da üretildiğinden, kalıcı değişiklik gerekirse
+  `agvtool new-marketing-version` adımı `codemagic.yaml`'a eklenmeli.
+- İlk build'de imzalama takılırsa: integration adını, bundle ID'nin portalda gerçekten var
+  olduğunu ve API key rolünü kontrol et.
 
 ### Cihazda çalıştır
 ```bash

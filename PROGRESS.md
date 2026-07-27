@@ -9,8 +9,12 @@
 > Elden geçirme ✅ (bug/refaktör/içerik/denge/UX-ilk3). Stage D detayı: aşağıda "🚀 STAGE D" bölümü.
 > appId=`com.onurra.yurtsim`, appName="Yurt Simülatör", webDir=`www` (build/www.js montajı). Capacitor 8.4.2.
 >
-> **▶ Devam noktası (SIRADA):** **Codemagic ile iOS build** (Windows'ta Xcode yok → CI'da derle/imzala;
-> `.ipa` / TestFlight). Ardından kullanıcı `npx cap add android/ios` ile native projeleri açar.
+> **Codemagic iOS build ✅ (kod tarafı):** `codemagic.yaml` yazıldı (2 workflow: imzalı TestFlight +
+> imzasız doğrulama); `ios/` artık gitignore'da, CI'da `npx cap add ios` ile üretiliyor.
+>
+> **▶ Devam noktası (SIRADA):** **Codemagic UI kurulumu + ilk build KULLANICIDA** —
+> App Store Connect API key → Codemagic integration adı **`YurtSim ASC`** → repo bağla →
+> `ios-testflight` workflow'unu çalıştır. Adımlar: README "Codemagic (iOS bulut derleme)".
 >
 > **Oluşan dosyalar (Stage D):** `package.json`, `package-lock.json`, `capacitor.config.ts`, `build/www.js`,
 > `build/icon.js`, `assets/*.png` (ikon+splash kaynakları), `assets/tabler/` (offline webfont) +
@@ -405,17 +409,46 @@ sunuldu). Tasarım menüdeki `APP_ICON_SVG` ile aynı geometriden türetildi: kr
 - **Yan düzeltme:** `build/www.js` artık `assets/*.png`'yi webDir'e kopyalamıyor (web tarafı kullanmıyor;
   ~300KB boşuna app paketine giriyordu). `assets/tabler/` kopyalanmaya devam ediyor.
 
-### ⬜ SIRADA — Codemagic iOS build (2026-07-24 kullanıcı önceliği)
-1. **Codemagic ile iOS build:** Windows'ta Xcode yok → iOS derleme/imzalama **CI'da** yapılacak.
-   Gerekenler: `codemagic.yaml` (workflow: `npm ci` → `npm run build:www` → `npx cap sync ios` → xcodebuild/imzalama),
-   Apple Developer hesabı + imzalama sertifikaları (Codemagic'te App Store Connect entegrasyonu), çıktı `.ipa` / TestFlight.
-   NOT: `ios/` native projesi CI'da `npx cap add ios` ile üretilebilir ya da repo'ya commit'lenebilir (karar verilecek).
+### ✅ TAMAM (kod tarafı) — Codemagic iOS build (`codemagic.yaml`, 2026-07-27)
+Kullanıcı kararları: **Apple Developer hesabı VAR** (imzalı/TestFlight hedefi) · **`ios/` CI'da üretilecek**
+(repo'ya commit edilmeyecek — native tarafta elle yazılmış dosyamız yok, tek kaynak `capacitor.config.ts`).
+
+- **`codemagic.yaml` — 2 workflow** (ortak adımlar YAML anchor'ı ile paylaşılıyor:
+  `npm ci` → `npm run build:www` → `npx cap add ios` (yoksa; varsa `cap sync ios`) → `npx capacitor-assets generate --ios`):
+  1. **`ios-testflight`** (asıl) — `instance_type: mac_mini_m2`, `integrations.app_store_connect: YurtSim ASC`,
+     `environment.ios_signing` (app_store / `com.onurra.yurtsim`) → sertifika+profili build ÖNCESİ çeker;
+     sonra scripts'te `xcode-project use-profiles` (⚠️ **sıra kritik**: proje `cap add ios` ile ÜRETİLDİKTEN
+     sonra uygulanmalı, o yüzden otomatik değil elle çağrılıyor) → `agvtool new-version -all $PROJECT_BUILD_NUMBER`
+     → `xcode-project build-ipa`. Publishing: `app_store_connect` (auth: integration, `submit_to_testflight: true`,
+     App Store'a gönderim kapalı) + e-posta bildirimi. Artifacts: `.ipa`, xcodebuild log, dSYM.
+  2. **`ios-unsigned`** (yedek/doğrulama, Apple hesabı gerekmez) — `xcodebuild ... CODE_SIGNING_ALLOWED=NO`
+     → `Payload/` klasörüyle elle `.ipa` zip'lenir (cihaza KURULAMAZ, sadece "derleniyor mu" testi).
+- **Tetikleme elle** (`Start new build`); her push'ta derlemek için yaml'daki `triggering:` bloğu yorumda duruyor.
+- **`.gitignore`:** eski `ios/App/Pods/` vb. satırlar → **`ios/` + `android/`** (üretilen) + CI çıktıları
+  (`build/ios-dd/`, `build/ios/`, `build/ipa/`, `build/*.ipa`).
+- **README:** "Codemagic (iOS bulut derleme)" bölümü — workflow tablosu + 5 adımlık bir kerelik kurulum
+  (ASC API key → App ID/app kaydı → repo bağlama → **integration adı `YurtSim ASC`** → Start build) + tuzak notları.
+- **Doğrulama:** `codemagic.yaml` js-yaml ile parse edildi, iki workflow'un env/scripts/artifacts'ı beklendiği gibi
+  çözülüyor. ⚠️ YAML **merge key** (`<<: *anchor`) kullanılmadı — Codemagic destekliyor ama js-yaml 4 çözmüyor;
+  riski sıfırlamak için `node/xcode/cocoapods` satırları her workflow'a **inline** yazıldı (script anchor'ları
+  düz alias, her parser'da güvenli). `npm run smoke`: 0 hata (oyun kodu değişmedi).
+- `typescript` package-lock'ta mevcut (darwin-arm64 optional binary dahil) → CI'daki `npm ci` sonrası
+  Capacitor CLI `capacitor.config.ts`'i okuyabilir.
+
+### ⬜ SIRADA — Codemagic UI kurulumu + ilk build (KULLANICIDA, tarayıcı işi)
+1. App Store Connect → Users and Access → Integrations → **API key** oluştur (rol: App Manager);
+   Issuer ID + Key ID + `.p8` (bir kez iner) sakla.
+2. Developer portal → Identifiers → **`com.onurra.yurtsim`** App ID; sonra ASC → My Apps → **+ New App**.
+3. [codemagic.io](https://codemagic.io) → GitHub ile giriş → `Onurra/yurtsim` reposunu ekle (yaml otomatik bulunur).
+4. Codemagic → Integrations → App Store Connect → key ekle, **adı birebir `YurtSim ASC`** (yaml bu adı arar).
+5. Start new build → workflow **`ios-testflight`** → ~15–25 dk → `.ipa` artifact + TestFlight.
+   Sorun çıkarsa önce `ios-unsigned` ile "derleniyor mu"yu ayrıştır.
 
 ### ⬜ KALAN — kullanıcı (native, bu makinede/Mac'te)
 - **`npx cap add android`** → `android/` native projesi (Android Studio + JDK 17 gerekir). Sonra
   `npm run sync` → `npm run open:android` → cihazda/emülatörde Run.
-- **`npx cap add ios`** → yalnızca **macOS** + Xcode + CocoaPods (yerelde). Windows'ta yapılamaz → iOS için
-  Codemagic CI kullanılacak (yukarı bak).
+- **`npx cap add ios`** → yerelde yalnızca **macOS**'ta. Windows'ta **gerekmiyor**: Codemagic her build'de
+  kendisi üretiyor (yukarı bak).
 
 ### ✅ BİTEN — takip işleri (kod tarafı, 2026-07-22)
 - **Offline ikon fontu ✅:** Tabler Icons webfontu (`@tabler/icons-webfont@3.31.0`) yerelleştirildi.
@@ -454,4 +487,4 @@ sunuldu). Tasarım menüdeki `APP_ICON_SVG` ile aynı geometriden türetildi: kr
 - Değişiklik sonrası `node build/smoke.js` — oyun bozulmasın (0 hata).
 - Her mantıklı checkpoint'te commit + push.
 
-**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅** (Save/Load · Mesajlaşma · Çalış mini-oyunu · Başarım · Animasyonlu karne · Görevler scroll; Ayarlar ⏭️) · **Elden geçirme ✅** (bug/refaktör/içerik/denge/UX-ilk3; UX kalan 3 ⏭️) · **Stage D ⏳ BAŞLADI** (iskele+deps+cap init ✅ · offline font ✅ · splash/status-bar ✅ · **Görevler paneli mobil ✅** [SE opsiyonel ⏭️]; **gerçek app ikonu ✅**; **SIRADA: Codemagic iOS build**; `cap add` native kısmı kullanıcıda).
+**Görev takibi:** Stage A ✅ · Stage B ✅ · **Stage C ✅** (Save/Load · Mesajlaşma · Çalış mini-oyunu · Başarım · Animasyonlu karne · Görevler scroll; Ayarlar ⏭️) · **Elden geçirme ✅** (bug/refaktör/içerik/denge/UX-ilk3; UX kalan 3 ⏭️) · **Stage D ⏳ BAŞLADI** (iskele+deps+cap init ✅ · offline font ✅ · splash/status-bar ✅ · **Görevler paneli mobil ✅** [SE opsiyonel ⏭️] · **gerçek app ikonu ✅** · **`codemagic.yaml` ✅**; **SIRADA: Codemagic UI kurulumu + ilk iOS build (kullanıcıda)**; `cap add android` yerelde kullanıcıda).
