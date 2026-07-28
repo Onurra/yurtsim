@@ -37,3 +37,4 @@ yurtsim (2).html
 
 # Ikon onizleme cikti klasoru (build/icon.js --preview)
 build/_icon-preview/
+cert_key.pem
