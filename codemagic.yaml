@@ -64,6 +64,45 @@ definitions:
       name: App ikonu + splash (capacitor-assets)
       script: npx capacitor-assets generate --ios
 
+    - &detect_xcode_target
+      name: Xcode hedefini tespit et (workspace mı project mi)
+      script: |
+        set -e
+        # Capacitor 8 CLI iOS projesini SPM şablonundan üretiyor
+        # (cli/dist/config.js → 'ios-spm-template.tar.gz'): Podfile ve
+        # App.xcworkspace YOK, sadece App.xcodeproj + CapApp-SPM/Package.swift.
+        # Eski (CocoaPods) şablonunda ise workspace vardı. İkisinde de çalışsın
+        # diye hedefi burada tespit edip sonraki adımlara aktarıyoruz.
+        echo "--- ios/ ağacı ---"
+        find ios -maxdepth 3 -name "*.xcworkspace" -o -maxdepth 3 -name "*.xcodeproj" -o -maxdepth 3 -name "Podfile" -o -maxdepth 3 -name "Package.swift" || true
+
+        # CocoaPods şablonuna düşülürse: workspace ancak pod install sonrası tam olur.
+        if [ -f "ios/App/Podfile" ] && [ ! -d "ios/App/App.xcworkspace" ]; then
+          echo "→ Podfile var ama workspace yok; pod install çalıştırılıyor."
+          (cd ios/App && pod install --repo-update)
+        fi
+
+        if [ -d "ios/App/App.xcworkspace" ]; then
+          KIND="workspace"; TARGET="ios/App/App.xcworkspace"
+        elif [ -d "ios/App/App.xcodeproj" ]; then
+          KIND="project";   TARGET="ios/App/App.xcodeproj"
+        else
+          echo "HATA: ios/App altında ne .xcworkspace ne .xcodeproj var — cap add ios başarısız olmuş."
+          ls -la ios/App || true
+          exit 1
+        fi
+
+        echo "→ Xcode hedefi: $KIND = $TARGET"
+        echo "XC_TARGET_KIND=$KIND" >> "$CM_ENV"
+        echo "XC_TARGET_PATH=$TARGET" >> "$CM_ENV"
+
+        # Şema gerçekten var mı (scheme adı 'App' bekleniyor). Şema bulunamazsa
+        # build adımı anlaşılmaz bir hata verir; burada logda görünsün.
+        echo "--- xcodebuild -list ---"
+        xcodebuild -list "-$KIND" "$TARGET" 2>&1 | tee /tmp/xc_list.txt || true
+        grep -qE "^[[:space:]]*App[[:space:]]*$" /tmp/xc_list.txt \
+          || echo "⚠️  'App' şeması listede görünmüyor — yukarıdaki şema listesine bak."
+
 workflows:
   # ---------------------------------------------------------------------------
   # 1) İMZALI — App Store Connect / TestFlight
@@ -89,8 +128,9 @@ workflows:
       # Bunun yerine imzalama aşağıda elle, `--create` ile yapılıyor (yoksa oluşturur).
       vars:
         BUNDLE_ID: "com.onurra.yurtsim"
-        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
+        # Not: workspace/project yolu sabit DEĞİL — `detect_xcode_target` adımı
+        # XC_TARGET_KIND + XC_TARGET_PATH olarak runtime'da belirliyor.
 
     # Elle tetiklenir (Start new build). Her push'ta derlemek istersen aç:
     # triggering:
@@ -105,6 +145,7 @@ workflows:
       - *build_www
       - *add_ios
       - *gen_assets
+      - *detect_xcode_target
 
       - name: Kod imzalama (sertifika/profil yoksa OLUŞTUR)
         script: |
@@ -154,8 +195,12 @@ workflows:
 
       - name: .ipa derle (imzalı)
         script: |
+          set -e
+          # Hedef bayrağı detect_xcode_target'tan geliyor:
+          #   Capacitor 8 (SPM)      → --project ios/App/App.xcodeproj
+          #   CocoaPods şablonu ise  → --workspace ios/App/App.xcworkspace
           xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
+            "--$XC_TARGET_KIND" "$XC_TARGET_PATH" \
             --scheme "$XCODE_SCHEME"
 
     artifacts:
@@ -197,12 +242,14 @@ workflows:
       - *build_www
       - *add_ios
       - *gen_assets
+      - *detect_xcode_target
 
       - name: Xcode build (imzasız)
         script: |
           set -e
+          # xcodebuild tek tire kullanır: -project / -workspace
           xcodebuild \
-            -workspace "ios/App/App.xcworkspace" \
+            "-$XC_TARGET_KIND" "$XC_TARGET_PATH" \
             -scheme "App" \
             -configuration Release \
             -sdk iphoneos \

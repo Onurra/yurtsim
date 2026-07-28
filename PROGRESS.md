@@ -20,7 +20,11 @@
 > (1) `codemagic.yaml` Node 20'ye pinliydi, Capacitor 8 CLI Node≥22 istiyor → `node: 22` +
 > `npm ci` öncesi `node_check` adımı; (2) `capacitor.config.ts` Node 22'de runtime TS parse'ında
 > `reading 'CommonJS'` hatası veriyordu → config **`capacitor.config.json`**'a çevrildi (`.ts` silindi;
-> CLI `.ts`'i `.json`'a tercih ettiği için dosya geri eklenmemeli).
+> CLI `.ts`'i `.json`'a tercih ettiği için dosya geri eklenmemeli);
+> (3) Step 9 `.ipa derle` → `--workspace ios/App/App.xcworkspace` yolu yok dedi: Capacitor 8
+> iOS'u **SPM** şablonundan üretiyor (`ios-spm-template.tar.gz`), Podfile/xcworkspace hiç
+> oluşmuyor → yeni `detect_xcode_target` adımı hedefi (`XC_TARGET_KIND`/`XC_TARGET_PATH`)
+> runtime'da bulup hem imzalı hem imzasız workflow'a veriyor.
 >
 > **Oluşan dosyalar (Stage D):** `package.json`, `package-lock.json`, `capacitor.config.json`, `build/www.js`,
 > `build/icon.js`, `assets/*.png` (ikon+splash kaynakları), `assets/tabler/` (offline webfont) +

@@ -92,6 +92,14 @@ Yapılandırma: [`codemagic.yaml`](codemagic.yaml) — iki workflow:
 > `Cannot read properties of undefined (reading 'CommonJS')` ile patlıyor. JSON'da
 > TypeScript hiç devreye girmez. `.ts` dosyası geri eklenirse CLI onu `.json`'a
 > tercih eder — yani sorun geri gelir.
+>
+> **CocoaPods yok, SPM var:** Capacitor 8 iOS projesini Swift Package Manager
+> şablonundan üretiyor (CLI'da sabit: `ios-spm-template.tar.gz`). Yani `ios/App`
+> altında **`Podfile` de `App.xcworkspace` de oluşmaz** — sadece `App.xcodeproj` +
+> `CapApp-SPM/Package.swift`. Bu yüzden Xcode komutları `-workspace` değil
+> `-project` ister. `codemagic.yaml`'daki `detect_xcode_target` adımı hedefi
+> runtime'da bulup `XC_TARGET_KIND`/`XC_TARGET_PATH` olarak aktarır (workspace
+> varsa onu, yoksa project'i kullanır), böylece iki şablonda da çalışır.
 
 **Bir kerelik kurulum:**
 
