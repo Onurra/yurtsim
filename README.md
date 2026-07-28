@@ -152,9 +152,31 @@ Codemagic → app → *Environment variables* → değişken adı **`CERTIFICATE
 değer = PEM'in tamamı (`-----BEGIN...` dahil), **Secure** işaretli. `cert_key.pem`'i
 repoya **koyma**, güvenli bir yerde sakla.
 
-Env var tanımlı değilse build yine de çalışır (script anahtarı kendisi üretir) ama logda
-uyarı basar. Limite takılırsan: Developer portal → Certificates → eski dağıtım
-sertifikalarını revoke et.
+**⚠️ Grup import'u — en sık atlanan adım.** Codemagic'te env var eklerken bir *group*
+seçilir (varsayılan `Default`). Değişken bir gruba konduysa, workflow o grubu
+`codemagic.yaml`'da **import etmedikçe build içinde görünmez** — script değişkeni
+tanımsız sanır. Bu repoda değişkenler **`yurtsim`** grubunda, dolayısıyla:
+
+```yaml
+environment:
+  groups:
+    - yurtsim          # Codemagic UI'daki grup adıyla BİREBİR aynı olmalı
+```
+
+Grup adını UI'da değiştirirsen yaml'ı da güncelle; aksi halde build "CERTIFICATE_PRIVATE_KEY
+tanımlı değil" der ve durur.
+
+Env var bulunamazsa build **durur** (`exit 1`) — bilerek. Eskiden script sessizce geçici
+bir anahtar üretiyordu; bu her seferinde yeni bir dağıtım sertifikası denemesi demekti ve
+limit dolduğunda `409: You already have a current Distribution certificate` ile patlıyordu.
+Daha kötüsü: o sertifikaların özel anahtarı build makinesinin `/tmp`'sinde kaldığı için bir
+daha **kullanılamıyor** (slot yanıyor). Hesapta gerçekten hiç dağıtım sertifikası yoksa ve
+yeni üretilmesini istiyorsan build'i `ALLOW_NEW_CERT=true` ile başlat, sonra üretilen
+anahtarı `CERTIFICATE_PRIVATE_KEY` olarak kaydet.
+
+Limite takıldıysan: Developer portal → Certificates → **özel anahtarı elinde olmayan**
+(eski CI build'lerinin ürettiği) dağıtım sertifikalarını revoke et, sonra saklı anahtarınla
+yeniden derle.
 
 Notlar:
 - Build numarası Codemagic'in artan sayacından (`$PROJECT_BUILD_NUMBER`) gelir — TestFlight
@@ -162,9 +184,10 @@ Notlar:
 - Sürüm numarası (`MARKETING_VERSION`) Capacitor'ın ürettiği Xcode projesinden gelir (1.0).
   Yükseltmek için `ios/App/App.xcodeproj` CI'da üretildiğinden, kalıcı değişiklik gerekirse
   `agvtool new-marketing-version` adımı `codemagic.yaml`'a eklenmeli.
-- İmzalama takılırsa sırayla bak: (1) integration adı yaml'daki `YurtSim ASC` ile aynı mı,
-  (2) API key rolü sertifika/profil oluşturmaya yetiyor mu — yetmiyorsa **Admin** rollü key
-  kullan, (3) "already have a current Distribution certificate" hatası = sertifika limiti,
+- İmzalama takılırsa sırayla bak: (1) env var grubu (`environment.groups` → `yurtsim`)
+  import edilmiş mi, (2) integration adı yaml'daki `YurtSim ASC` ile aynı mı,
+  (3) API key rolü sertifika/profil oluşturmaya yetiyor mu — yetmiyorsa **Admin** rollü key
+  kullan, (4) "already have a current Distribution certificate" hatası = sertifika limiti,
   yukarıdaki `CERTIFICATE_PRIVATE_KEY` adımını uygula veya eski sertifikayı revoke et.
 - İmzalamayı derlemeden ayrıştırmak için `ios-unsigned` workflow'unu çalıştır: o geçip
   `ios-testflight` patlıyorsa sorun kesinlikle imzalamadadır.

@@ -128,6 +128,14 @@ workflows:
       app_store_connect: YurtSim ASC
 
     environment:
+      # ⚠️ Codemagic'te bir env var GRUBA konduysa, workflow o grubu BURADA import
+      # etmedikçe build içinde GÖRÜNMEZ (tanımsız gibi davranır). CERTIFICATE_PRIVATE_KEY
+      # "yurtsim" grubunda olduğu için bu satır zorunlu — yoksa script anahtarı
+      # bulamayıp her build'de yeni sertifika üretmeye çalışır ve Apple'ın dağıtım
+      # sertifikası limitine takılır ("409: You already have a current Distribution
+      # certificate"). Grup adı Codemagic UI'daki adla BİREBİR aynı olmalı.
+      groups:
+        - yurtsim
       node: 22          # Capacitor 8 CLI >=22 ister (20 ile `npx cap add ios` patlıyor)
       xcode: latest
       cocoapods: default
@@ -175,17 +183,35 @@ workflows:
           # var olan sertifikayı ancak ELİNDEKİ ÖZEL ANAHTARLA eşleşiyorsa yeniden kullanır.
           # Bu yüzden: anahtarı bir kez üretip Codemagic'te CERTIFICATE_PRIVATE_KEY
           # (secure env var) olarak saklamak ÖNERİLİR — bkz. README.
-          # Tanımlı değilse ilk build için yeni anahtar üretilir (yeni sertifika oluşur).
           if [ -n "$CERTIFICATE_PRIVATE_KEY" ]; then
             CERT_KEY_ARG="@env:CERTIFICATE_PRIVATE_KEY"
-            echo "→ CERTIFICATE_PRIVATE_KEY kullanılıyor (mevcut sertifika yeniden kullanılacak)."
-          else
+            echo "→ CERTIFICATE_PRIVATE_KEY bulundu (mevcut sertifika yeniden kullanılacak)."
+          elif [ "$ALLOW_NEW_CERT" = "true" ]; then
+            # Bilinçli kaçış yolu: hesapta HİÇ dağıtım sertifikası yokken ilk kurulum.
             openssl genrsa -out /tmp/asc_cert_key.pem 2048
             CERT_KEY_ARG="@file:/tmp/asc_cert_key.pem"
-            echo "⚠️  CERTIFICATE_PRIVATE_KEY tanımlı değil → yeni özel anahtar üretildi."
-            echo "⚠️  Bu build Apple hesabında YENİ bir dağıtım sertifikası oluşturabilir."
-            echo "⚠️  Sertifika limitine takılmamak için README'deki adımla anahtarı"
-            echo "⚠️  bir kez üretip Codemagic env var olarak kaydet."
+            echo "⚠️  ALLOW_NEW_CERT=true → yeni özel anahtar üretildi, YENİ sertifika oluşabilir."
+            echo "⚠️  Build bitince bu anahtarı CERTIFICATE_PRIVATE_KEY olarak kaydet, yoksa"
+            echo "⚠️  sonraki build yine yenisini üretmeye çalışır."
+          else
+            # ESKİDEN: burada sessizce geçici anahtar üretiliyordu. Sonuç: her build yeni
+            # sertifika denemesi → Apple limiti dolunca "409: You already have a current
+            # Distribution certificate". Üstelik o sertifikaların özel anahtarı /tmp'de
+            # kaldığı için bir daha KULLANILAMIYOR. Artık sessizce devam etmek yerine
+            # burada duruyoruz: bir slot daha yakmak, build'i düşürmekten pahalı.
+            echo "HATA: CERTIFICATE_PRIVATE_KEY tanımlı değil."
+            echo ""
+            echo "Muhtemel sebep: değişken Codemagic'te bir GRUBA eklenmiş ama bu workflow"
+            echo "o grubu import etmiyor. Kontrol et: codemagic.yaml → environment.groups"
+            echo "listesindeki ad, Codemagic UI'daki grup adıyla BİREBİR aynı mı?"
+            echo "(Bu workflow şu grupları import ediyor: yurtsim)"
+            echo ""
+            echo "Değişkeni gruba değil doğrudan app'e eklediysen grup import'u gerekmez;"
+            echo "o durumda adının tam olarak CERTIFICATE_PRIVATE_KEY olduğunu doğrula."
+            echo ""
+            echo "Hesapta gerçekten hiç dağıtım sertifikası yoksa ve yeni üretilmesini"
+            echo "İSTİYORSAN: ALLOW_NEW_CERT=true env var'ı ile bu build'i tekrar başlat."
+            exit 1
           fi
 
           # Bundle ID kayıtlı değilse kaydeder, sertifika yoksa üretir, App Store
