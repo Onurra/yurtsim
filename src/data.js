@@ -123,12 +123,24 @@ games:[
 // CS:GO: kazanırsan +10 mood, kaybetsen +5 (5 az)
 {id:'cs',name:'CS:GO Premier',note:'Klan ile maç',mood:10,energy:-15,hygiene:-8,mins:90,lossChance:0.35,lossMood:5}
 ],
+// Kız oyunu: SADECE tema/isim farklı — sayılar (mood/energy/hygiene/mins/lossChance/
+// lossMood) yukarıdaki erkek listesiyle slot slot AYNI, denge değişmesin diye.
+// ⚠️ 'okeyonline' KUMAR DEĞİL: kahvehanedeki okey ayrı bir sistem (doOkey/
+// state.okeyWinRate, para yatırılır, campus.js) — burası bedava eğlence aktivitesi.
+gamesKiz:[
+{id:'dizi',name:'Dizi izle',note:'Yeni bölüm · tek oturuşta',mood:12,energy:-5,hygiene:-3,mins:60,winMsg:'Dizinin yeni bölümlerini izledin · keyifliydi'},
+{id:'okeyonline',name:'Online okey',note:'Telefondan · arkadaşlarla',mood:8,energy:-15,hygiene:-8,mins:90,lossChance:0.40,lossMood:3,winMsg:'Online okeyde masayı topladın · keyifliydi',lossMsg:'Online okeyde eller kötü geldi, yine de vakit geçti'},
+{id:'hayday',name:'Hay Day',note:'Çiftlik · mahsul + market',mood:10,energy:-15,hygiene:-8,mins:90,lossChance:0.35,lossMood:5,winMsg:'Hay Day\'de çiftliği büyüttün · keyifliydi',lossMsg:'Hay Day\'de mahsuller çürüdü, sinir oldun ama oyalandın'}
+],
 gamble:[
 {id:'sweet',name:'Şeker oyunu',note:'Slot · ev kazanır',winRate:0.28,payMin:1.5,payMax:3.0,mins:5,emoji:'🍭'},
 {id:'bj',name:'Blackjack',note:'21 karşı krupiye',winRate:0.33,payMin:2.0,payMax:2.0,mins:10,emoji:'♠️'},
 {id:'iddia',name:'İddia',note:'Maç tahmini · seviye var',winRate:0.45,payMin:1.5,payMax:1.5,mins:15,levels:true,emoji:'⚽'}
 ]
 };
+// Oyun listesi cinsiyete göre (getJobs/getCarePlaces ile aynı kalıp).
+// gamble ve kahvehane okeyi cinsiyetten BAĞIMSIZ — ikisinde de aynı.
+function getGames(){return state.gender==='kız'?entertainment.gamesKiz:entertainment.games}
 const gfDates=[
 {id:'walk',name:'Sahile yürüyüş',note:'romantik',cost:0,rel:5,mood:8,mins:90},
 {id:'cinema',name:'Sinemaya götür',note:'2 bilet + popcorn',cost:400,rel:7,mood:14,mins:150},

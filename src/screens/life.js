@@ -41,12 +41,15 @@ function doCare(id){const c=getCarePlaces().find(x=>x.id===id);if(!c)return;if(c
 function doOuting(id){const o=entertainment.outings.find(x=>x.id===id);if(!o)return;if(o.gate&&!o.gate()){msg('Şu saatte değil.');return}if(state.money<o.price){msg('Param yetmedi.');return}state.money-=o.price;state.mood=clamp(state.mood+o.mood);state.energy=clamp(state.energy+o.energy);state.hygiene=clamp(state.hygiene+o.hygiene);state.location=o.name.replace("'a git","").replace("'e git","");advance(o.mins);msg(o.name+' · harika geçti.');render()}
 // === OYUN: kaybedersen küçük pozitif moral ===
 function playGame(id){
-const g=entertainment.games.find(x=>x.id===id);if(!g)return;
+const g=getGames().find(x=>x.id===id);if(!g)return;
 let mood=g.mood;
-let t=g.name+' oynadın · keyifliydi · moral +'+mood;
+// winMsg/lossMsg sadece TEMA metni; yoksa eski genel cümle kullanılır (erkek
+// listesinde yok → çıktı birebir aynı). "Dizi izle oynadın" gibi bozuk cümleler
+// olmasın diye kız listesinde tanımlı.
+let t=(g.winMsg||g.name+' oynadın · keyifliydi')+' · moral +'+mood;
 if(g.lossChance&&Math.random()<g.lossChance){
 mood=g.lossMood;
-t=g.name+' kaybettin ama yine de keyif aldın · moral +'+mood;
+t=(g.lossMsg||g.name+' kaybettin ama yine de keyif aldın')+' · moral +'+mood;
 }
 state.mood=clamp(state.mood+mood);
 state.energy=clamp(state.energy+g.energy);

@@ -158,8 +158,9 @@ function modalFunHtml(){
 let h=`<div style="font-size:11px;color:${C.ts};margin-bottom:6px;"><i class="ti ti-music"></i> Dışarı çık</div><div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;margin-bottom:14px;">`;
 entertainment.outings.forEach((o,i)=>{const ok=(!o.gate||o.gate())&&state.money>=o.price;h+=`<div style="padding:10px 12px;${i<entertainment.outings.length-1?'border-bottom:0.5px solid '+C.bt+';':''}display:flex;justify-content:space-between;align-items:center;gap:8px;"><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:600;color:${C.tp};">${o.name}</div><div style="font-size:10px;color:${C.ts};">${o.note} · moral +${o.mood}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;"><span style="font-size:12px;font-weight:600;color:${C.tp};">${o.price}₺</span><button onclick="doOuting('${o.id}')" style="font-size:10px;padding:3px 10px;opacity:${ok?1:0.4};">Git</button></div></div>`});
 h+=`</div><div style="font-size:11px;color:${C.ts};margin-bottom:6px;"><i class="ti ti-device-gamepad-2"></i> Oyun · bedava</div><div style="background:var(--surface);border:0.5px solid ${C.bt};border-radius:6px;overflow:hidden;margin-bottom:14px;">`;
-entertainment.games.forEach((g,i)=>{
-h+=`<div style="padding:10px 12px;${i<entertainment.games.length-1?'border-bottom:0.5px solid '+C.bt+';':''}display:flex;justify-content:space-between;align-items:center;gap:8px;">
+const funGames=getGames();
+funGames.forEach((g,i)=>{
+h+=`<div style="padding:10px 12px;${i<funGames.length-1?'border-bottom:0.5px solid '+C.bt+';':''}display:flex;justify-content:space-between;align-items:center;gap:8px;">
 <div style="flex:1;min-width:0;">
 <div style="font-size:12px;font-weight:600;color:${C.tp};">${g.name}</div>
 <div style="font-size:10px;color:${C.ts};">${g.note} · ${g.mins}dk</div>
