@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Yurt Simülatör — Türk üniversite hayatı temalı yaşam simülasyonu (vanilla JS + Capacitor paketleme).",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build:www": "node build/www.js",
     "smoke": "node build/smoke.js",

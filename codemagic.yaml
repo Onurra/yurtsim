@@ -13,6 +13,35 @@
 definitions:
   # Her iki workflow'un ortak adımları. YAML anchor'ları ile paylaşılıyor.
   scripts:
+    - &node_check
+      name: Node sürümü (>=22 zorunlu)
+      script: |
+        set -e
+        # Capacitor 8 CLI Node >=22 ister. `environment.node` genelde bunu halleder,
+        # ama makinede eski sürüm aktif kalırsa `npx cap add ios` "[fatal] The Capacitor
+        # CLI requires NodeJS >=22.0.0" ile patlar. Burada garantiye alıyoruz.
+        MAJOR=$(node -p "process.versions.node.split('.')[0]" 2>/dev/null || echo 0)
+        echo "Aktif Node: $(node -v 2>/dev/null || echo 'yok') (major=$MAJOR)"
+        if [ "$MAJOR" -lt 22 ]; then
+          echo "→ Node 22'ye geçiliyor (nvm)."
+          export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+          if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+            echo "HATA: Node $MAJOR ve nvm bulunamadı ($NVM_DIR). Capacitor 8 için Node>=22 şart."
+            exit 1
+          fi
+          # shellcheck disable=SC1090
+          . "$NVM_DIR/nvm.sh"
+          nvm install 22
+          nvm use 22
+          nvm alias default 22
+          # Sonraki build adımları ayrı shell'de çalışır → PATH'i kalıcı yaz.
+          NODE22_BIN=$(dirname "$(nvm which 22)")
+          echo "PATH=$NODE22_BIN:$PATH" >> "$CM_ENV"
+          export PATH="$NODE22_BIN:$PATH"
+        fi
+        node -v
+        npm -v
+
     - &npm_install
       name: Bağımlılıklar (npm ci)
       script: npm ci
@@ -50,7 +79,7 @@ workflows:
       app_store_connect: YurtSim ASC
 
     environment:
-      node: 20
+      node: 22          # Capacitor 8 CLI >=22 ister (20 ile `npx cap add ios` patlıyor)
       xcode: latest
       cocoapods: default
       # ⚠️ `ios_signing:` bloğu BİLEREK YOK.
@@ -71,6 +100,7 @@ workflows:
     #       include: true
 
     scripts:
+      - *node_check
       - *npm_install
       - *build_www
       - *add_ios
@@ -157,11 +187,12 @@ workflows:
     max_build_duration: 45
 
     environment:
-      node: 20
+      node: 22          # Capacitor 8 CLI >=22 ister
       xcode: latest
       cocoapods: default
 
     scripts:
+      - *node_check
       - *npm_install
       - *build_www
       - *add_ios
