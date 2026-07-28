@@ -416,9 +416,7 @@ Kullanıcı kararları: **Apple Developer hesabı VAR** (imzalı/TestFlight hede
 - **`codemagic.yaml` — 2 workflow** (ortak adımlar YAML anchor'ı ile paylaşılıyor:
   `npm ci` → `npm run build:www` → `npx cap add ios` (yoksa; varsa `cap sync ios`) → `npx capacitor-assets generate --ios`):
   1. **`ios-testflight`** (asıl) — `instance_type: mac_mini_m2`, `integrations.app_store_connect: YurtSim ASC`,
-     `environment.ios_signing` (app_store / `com.onurra.yurtsim`) → sertifika+profili build ÖNCESİ çeker;
-     sonra scripts'te `xcode-project use-profiles` (⚠️ **sıra kritik**: proje `cap add ios` ile ÜRETİLDİKTEN
-     sonra uygulanmalı, o yüzden otomatik değil elle çağrılıyor) → `agvtool new-version -all $PROJECT_BUILD_NUMBER`
+     imzalama **elle** (aşağıdaki 07-28 düzeltmesi) → `agvtool new-version -all $PROJECT_BUILD_NUMBER`
      → `xcode-project build-ipa`. Publishing: `app_store_connect` (auth: integration, `submit_to_testflight: true`,
      App Store'a gönderim kapalı) + e-posta bildirimi. Artifacts: `.ipa`, xcodebuild log, dSYM.
   2. **`ios-unsigned`** (yedek/doğrulama, Apple hesabı gerekmez) — `xcodebuild ... CODE_SIGNING_ALLOWED=NO`
@@ -435,13 +433,34 @@ Kullanıcı kararları: **Apple Developer hesabı VAR** (imzalı/TestFlight hede
 - `typescript` package-lock'ta mevcut (darwin-arm64 optional binary dahil) → CI'daki `npm ci` sonrası
   Capacitor CLI `capacitor.config.ts`'i okuyabilir.
 
+### 🔧 DÜZELTME — ilk build hatası: "No matching profiles found" (2026-07-28)
+İlk `ios-testflight` build'i `No matching profiles found for bundle identifier com.onurra.yurtsim
+and distribution type app_store` ile patladı.
+- **Kök neden:** `environment.ios_signing` bloğu build BAŞLAMADAN çalışır ve yalnızca *var olan*
+  profili arar — oluşturmaz. Hesapta App Store profili olmadığı için scripts'e hiç gelmeden patlıyordu.
+- **Fix:** `ios_signing` bloğu **kaldırıldı**; imzalama `cap add ios`tan sonra elle yapılıyor:
+  `keychain initialize` → `app-store-connect fetch-signing-files "$BUNDLE_ID" --platform IOS
+  --type IOS_APP_STORE --certificate-key <anahtar> --create` → `keychain add-certificates`
+  → `xcode-project use-profiles --project ios/App/App.xcodeproj`. `--create` eksik olanı üretir
+  (Bundle ID kaydı + dağıtım sertifikası + App Store profili).
+- **⚠️ Sertifika limiti tuzağı:** `fetch-signing-files` var olan sertifikayı ancak **eşleşen özel
+  anahtarla** yeniden kullanır. Anahtar verilmezse her build yeni sertifika üretir → Apple'ın 2-3
+  dağıtım sertifikası limiti dolar. Bu yüzden script: `CERTIFICATE_PRIVATE_KEY` env var'ı **varsa**
+  onu kullanır (`@env:`), yoksa `openssl genrsa` ile üretip (`@file:`) logda uyarı basar.
+  README'ye "bir kez üret → Codemagic'e Secure env var olarak kaydet" adımı eklendi.
+- `--certificate-key` bilerek **her zaman** veriliyor: CLI dokümanı anahtar verilmediğinde
+  `--create` davranışını netleştirmiyor (auto-generate mi, hata mı) — belirsizlik script'te kapatıldı.
+- Doğrulama: yaml js-yaml ile parse edildi (`ios_signing present? false`, adım sırası doğru).
+
 ### ⬜ SIRADA — Codemagic UI kurulumu + ilk build (KULLANICIDA, tarayıcı işi)
 1. App Store Connect → Users and Access → Integrations → **API key** oluştur (rol: App Manager);
    Issuer ID + Key ID + `.p8` (bir kez iner) sakla.
 2. Developer portal → Identifiers → **`com.onurra.yurtsim`** App ID; sonra ASC → My Apps → **+ New App**.
 3. [codemagic.io](https://codemagic.io) → GitHub ile giriş → `Onurra/yurtsim` reposunu ekle (yaml otomatik bulunur).
 4. Codemagic → Integrations → App Store Connect → key ekle, **adı birebir `YurtSim ASC`** (yaml bu adı arar).
-5. Start new build → workflow **`ios-testflight`** → ~15–25 dk → `.ipa` artifact + TestFlight.
+5. *(Önerilen)* `openssl genrsa -out cert_key.pem 2048` → PEM'in tamamını Codemagic'te
+   **`CERTIFICATE_PRIVATE_KEY`** (Secure) env var'ı olarak kaydet → sertifika limiti sorunu olmaz.
+6. Start new build → workflow **`ios-testflight`** → ~15–25 dk → `.ipa` artifact + TestFlight.
    Sorun çıkarsa önce `ios-unsigned` ile "derleniyor mu"yu ayrıştır.
 
 ### ⬜ KALAN — kullanıcı (native, bu makinede/Mac'te)

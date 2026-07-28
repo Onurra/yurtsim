@@ -53,12 +53,11 @@ workflows:
       node: 20
       xcode: latest
       cocoapods: default
-      ios_signing:
-        # Bu blok build'den ÖNCE sertifika+profili çeker ve keychain'e kurar.
-        # Profili Xcode projesine uygulamak (`xcode-project use-profiles`) aşağıda,
-        # `cap add ios` projeyi ÜRETTİKTEN SONRA yapılır — sıra önemli.
-        distribution_type: app_store
-        bundle_identifier: com.onurra.yurtsim
+      # ⚠️ `ios_signing:` bloğu BİLEREK YOK.
+      # O blok build başlamadan önce çalışır ve SADECE var olan profili arar; hesapta
+      # App Store profili yoksa "No matching profiles found for bundle identifier ...
+      # and distribution type app_store" ile daha scripts'e gelmeden patlar.
+      # Bunun yerine imzalama aşağıda elle, `--create` ile yapılıyor (yoksa oluşturur).
       vars:
         BUNDLE_ID: "com.onurra.yurtsim"
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
@@ -77,8 +76,42 @@ workflows:
       - *add_ios
       - *gen_assets
 
-      - name: İmzalama profillerini Xcode projesine uygula
-        script: xcode-project use-profiles --project "ios/App/App.xcodeproj"
+      - name: Kod imzalama (sertifika/profil yoksa OLUŞTUR)
+        script: |
+          set -e
+          # Bu adım `cap add ios`tan SONRA olmak zorunda: use-profiles üretilmiş
+          # Xcode projesini düzenler.
+          keychain initialize
+
+          # --- Sertifika özel anahtarı --------------------------------------
+          # Apple hesabında en fazla 2-3 dağıtım sertifikası olabilir. fetch-signing-files
+          # var olan sertifikayı ancak ELİNDEKİ ÖZEL ANAHTARLA eşleşiyorsa yeniden kullanır.
+          # Bu yüzden: anahtarı bir kez üretip Codemagic'te CERTIFICATE_PRIVATE_KEY
+          # (secure env var) olarak saklamak ÖNERİLİR — bkz. README.
+          # Tanımlı değilse ilk build için yeni anahtar üretilir (yeni sertifika oluşur).
+          if [ -n "$CERTIFICATE_PRIVATE_KEY" ]; then
+            CERT_KEY_ARG="@env:CERTIFICATE_PRIVATE_KEY"
+            echo "→ CERTIFICATE_PRIVATE_KEY kullanılıyor (mevcut sertifika yeniden kullanılacak)."
+          else
+            openssl genrsa -out /tmp/asc_cert_key.pem 2048
+            CERT_KEY_ARG="@file:/tmp/asc_cert_key.pem"
+            echo "⚠️  CERTIFICATE_PRIVATE_KEY tanımlı değil → yeni özel anahtar üretildi."
+            echo "⚠️  Bu build Apple hesabında YENİ bir dağıtım sertifikası oluşturabilir."
+            echo "⚠️  Sertifika limitine takılmamak için README'deki adımla anahtarı"
+            echo "⚠️  bir kez üretip Codemagic env var olarak kaydet."
+          fi
+
+          # Bundle ID kayıtlı değilse kaydeder, sertifika yoksa üretir, App Store
+          # profili yoksa oluşturur; hepsini indirir.
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --platform IOS \
+            --type IOS_APP_STORE \
+            --certificate-key "$CERT_KEY_ARG" \
+            --create
+
+          # İndirilen sertifikaları keychain'e ekle, profilleri projeye uygula.
+          keychain add-certificates
+          xcode-project use-profiles --project "ios/App/App.xcodeproj"
 
       - name: Build numarası
         script: |

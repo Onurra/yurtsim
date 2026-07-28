@@ -100,9 +100,47 @@ Yapılandırma: [`codemagic.yaml`](codemagic.yaml) — iki workflow:
 4. **Integration** — Codemagic → Teams/Personal → Integrations → **App Store Connect** → Add key:
    issuer ID + key ID + `.p8`. **Key adı birebir `YurtSim ASC` olmalı** — `codemagic.yaml` içindeki
    `integrations.app_store_connect` bu adı arar (başka ad verirsen yaml'ı da güncelle).
-5. **Derle** — Codemagic'te app → *Start new build* → workflow **`ios-testflight`** → Start.
+5. **(Önerilen) Sertifika özel anahtarını sabitle** — aşağıdaki "Kod imzalama" bölümü.
+6. **Derle** — Codemagic'te app → *Start new build* → workflow **`ios-testflight`** → Start.
    ~15–25 dk sonra `.ipa` artifact olarak iner ve TestFlight'a yüklenir; telefonda
    **TestFlight** uygulamasından kurulur.
+
+#### Kod imzalama (nasıl çalışıyor)
+
+`codemagic.yaml`'da **`environment.ios_signing` bloğu bilerek yok**: o blok build başlamadan
+çalışır ve yalnızca *var olan* profili arar — hesapta App Store profili yoksa
+`No matching profiles found for bundle identifier ... and distribution type app_store`
+hatasıyla daha script'lere gelmeden patlar. Bunun yerine imzalama, Xcode projesi
+`npx cap add ios` ile üretildikten **sonra** elle yapılıyor:
+
+```bash
+keychain initialize
+app-store-connect fetch-signing-files com.onurra.yurtsim \
+  --platform IOS --type IOS_APP_STORE --certificate-key <anahtar> --create
+keychain add-certificates
+xcode-project use-profiles --project ios/App/App.xcodeproj
+```
+
+`--create` sayesinde **eksik olan üretilir**: Bundle ID kayıtlı değilse kaydedilir,
+dağıtım sertifikası yoksa oluşturulur, App Store provisioning profile yoksa yaratılır.
+
+**⚠️ Sertifika limiti — `CERTIFICATE_PRIVATE_KEY`.** `fetch-signing-files` var olan bir
+sertifikayı ancak **elindeki özel anahtarla eşleşiyorsa** yeniden kullanır. Anahtar
+verilmezse build her seferinde yenisini üretir ve Apple'ın dağıtım sertifikası limitine
+(2–3) takılırsın. Bu yüzden anahtarı **bir kez** üretip Codemagic'e kaydet:
+
+```bash
+openssl genrsa -out cert_key.pem 2048     # Git Bash / macOS / Linux
+cat cert_key.pem                          # çıktının TAMAMINI kopyala
+```
+
+Codemagic → app → *Environment variables* → değişken adı **`CERTIFICATE_PRIVATE_KEY`**,
+değer = PEM'in tamamı (`-----BEGIN...` dahil), **Secure** işaretli. `cert_key.pem`'i
+repoya **koyma**, güvenli bir yerde sakla.
+
+Env var tanımlı değilse build yine de çalışır (script anahtarı kendisi üretir) ama logda
+uyarı basar. Limite takılırsan: Developer portal → Certificates → eski dağıtım
+sertifikalarını revoke et.
 
 Notlar:
 - Build numarası Codemagic'in artan sayacından (`$PROJECT_BUILD_NUMBER`) gelir — TestFlight
@@ -110,8 +148,12 @@ Notlar:
 - Sürüm numarası (`MARKETING_VERSION`) Capacitor'ın ürettiği Xcode projesinden gelir (1.0).
   Yükseltmek için `ios/App/App.xcodeproj` CI'da üretildiğinden, kalıcı değişiklik gerekirse
   `agvtool new-marketing-version` adımı `codemagic.yaml`'a eklenmeli.
-- İlk build'de imzalama takılırsa: integration adını, bundle ID'nin portalda gerçekten var
-  olduğunu ve API key rolünü kontrol et.
+- İmzalama takılırsa sırayla bak: (1) integration adı yaml'daki `YurtSim ASC` ile aynı mı,
+  (2) API key rolü sertifika/profil oluşturmaya yetiyor mu — yetmiyorsa **Admin** rollü key
+  kullan, (3) "already have a current Distribution certificate" hatası = sertifika limiti,
+  yukarıdaki `CERTIFICATE_PRIVATE_KEY` adımını uygula veya eski sertifikayı revoke et.
+- İmzalamayı derlemeden ayrıştırmak için `ios-unsigned` workflow'unu çalıştır: o geçip
+  `ios-testflight` patlıyorsa sorun kesinlikle imzalamadadır.
 
 ### Cihazda çalıştır
 ```bash
