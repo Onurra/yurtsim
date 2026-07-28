@@ -2,7 +2,7 @@
 #
 # Neden: Windows'ta Xcode yok → iOS derleme/imzalama bulutta (macOS runner) yapılır.
 # ios/ native projesi REPO'DA DEĞİL; her build'de `npx cap add ios` ile üretilir
-# (native tarafta elle yazılmış dosyamız yok, capacitor.config.ts tek kaynak).
+# (native tarafta elle yazılmış dosyamız yok, capacitor.config.json tek kaynak).
 #
 # İki workflow:
 #   ios-testflight → imzalı .ipa + TestFlight'a yükleme (Apple Developer hesabı gerekir)

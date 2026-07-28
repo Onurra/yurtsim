@@ -16,7 +16,13 @@
 > App Store Connect API key → Codemagic integration adı **`YurtSim ASC`** → repo bağla →
 > `ios-testflight` workflow'unu çalıştır. Adımlar: README "Codemagic (iOS bulut derleme)".
 >
-> **Oluşan dosyalar (Stage D):** `package.json`, `package-lock.json`, `capacitor.config.ts`, `build/www.js`,
+> **CI düzeltmeleri (2026-07-28):** ilk `ios-testflight` denemesi iki kez patladı →
+> (1) `codemagic.yaml` Node 20'ye pinliydi, Capacitor 8 CLI Node≥22 istiyor → `node: 22` +
+> `npm ci` öncesi `node_check` adımı; (2) `capacitor.config.ts` Node 22'de runtime TS parse'ında
+> `reading 'CommonJS'` hatası veriyordu → config **`capacitor.config.json`**'a çevrildi (`.ts` silindi;
+> CLI `.ts`'i `.json`'a tercih ettiği için dosya geri eklenmemeli).
+>
+> **Oluşan dosyalar (Stage D):** `package.json`, `package-lock.json`, `capacitor.config.json`, `build/www.js`,
 > `build/icon.js`, `assets/*.png` (ikon+splash kaynakları), `assets/tabler/` (offline webfont) +
 > değişenler: `index.html` (viewport/meta +
 > `.app-frame`/`.app-bezel` + yerel font linki), `src/styles.css` (mobil media query), `src/screens/extras.js`

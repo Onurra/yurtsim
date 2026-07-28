@@ -84,8 +84,14 @@ Yapılandırma: [`codemagic.yaml`](codemagic.yaml) — iki workflow:
 | `ios-unsigned` | İmzasız derler; "proje gerçekten build oluyor mu" kontrolü | Gerekmez |
 
 > `ios/` native projesi **repo'da tutulmaz** (`.gitignore`'da). Her build'de
-> `npx cap add ios` ile üretilir — tek kaynak `capacitor.config.ts`. Native dosyalara
+> `npx cap add ios` ile üretilir — tek kaynak `capacitor.config.json`. Native dosyalara
 > elle müdahale gerekirse bu karar gözden geçirilmeli.
+>
+> Config **bilerek `.json`** (eskiden `.ts`'ti): Capacitor CLI `.ts` config'i çalışma
+> anında TypeScript ile parse ediyor ve Node 22+ üzerinde
+> `Cannot read properties of undefined (reading 'CommonJS')` ile patlıyor. JSON'da
+> TypeScript hiç devreye girmez. `.ts` dosyası geri eklenirse CLI onu `.json`'a
+> tercih eder — yani sorun geri gelir.
 
 **Bir kerelik kurulum:**
 
@@ -170,7 +176,7 @@ npm run smoke                   # headless Chrome boot testi (0 hata beklenir)
 
 - Saf HTML / CSS / JavaScript (modüler; bundler yok).
 - Capacitor (Android + iOS paketleme) + `@capacitor/splash-screen` + `@capacitor/status-bar`
-  (native splash/durum çubuğu, `capacitor.config.ts` + `extras.js` `initNativeShell()`).
+  (native splash/durum çubuğu, `capacitor.config.json` + `extras.js` `initNativeShell()`).
 - İkonlar için Tabler Icons — **offline yerel webfont** (`assets/tabler/`, CDN'e bağımlı değil).
 
 ## Lisans
