@@ -1,0 +1,22 @@
+{
+  "_aciklama": "AdMob yapılandırması — TEK KAYNAK. build/www.js (web tarafı: src/ads.js kimlikleri) ve build/ios-plist.js (native tarafı: Info.plist) ikisi de buradan okur. Ortam seçimi: ADS_ENV=test|prod (varsayılan test).",
+  "env": {
+    "test": {
+      "_aciklama": "Google resmî iOS test birimleri — gerçek gösterim/gelir yok, tıklanması güvenli. VARSAYILAN.",
+      "appId": "ca-app-pub-3940256099942544~1458002511",
+      "interstitial": "ca-app-pub-3940256099942544/4411468910"
+    },
+    "prod": {
+      "_aciklama": "Gerçek App Store kimlikleri. SADECE ADS_ENV=prod ile derlenen sürümlerde kullanılır.",
+      "appId": "ca-app-pub-7050391296416054~1552499206",
+      "interstitial": "ca-app-pub-7050391296416054/2682436406"
+    }
+  },
+  "ios": {
+    "trackingUsageDescription": "Sana daha alakalı reklamlar gösterebilmek için bu izni kullanıyoruz. İzin vermezsen oyun aynı şekilde çalışır, reklamlar sadece kişiselleştirilmez.",
+    "_skAdNetworkNot": "SKAdNetwork, iOS'ta reklam yüklemesini (attribution) izin gerektirmeden ölçmeyi sağlar. Aşağıdaki liste Google'ın KENDİ kimliğini içerir. Google'ın reklam ağı ortaklarının tam listesi zamanla değişir; gerekirse https://developers.google.com/admob/ios/quick-start#update_your_infoplist adresindeki güncel listeyi buraya kopyala. Liste eksik olması reklamların çalışmasını ENGELLEMEZ, sadece ölçüm kapsamını daraltır.",
+    "skAdNetworkIds": [
+      "cstr6suwn9.skadnetwork"
+    ]
+  }
+}

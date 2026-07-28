@@ -64,6 +64,16 @@ definitions:
       name: App ikonu + splash (capacitor-assets)
       script: npx capacitor-assets generate --ios
 
+    - &inject_plist
+      name: AdMob Info.plist anahtarları (GADApplicationIdentifier + ATT)
+      script: |
+        set -e
+        # ios/ repoda yok (her build'de üretiliyor) → Info.plist'i elle commit'lemek
+        # mümkün değil, bu yüzden anahtarlar burada enjekte ediliyor.
+        # GADApplicationIdentifier eksikse Google SDK uygulamayı açılışta ÇÖKERTİR,
+        # o yüzden script hata durumunda exit 1 verir (sessizce geçmez).
+        node build/ios-plist.js
+
     - &detect_xcode_target
       name: Xcode hedefini tespit et (workspace mı project mi)
       script: |
@@ -129,6 +139,11 @@ workflows:
       vars:
         BUNDLE_ID: "com.onurra.yurtsim"
         XCODE_SCHEME: "App"
+        # Reklam kimlik seti: test (Google test birimleri) | prod (gerçek).
+        # Hem web tarafını (build/www.js → src/ads.js) hem Info.plist'i (build/ios-plist.js)
+        # birlikte belirler; ikisi ayrışamaz. TestFlight'ta gerçek reklam denemek
+        # istediğinde "prod" yap. VARSAYILAN BİLEREK test.
+        ADS_ENV: "test"
         # Not: workspace/project yolu sabit DEĞİL — `detect_xcode_target` adımı
         # XC_TARGET_KIND + XC_TARGET_PATH olarak runtime'da belirliyor.
 
@@ -145,6 +160,7 @@ workflows:
       - *build_www
       - *add_ios
       - *gen_assets
+      - *inject_plist
       - *detect_xcode_target
 
       - name: Kod imzalama (sertifika/profil yoksa OLUŞTUR)
@@ -235,6 +251,8 @@ workflows:
       node: 22          # Capacitor 8 CLI >=22 ister
       xcode: latest
       cocoapods: default
+      vars:
+        ADS_ENV: "test"   # doğrulama derlemesi → hep test reklamları
 
     scripts:
       - *node_check
@@ -242,6 +260,7 @@ workflows:
       - *build_www
       - *add_ios
       - *gen_assets
+      - *inject_plist
       - *detect_xcode_target
 
       - name: Xcode build (imzasız)

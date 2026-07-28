@@ -180,11 +180,71 @@ npm run open:ios                # (macOS) Xcode'da açar → Run
 npm run smoke                   # headless Chrome boot testi (0 hata beklenir)
 ```
 
+## Reklamlar (AdMob geçiş reklamı)
+
+`@capacitor-community/admob` ile **sadece native cihazda** geçiş reklamı (interstitial)
+gösterilir. Tarayıcıda ve `npm run smoke` içinde `window.Capacitor` olmadığı için
+reklam kodu tamamen pasiftir — tek satır hata üretmez.
+
+**Ne zaman çıkar** (`src/ads.js`, `processDayTransition` sonunda tetiklenir):
+
+> Son reklamdan beri **5 dakika gerçek zaman** geçtiyse, o eşik aşıldıktan **sonraki
+> ilk gün geçişinde** reklam çıkar ve zamanlayıcı sıfırlanır.
+
+Arada kaç gün geçtiği **önemsiz** — tek ölçüt süredir; gün geçişi yalnızca gösterimin
+anıdır (reklam oyunun ortasında, bir eylemin üstüne patlamaz). İstisna:
+
+| Kural | Değer | Sabit |
+|---|---|---|
+| Son reklamdan beri gerçek zaman | ≥ 300 sn (5 dk) | `ADS_MIN_SECONDS` |
+| Yeni oyuncu muafiyeti | ilk 7 oyun günü reklamsız | `ADS_GRACE_DAYS` |
+
+Hiç reklam gösterilmemişken süre, uygulamanın açılış anından sayılır — yani oyunun
+ilk dakikalarında da reklam çıkmaz.
+
+Durum `state` içinde (`adsLastShownAt`, `adsShownCount`, `adsStartDay`) →
+`saveGame()` ile kaydedilir, kapatıp açınca sıfırlanmaz.
+Reklam yüklenmemişse **oyun akışı beklemez**, gösterim sessizce atlanır.
+
+### Test ↔ gerçek reklam (`ADS_ENV`)
+
+Kimliklerin tek kaynağı **`build/ads-config.json`**. Ortam `ADS_ENV` ile seçilir,
+**varsayılan `test`** (Google resmî test birimleri — tıklaması güvenli):
+
+```bash
+npm run build:www               # test kimlikleri (varsayılan)
+ADS_ENV=prod npm run build:www  # gerçek App Store kimlikleri
+```
+
+`ADS_ENV` iki yeri **birlikte** belirler, dolayısıyla ayrışamazlar:
+- web tarafı → `build/www.js`, `www/src/ads.js` içindeki kimlik satırını yeniden yazar
+  (kaynak `src/ads.js` her zaman test'te kalır — kazara gerçek reklam istenmesin diye),
+- native taraf → `build/ios-plist.js`, `Info.plist`'e `GADApplicationIdentifier` yazar.
+
+Codemagic'te `ADS_ENV` her iki workflow'un `environment.vars` bloğunda; TestFlight'ta
+gerçek reklam denemek için `ios-testflight` altında `"prod"` yap.
+
+### iOS native gereksinimleri
+
+`ios/` repoda tutulmadığı için `Info.plist` elle düzenlenemez; `build/ios-plist.js`
+`npx cap add ios` sonrası şu anahtarları enjekte eder (codemagic.yaml → `inject_plist`):
+
+- `GADApplicationIdentifier` — **zorunlu**; yoksa Google SDK uygulamayı açılışta
+  çökertir. Bu yüzden script başarısız olursa build de düşer (sessizce geçmez).
+- `NSUserTrackingUsageDescription` — ATT izin penceresinin metni. `src/ads.js` izni
+  SDK başlatılmadan hemen önce, sadece durum `notDetermined` ise ister.
+- `SKAdNetworkItems` — şu an sadece Google'ın kendi kimliği (`cstr6suwn9.skadnetwork`).
+  Google'ın ortak ağ listesi zamanla değişiyor; genişletmek istersen güncel listeyi
+  [AdMob iOS quick-start](https://developers.google.com/admob/ios/quick-start#update_your_infoplist)
+  sayfasından `build/ads-config.json` → `ios.skAdNetworkIds` içine kopyala. Liste
+  eksikliği reklamları engellemez, sadece yükleme ölçümünü daraltır.
+
 ## Teknoloji
 
 - Saf HTML / CSS / JavaScript (modüler; bundler yok).
 - Capacitor (Android + iOS paketleme) + `@capacitor/splash-screen` + `@capacitor/status-bar`
-  (native splash/durum çubuğu, `capacitor.config.json` + `extras.js` `initNativeShell()`).
+  (native splash/durum çubuğu, `capacitor.config.json` + `extras.js` `initNativeShell()`)
+  + `@capacitor-community/admob` (geçiş reklamı, `src/ads.js` — sadece cihazda).
 - İkonlar için Tabler Icons — **offline yerel webfont** (`assets/tabler/`, CDN'e bağımlı değil).
 
 ## Lisans

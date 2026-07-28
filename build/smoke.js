@@ -167,6 +167,24 @@ async function main() {
   const barsUx = await js("(function(){state.energy=15;state.hygiene=80;render();var f0=document.getElementById('barFill0');var f1=document.getElementById('barFill1');var hasTrans=/width/.test(f0.style.transition);var crit=f0.classList.contains('barCrit');var normalNotCrit=!f1.classList.contains('barCrit');var col=f0.style.background;state.energy=90;render();var f0b=document.getElementById('barFill0');var clears=!f0b.classList.contains('barCrit');var widthTracks=f0b.style.width==='90%';return JSON.stringify({hasTransition:hasTrans,critClass:crit,critColor:col,normalNotCrit:normalNotCrit,clearsWhenRecovered:clears,widthTracks:widthTracks});})()");
   await js("state.energy=85;state.hygiene=85;render()");
 
+  // AdMob geçiş reklamı — tarayıcıda TAMAMEN pasif olmalı (native guard), ama
+  // gün/zaman kuralları saf mantık olduğu için burada doğrulanabilir.
+  const adsCheck = await js("(function(){var snap={l:state.adsLastShownAt,s:state.adsStartDay,c:state.adsShownCount};\
+ensureAdsState();\
+var wired=/adsOnDayTransition/.test(processDayTransition.toString());\
+var noDayCounter=!/adsDaysSinceLast/.test(adsCanShow.toString()+maybeShowInterstitial.toString());\
+state.adsLastShownAt=1;\
+state.adsStartDay=state.dayOfMonth;var inGrace=adsCanShow();\
+state.adsStartDay=state.dayOfMonth-7;var afterGrace=adsCanShow();\
+state.adsLastShownAt=Date.now()-299*1000;var justUnder=adsCanShow();\
+state.adsLastShownAt=Date.now()-301*1000;var justOver=adsCanShow();\
+var shownOnWeb=maybeShowInterstitial();\
+state.adsLastShownAt=1234567;state.adsShownCount=4;saveGame();\
+state.adsLastShownAt=null;state.adsShownCount=0;loadGame();\
+var persists=state.adsLastShownAt===1234567&&state.adsShownCount===4;\
+state.adsLastShownAt=snap.l;state.adsStartDay=snap.s;state.adsShownCount=snap.c;\
+return JSON.stringify({wired:wired,env:ADS.env,dayCountRuleGone:noDayCounter,inGraceBlocked:inGrace===false,afterGrace:afterGrace,under5minBlocked:justUnder===false,over5minAllowed:justOver,shownOnWeb:shownOnWeb,persistsAcrossReload:persists,pluginAbsent:adsPlugin()===null});})()");
+
   console.log('menu.display   =', menuVisible);
   console.log('menu.innerText =', JSON.stringify(menuText).slice(0, 100));
   console.log('char.display   =', charVisible);
@@ -186,6 +204,7 @@ async function main() {
   console.log('bars ux        =', barsUx);
   console.log('ach queue      =', achQueue);
   console.log('ach drain      =', achDrain);
+  console.log('ads (native-only) =', adsCheck);
   console.log('ERRORS         =', errors.length ? '\n  ' + errors.join('\n  ') : 'NONE');
 
   cdp.close(); proc.kill();
