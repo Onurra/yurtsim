@@ -145,12 +145,19 @@ verilmezse build her seferinde yenisini üretir ve Apple'ın dağıtım sertifik
 
 ```bash
 openssl genrsa -out cert_key.pem 2048     # Git Bash / macOS / Linux
-cat cert_key.pem                          # çıktının TAMAMINI kopyala
+openssl base64 -A -in cert_key.pem        # ÇIKTIYI KOPYALA (tek satır)
 ```
 
 Codemagic → app → *Environment variables* → değişken adı **`CERTIFICATE_PRIVATE_KEY`**,
-değer = PEM'in tamamı (`-----BEGIN...` dahil), **Secure** işaretli. `cert_key.pem`'i
-repoya **koyma**, güvenli bir yerde sakla.
+değer = yukarıdaki **base64 çıktısı**, **Secure** işaretli, grup **`yurtsim`**.
+`cert_key.pem`'i repoya **koyma**, güvenli bir yerde sakla.
+
+**Neden base64?** Ham PEM çok satırlıdır; env var'a yapıştırılırken satır sonları
+bozulursa araç `argument --certificate-key: Provided value in environment variable is
+not valid` der. Base64 tek satırdır, bozulamaz. `codemagic.yaml` değeri build sırasında
+çözüp doğruluyor ve dosyaya yazıyor (`--certificate-key @file:...`), dolayısıyla
+**ham PEM de kabul edilir** — hatta tek satıra sıkışmış PEM onarılır. Ama önerilen
+biçim base64. Değer hiçbir biçimde loglanmaz; çözülemezse build net mesajla durur.
 
 **⚠️ Grup import'u — en sık atlanan adım.** Codemagic'te env var eklerken bir *group*
 seçilir (varsayılan `Default`). Değişken bir gruba konduysa, workflow o grubu

@@ -183,16 +183,65 @@ workflows:
           # var olan sertifikayı ancak ELİNDEKİ ÖZEL ANAHTARLA eşleşiyorsa yeniden kullanır.
           # Bu yüzden: anahtarı bir kez üretip Codemagic'te CERTIFICATE_PRIVATE_KEY
           # (secure env var) olarak saklamak ÖNERİLİR — bkz. README.
+          #
+          # NEDEN @env: DEĞİL @file:  ────────────────────────────────────────
+          # `--certificate-key @env:CERTIFICATE_PRIVATE_KEY` dokümana göre DOĞRU
+          # kullanım, ama env var'daki PEM'in satır sonları bozulursa (UI'a çok
+          # satırlı değer yapıştırırken sık olur) araç "argument --certificate-key:
+          # Provided value in environment variable is not valid" der. Değeri burada
+          # normalleştirip DOSYAYA yazıyoruz; hem ham PEM hem base64 kabul ediliyor,
+          # tek satıra sıkışmış PEM onarılıyor ve anahtar openssl ile DOĞRULANIYOR.
+          # Böylece hata, imzalamanın ortasında değil burada, anlaşılır şekilde çıkar.
+          # Anahtarın kendisi hiçbir zaman loglanmaz.
+          KEY_FILE=/tmp/asc_cert_key.pem
           if [ -n "$CERTIFICATE_PRIVATE_KEY" ]; then
-            CERT_KEY_ARG="@env:CERTIFICATE_PRIVATE_KEY"
-            echo "→ CERTIFICATE_PRIVATE_KEY bulundu (mevcut sertifika yeniden kullanılacak)."
+            umask 077
+            RAW="$KEY_FILE.raw"
+            printf '%s' "$CERTIFICATE_PRIVATE_KEY" | tr -d '\r' > "$RAW"
+
+            if grep -q -- "-----BEGIN" "$RAW"; then
+              if [ "$(grep -c '' "$RAW")" -le 1 ]; then
+                # Satır sonları kaybolmuş: başlık/gövde/son'u ayırıp 64'lük satırlara böl.
+                echo "→ PEM tek satıra sıkışmış görünüyor, satır sonları yeniden kuruluyor."
+                HDR=$(sed -E 's/.*(-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----).*/\1/' "$RAW")
+                FTR=$(sed -E 's/.*(-----END [A-Z0-9 ]*PRIVATE KEY-----).*/\1/' "$RAW")
+                BODY=$(sed -E 's/.*-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----//; s/-----END [A-Z0-9 ]*PRIVATE KEY-----.*//' "$RAW" | tr -d ' \t\n')
+                { echo "$HDR"; echo "$BODY" | fold -w 64; echo "$FTR"; } > "$KEY_FILE"
+              else
+                echo "→ CERTIFICATE_PRIVATE_KEY çok satırlı PEM olarak alındı."
+                cp "$RAW" "$KEY_FILE"
+              fi
+            else
+              # PEM değilse base64 kabul et. Base64 tek satır olduğu için env var'da
+              # bozulmaz — ÖNERİLEN saklama biçimi budur (bkz. README).
+              echo "→ Değer PEM değil; base64 olarak çözülüyor."
+              tr -d ' \t\n' < "$RAW" | openssl base64 -d -A -out "$KEY_FILE" 2>/dev/null || true
+            fi
+            rm -f "$RAW"
+
+            if ! openssl pkey -in "$KEY_FILE" -noout >/dev/null 2>&1; then
+              rm -f "$KEY_FILE"
+              echo "HATA: CERTIFICATE_PRIVATE_KEY geçerli bir özel anahtara çözülemedi."
+              echo ""
+              echo "Değer ne geçerli PEM ne de geçerli base64. En sık sebep: çok satırlı"
+              echo "PEM'i Codemagic env var'ına yapıştırırken satır sonlarının bozulması."
+              echo ""
+              echo "ÇÖZÜM — anahtarı base64 olarak sakla (tek satır, bozulamaz):"
+              echo "  openssl base64 -A -in cert_key.pem"
+              echo "Çıktının tamamını CERTIFICATE_PRIVATE_KEY değeri yap (Secure, 'yurtsim' grubu)."
+              echo "Bu script base64'ü otomatik çözer; ham PEM de kabul edilir."
+              exit 1
+            fi
+            CERT_KEY_ARG="@file:$KEY_FILE"
+            echo "→ Özel anahtar doğrulandı (mevcut sertifika yeniden kullanılacak)."
           elif [ "$ALLOW_NEW_CERT" = "true" ]; then
             # Bilinçli kaçış yolu: hesapta HİÇ dağıtım sertifikası yokken ilk kurulum.
-            openssl genrsa -out /tmp/asc_cert_key.pem 2048
-            CERT_KEY_ARG="@file:/tmp/asc_cert_key.pem"
+            umask 077
+            openssl genrsa -out "$KEY_FILE" 2048
+            CERT_KEY_ARG="@file:$KEY_FILE"
             echo "⚠️  ALLOW_NEW_CERT=true → yeni özel anahtar üretildi, YENİ sertifika oluşabilir."
-            echo "⚠️  Build bitince bu anahtarı CERTIFICATE_PRIVATE_KEY olarak kaydet, yoksa"
-            echo "⚠️  sonraki build yine yenisini üretmeye çalışır."
+            echo "⚠️  Build bitince bu anahtarı CERTIFICATE_PRIVATE_KEY olarak kaydet (base64:"
+            echo "⚠️  openssl base64 -A -in cert_key.pem), yoksa sonraki build yine yenisini dener."
           else
             # ESKİDEN: burada sessizce geçici anahtar üretiliyordu. Sonuç: her build yeni
             # sertifika denemesi → Apple limiti dolunca "409: You already have a current
